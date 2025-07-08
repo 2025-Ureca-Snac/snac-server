@@ -44,4 +44,8 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> ok(BaseCode code) {
         return new ApiResponse<>(code, null);
     }
+
+    public static <T> ApiResponse<T> error(BaseCode code) {
+        return new ApiResponse<>(code, null);
+    }
 }
