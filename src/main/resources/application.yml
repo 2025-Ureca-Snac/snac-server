@@ -14,5 +14,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
     open-in-view: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    with-credentials: true
+    oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
