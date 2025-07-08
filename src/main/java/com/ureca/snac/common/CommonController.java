@@ -9,7 +9,7 @@ import static com.ureca.snac.common.BaseCode.*;
 @RestController
 public class CommonController {
 
-    @GetMapping("/health")
+    @GetMapping("/api/health")
     public ResponseEntity<ApiResponse<?>> health() {
         return ResponseEntity
                 .ok(ApiResponse.ok(STATUS_OK));
