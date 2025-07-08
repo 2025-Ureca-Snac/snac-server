@@ -44,7 +44,13 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> ok(BaseCode code) {
         return new ApiResponse<>(code, null);
     }
-
+/**
+     * 주어진 BaseCode를 사용해 데이터 없이 에러 상태코드로 응답 생성
+     *
+     * @param code 상태 코드, HTTP 상태, 메시지를 담은 BaseCode
+     * @param <T>      페이로드 타입
+     * @return ApiResponse 인스턴스
+     */
     public static <T> ApiResponse<T> error(BaseCode code) {
         return new ApiResponse<>(code, null);
     }
