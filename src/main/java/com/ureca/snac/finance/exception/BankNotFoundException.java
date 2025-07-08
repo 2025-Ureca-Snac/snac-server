@@ -1,17 +1,14 @@
 package com.ureca.snac.finance.exception;
 
-import com.ureca.snac.common.BaseCode;
+import com.ureca.snac.common.exception.BusinessException;
 import lombok.Getter;
 
-import java.util.NoSuchElementException;
+import static com.ureca.snac.common.BaseCode.BANK_NOT_FOUND;
 
 @Getter
-public class BankNotFoundException extends NoSuchElementException {
+public class BankNotFoundException extends BusinessException {
 
-    private final BaseCode baseCode;
-
-    public BankNotFoundException(BaseCode baseCode) {
-        super(baseCode.getMessage());
-        this.baseCode = baseCode;
+    public BankNotFoundException() {
+        super(BANK_NOT_FOUND);
     }
 }

@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.ureca.snac.common.BaseCode.BANK_NOT_FOUND;
-
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -35,7 +33,7 @@ public class BankServiceImpl implements BankService{
     public BankResponse getBankById(Long bankId) {
         return bankRepository.findById(bankId)
                 .map(BankResponse::from)
-                .orElseThrow(() -> new BankNotFoundException(BANK_NOT_FOUND));
+                .orElseThrow(BankNotFoundException::new);
     }
 
     @Override
@@ -51,7 +49,7 @@ public class BankServiceImpl implements BankService{
     public void updateBank(Long bankId, UpdateBankRequest updateBankRequest) {
         Bank bank = bankRepository
                 .findById(bankId)
-                .orElseThrow(() -> new BankNotFoundException(BANK_NOT_FOUND));
+                .orElseThrow(BankNotFoundException::new);
 
         bank.update(updateBankRequest.getName());
     }
