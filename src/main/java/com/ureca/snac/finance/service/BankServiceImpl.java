@@ -24,6 +24,7 @@ public class BankServiceImpl implements BankService{
     private final BankRepository bankRepository;
 
     @Override
+    @Transactional
     public Long createBank(CreateBankRequest createBankRequest) {
         Bank savedBank = bankRepository.save(new Bank(createBankRequest.getName()));
 
@@ -46,6 +47,7 @@ public class BankServiceImpl implements BankService{
     }
 
     @Override
+    @Transactional
     public void updateBank(Long bankId, UpdateBankRequest updateBankRequest) {
         Bank bank = bankRepository
                 .findById(bankId)
@@ -55,6 +57,7 @@ public class BankServiceImpl implements BankService{
     }
 
     @Override
+    @Transactional
     public void deleteBank(Long bankId) {
         bankRepository.deleteById(bankId);
     }
