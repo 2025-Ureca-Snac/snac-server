@@ -34,7 +34,7 @@ public class JoinService {
                 .name(joinDto.getName())
                 .phone(joinDto.getPhone())
                 .role(USER)
-                .ratingScore(0)
+                .ratingScore(1000)
                 .activated(NORMAL)
                 .build();
 
