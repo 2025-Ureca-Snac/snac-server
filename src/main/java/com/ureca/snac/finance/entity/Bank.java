@@ -19,4 +19,12 @@ public class Bank extends BaseTimeEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    public Bank(String name) {
+        this.name = name;
+    }
+
+    public void update(String name) {
+        this.name = name;
+    }
 }
