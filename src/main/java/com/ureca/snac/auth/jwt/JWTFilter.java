@@ -67,6 +67,7 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+
     private void sendErrorResponse(HttpServletResponse response, BaseCode code) throws IOException {
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(code.getStatus().value());
