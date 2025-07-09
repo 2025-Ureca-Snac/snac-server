@@ -8,6 +8,8 @@ spring:
         secret-key: ${AWS_SNS_SECRET_KEY}
       region:
         static: ${REGION}
+  jwt:
+    secret: 5ayvqSOyxLObyWbvEpOEv2wSiqGAYXXo
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
