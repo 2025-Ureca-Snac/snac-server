@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@ApiResponse(responseCode = "204", description = "콘텐츠가 없습니다.",
-        content = @Content(schema = @Schema(hidden = true)))
-public @interface ApiNoContentResponse {
+@ApiResponse(responseCode = "200", description = "머니 충전 요청 성공",
+        content = @Content(schema = @Schema(implementation = com.ureca.snac.common.ApiResponse.class)))
+public @interface ApiRechargeSuccessResponse {
     @AliasFor(annotation = ApiResponse.class, attribute = "description")
-    String description() default "콘텐츠 없음";
+    String description() default "인증 실패";
 }

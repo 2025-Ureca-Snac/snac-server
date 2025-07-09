@@ -8,15 +8,11 @@ import org.springframework.http.ProblemDetail;
 
 import java.lang.annotation.*;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-
-@Documented
-@Target(METHOD)
-@Retention(RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @ApiResponse(responseCode = "404", description = "리스소 찾을 수 없습니다",
         content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 public @interface ErrorCode404 {
     @AliasFor(annotation = ApiResponse.class, attribute = "description")
-    String description() default "리소스 찾을 수 없습니다.";
+    String description() default "리스소 찾을 수 없습니다";
 }

@@ -10,11 +10,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@ApiResponse(responseCode = "204", description = "콘텐츠가 없습니다.",
+@ApiResponse(responseCode = "302", description = "요청 성공 후 리다이렉션",
         content = @Content(schema = @Schema(hidden = true)))
-public @interface ApiNoContentResponse {
+public @interface ApiRedirectResponse {
     @AliasFor(annotation = ApiResponse.class, attribute = "description")
-    String description() default "콘텐츠 없음";
+    String description() default "요청 성공 후 리다이렉션";
 }

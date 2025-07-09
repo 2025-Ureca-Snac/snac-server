@@ -8,12 +8,8 @@ import org.springframework.http.ProblemDetail;
 
 import java.lang.annotation.*;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-
-@Documented
-@Target(METHOD)
-@Retention(RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @ApiResponse(responseCode = "403", description = "접근 권한 없음",
         content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 public @interface ErrorCode403 {

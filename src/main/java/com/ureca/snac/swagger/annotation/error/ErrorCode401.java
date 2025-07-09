@@ -8,12 +8,8 @@ import org.springframework.http.ProblemDetail;
 
 import java.lang.annotation.*;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-
-@Documented
-@Target(METHOD)
-@Retention(RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @ApiResponse(responseCode = "401", description = "인증 실패",
         content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
 public @interface ErrorCode401 {
