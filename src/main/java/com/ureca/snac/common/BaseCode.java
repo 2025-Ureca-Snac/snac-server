@@ -21,9 +21,12 @@ public enum BaseCode {
     BANK_DELETE_SUCCESS("BANK_DELETE_SUCCESS_200", HttpStatus.OK, "은행이 성공적으로 삭제되었습니다."),
 
     // 은행 - 예외
-    BANK_NOT_FOUND("BANK_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 은행을 찾을 수 없습니다.");
+    BANK_NOT_FOUND("BANK_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 은행을 찾을 수 없습니다."),
 
-
+    // 포인트 충전
+    ORDER_NOT_FOUND("ORDER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다"),
+    AMOUNT_MISMATCH("AMOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "주문 금액이 일치하지 않습니다"),
+    ALREADY_PROCESSED_ORDER("ALREADY_PROCESSED_ORDER_400", HttpStatus.BAD_REQUEST, "이미 처리도니 주문입니다");
 
     private final String code;
     private final HttpStatus status;
