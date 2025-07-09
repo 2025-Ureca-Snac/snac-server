@@ -49,15 +49,27 @@ public class Trade extends BaseTimeEntity {
     @Column(name = "status", nullable = false)
     private TradeStatus status;
 
+    // 추가 (포인트/머니)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_type", nullable = false)
+    private PaymentType paymentType;
+
     @Builder
-    public Trade(Long cardId, Member seller, Member buyer, Carrier carrier,
-                 Integer priceGb, Integer dataAmount, TradeStatus status) {
+    private Trade(Long cardId, Member seller, Member buyer,
+                  Carrier carrier, Integer priceGb, Integer dataAmount,
+                  PaymentType paymentType, TradeStatus status) {
         this.cardId = cardId;
         this.seller = seller;
-        this.buyer = buyer;
+        this.buyer  = buyer;
         this.carrier = carrier;
         this.priceGb = priceGb;
         this.dataAmount = dataAmount;
+        this.paymentType = paymentType;
+        this.status = status;
+    }
+
+    // 거래 상태 변경
+    public void changeStatus(TradeStatus status) {
         this.status = status;
     }
 }

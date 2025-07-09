@@ -9,14 +9,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "wallet_history")
+@Table(name = "trade_history")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WalletHistory extends BaseTimeEntity {
+public class TradeHistory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "wallet_history_id")
+    @Column(name = "trade_history_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,10 +29,10 @@ public class WalletHistory extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private WalletHistoryType type;
+    private TradeHistoryType type;
 
     @Builder
-    public WalletHistory(Trade trade, Member member, WalletHistoryType type) {
+    public TradeHistory(Trade trade, Member member, TradeHistoryType type) {
         this.trade = trade;
         this.member = member;
         this.type = type;

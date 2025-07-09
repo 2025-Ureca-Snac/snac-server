@@ -27,4 +27,14 @@ public class Wallet {
     @Column(name = "balance_money", nullable = false)
     private Long money;
 
+    public void decrease(Long amount, PaymentType type) {
+        if (type == PaymentType.POINT) this.point -= amount;
+        else this.money -= amount;
+    }
+
+    public void increase(Long amount, PaymentType type) {
+        if (type == PaymentType.POINT) this.point += amount;
+        else this.money += amount;
+    }
+
 }
