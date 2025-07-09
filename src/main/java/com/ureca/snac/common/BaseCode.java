@@ -8,8 +8,11 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum BaseCode {
 
-    // 회원가입 - 성공
+    // common
     STATUS_OK("STATUS_OK_200", HttpStatus.OK, "서버가 정상적으로 동작 중입니다."),
+    INVALID_INPUT("INVALID_INPUT_400", HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+
+    // 회원가입 - 성공
     USER_SIGNUP_SUCCESS("USER_SIGNUP_SUCCESS_201", HttpStatus.CREATED, "정상적으로 회원가입 되었습니다."),
 
     // 회원가입 - 예외
