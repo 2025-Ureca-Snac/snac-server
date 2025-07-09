@@ -21,3 +21,9 @@ springdoc:
     path: /swagger-ui.html
     with-credentials: true
     oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
+
+
+payments:
+  toss:
+    success-url: 1
+    fail-url: 1

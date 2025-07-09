@@ -23,10 +23,12 @@ public enum BaseCode {
     // 은행 - 예외
     BANK_NOT_FOUND("BANK_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 은행을 찾을 수 없습니다."),
 
-    // 포인트 충전
+    // 머니 충전
     ORDER_NOT_FOUND("ORDER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다"),
     AMOUNT_MISMATCH("AMOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "주문 금액이 일치하지 않습니다"),
-    ALREADY_PROCESSED_ORDER("ALREADY_PROCESSED_ORDER_400", HttpStatus.BAD_REQUEST, "이미 처리도니 주문입니다");
+    ALREADY_PROCESSED_ORDER("ALREADY_PROCESSED_ORDER_400", HttpStatus.BAD_REQUEST, "이미 처리된 주문입니다"),
+    // 머니 충전 - 성공
+    MONEY_RECHARGE_PREPARE_SUCCESS("MONEY_RECHARGE_PREPARE_SUCCESS_200", HttpStatus.OK, "머니 충전 요청에 성공했습니다");
 
     private final String code;
     private final HttpStatus status;
