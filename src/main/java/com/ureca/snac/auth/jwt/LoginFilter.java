@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -67,10 +68,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
 
-        response.setHeader("access", access);
+        response.setHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ access);
         response.addCookie(createCookie("refresh", refresh));
-        response.setStatus(HttpStatus.OK.value());
 
+        response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json; charset=UTF-8");
         ApiResponse<Void> apiResponse = ApiResponse.ok(BaseCode.LOGIN_SUCCESS);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
