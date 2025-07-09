@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
-    private final ObjectMapper objectMapper= new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
 
     @Override

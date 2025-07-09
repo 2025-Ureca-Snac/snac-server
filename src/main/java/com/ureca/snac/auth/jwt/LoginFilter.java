@@ -1,6 +1,7 @@
 package com.ureca.snac.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ureca.snac.auth.dto.request.LoginRequest;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.FilterChain;
@@ -8,7 +9,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,25 +25,32 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, ObjectMapper objectMapper) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.objectMapper = objectMapper;
         setFilterProcessesUrl("/api/login");
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        // JSON 파싱해야됨.. 필터 단이라서 @RequestBody 없음
 
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+        LoginRequest loginRequest;
+        try {
+            loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        System.out.println(username);
+        String username = loginRequest.getEmail();
+        String password = loginRequest.getPassword();
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
 
-        return authenticationManager.authenticate(authToken); // 비번을 db와 실제로 비교, 성공하면 successfulAuthentication 이 진행.
+        return authenticationManager.authenticate(authToken);
     }
 
     @Override
