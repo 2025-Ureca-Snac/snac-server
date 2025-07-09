@@ -55,4 +55,11 @@ public class Card extends BaseTimeEntity {
         this.dataAmount = dataAmount;
         this.price = price;
     }
+
+    public void update(CardCategory cardCategory, Carrier carrier, Integer dataAmount, Integer price) {
+        this.cardCategory = cardCategory;
+        this.carrier = carrier;
+        this.dataAmount = dataAmount;
+        this.price = price;
+    }
 }

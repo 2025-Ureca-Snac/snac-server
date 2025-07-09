@@ -1,8 +1,10 @@
 package com.ureca.snac.board.service;
 
 import com.ureca.snac.board.controller.request.CreateCardRequest;
+import com.ureca.snac.board.controller.request.UpdateCardRequest;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
@@ -38,4 +40,18 @@ public class CardServiceImpl implements CardService {
 
         return savedCard.getId();
     }
+
+    @Override
+    @Transactional
+    public void updateCard(Long memberId, Long cardId, UpdateCardRequest updateCardRequest) {
+        Card card = cardRepository.findByIdAndMemberId(cardId, memberId).orElseThrow(CardNotFoundException::new);
+
+        card.update(
+                updateCardRequest.getCardCategory(),
+                updateCardRequest.getCarrier(),
+                updateCardRequest.getDataAmount(),
+                updateCardRequest.getPrice()
+        );
+    }
+
 }
