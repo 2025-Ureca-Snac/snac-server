@@ -21,12 +21,18 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        setFilterProcessesUrl("/api/login");
+    }
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
