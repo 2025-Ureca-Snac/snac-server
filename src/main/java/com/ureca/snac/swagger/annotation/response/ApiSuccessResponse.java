@@ -1,4 +1,4 @@
-package com.ureca.snac.swagger.response;
+package com.ureca.snac.swagger.annotation.response;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.core.annotation.AliasFor;

@@ -1,4 +1,4 @@
-package com.ureca.snac.swagger.response;
+package com.ureca.snac.swagger.annotation.response;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.core.annotation.AliasFor;
@@ -13,9 +13,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@ApiResponse(responseCode = "201")
-public @interface ApiCreatedResponse {
+@ApiResponse(responseCode = "204")
+public @interface ApiNoContentResponse {
     @AliasFor(annotation = ApiResponse.class,
             attribute = "description")
-    String description() default "리소스 생성 성공";
+    String description() default "콘텐츠가 없습니다.";
 }

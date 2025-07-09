@@ -1,4 +1,4 @@
-package com.ureca.snac.swagger.error;
+package com.ureca.snac.swagger.annotation.error;
 
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,9 +14,9 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@ApiResponse(responseCode = "500", description = "서버 오류",
+@ApiResponse(responseCode = "409", description = "데이터 충돌",
         content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-public @interface ErrorCode500 {
+public @interface ErrorCode409 {
     @AliasFor(annotation = ApiResponse.class, attribute = "description")
-    String description() default "서버 오류";
+    String description() default "데이터 충돌";
 }
