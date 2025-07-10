@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.dto;
+package com.ureca.snac.auth.dto.request;
 
 import lombok.*;
 
@@ -6,9 +6,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class JoinDto {
+public class LoginRequest {
     private String email;
     private String password;
-    private String name;
-    private String phone;
 }
