@@ -1,6 +1,7 @@
 package com.ureca.snac.auth.exception;
 
 import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.common.exception.BusinessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
