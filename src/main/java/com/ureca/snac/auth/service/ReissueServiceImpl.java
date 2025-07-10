@@ -53,7 +53,7 @@ public class ReissueServiceImpl implements ReissueService {
 
         // 4. 레디스에 저장된 토큰인지 확인
         if (!refreshRepository.existsByRefresh(refresh)) {
-            throw new BusinessException(BaseCode.INVALID_REFRESH_TOKEN);
+            throw new BusinessException(BaseCode.REFRESH_TOKEN_NULL);
         }
 
         // 5. 새로운 토큰 발급
