@@ -26,7 +26,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
     @Override
     public List<Card> scroll(CardCategory cardCategory,
                              Carrier carrier,
-                             PriceRange priceRange,
+                             List<PriceRange> priceRanges,
                              int size,
                              Long lastCardId, LocalDateTime lastUpdatedAt) {
 
@@ -37,11 +37,28 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                         c.cardCategory.eq(cardCategory),
                         ltCursor(lastCardId, lastUpdatedAt, c),
                         carrierEq(carrier, c),
-                        priceRangeEq(priceRange, c)
+                        priceRangeIn(priceRanges, c)
                 )
                 .orderBy(c.updatedAt.desc(), c.id.desc())
                 .limit(size)
                 .fetch();
+    }
+
+    private BooleanExpression priceRangeIn(List<PriceRange> prList, QCard c) {
+        if (prList == null || prList.isEmpty() || prList.contains(PriceRange.ALL)) {
+            return null;
+        }
+
+        BooleanExpression combined = null;
+
+        for (PriceRange pr : prList) {
+            BooleanExpression ge = pr.getMin() != null ? c.price.goe(pr.getMin()) : null;
+            BooleanExpression le = pr.getMax() != null ? c.price.loe(pr.getMax()) : null;
+            BooleanExpression expr = ge == null ? le : (le == null ? ge : ge.and(le));
+            combined = combined == null ? expr : combined.or(expr);
+        }
+
+        return combined;
     }
 
     private BooleanExpression ltCursor(Long lastCardId,
