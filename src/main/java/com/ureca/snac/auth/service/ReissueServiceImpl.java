@@ -41,7 +41,7 @@ public class ReissueServiceImpl implements ReissueService {
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-            refreshRepository.deleteByRefresh(refresh);
+            refreshRepository.findByRefresh(refresh).ifPresent(refreshRepository::delete);
             throw new BusinessException(BaseCode.REFRESH_TOKEN_EXPIRED);
         }
 
@@ -52,19 +52,19 @@ public class ReissueServiceImpl implements ReissueService {
         }
 
         // 4. 레디스에 저장된 토큰인지 확인
-        if (!refreshRepository.existsByRefresh(refresh)) {
-            throw new BusinessException(BaseCode.REFRESH_TOKEN_NULL);
-        }
-
-        // 5. 새로운 토큰 발급
         String username = jwtUtil.getUsername(refresh);
+        Refresh storedRefresh = refreshRepository.findByRefresh(refresh)
+                .orElseThrow(() -> new BusinessException(BaseCode.INVALID_REFRESH_TOKEN));
+
+        if (!storedRefresh.getEmail().equals(username)) {
+            throw new BusinessException(BaseCode.INVALID_REFRESH_TOKEN);
+        }
         String role = jwtUtil.getRole(refresh);
 
         String newAccess = jwtUtil.createJwt("access", username, role, 600000L);
         String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
-        // 6. 기존 리프레시 토큰 레디스에서 삭제, 새 거 저장
-        refreshRepository.deleteByRefresh(refresh);
+        // 5. 기존 리프레시 토큰 레디스에서 삭제, 새 거 저장 => 생각해보니까 굳이 삭제 할 필요가 없고 덮어씌우면 되어서 코드 변경
         refreshRepository.save(new Refresh(username, newRefresh));
 
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + newAccess);
