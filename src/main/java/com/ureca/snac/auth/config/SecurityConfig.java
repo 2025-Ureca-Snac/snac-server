@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -42,24 +44,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors
-                        .configurationSource(new CorsConfigurationSource() {
-                            @Override
-                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                                CorsConfiguration configuration = new CorsConfiguration();
-
-                                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                                configuration.setAllowedMethods(Collections.singletonList("*"));
-                                configuration.setAllowedHeaders(Collections.singletonList("*"));
-                                configuration.setAllowCredentials(true);
-                                configuration.setMaxAge(3600L);
-
-                                configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-
-                                return configuration;
-                            }
-                        }));
+        http.
+                cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration cfg = new CorsConfiguration();
+                cfg.setAllowedOrigins(List.of("http://localhost:3000"));
+                cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+                cfg.setAllowedHeaders(List.of("*"));
+                cfg.setExposedHeaders(List.of("Authorization"));
+                cfg.setAllowCredentials(true);
+                return cfg;
+        }));
 
         http
                 .csrf((auth) -> auth.disable());
@@ -73,7 +67,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers("/api/login", "/api/join", "/api/reissue").permitAll()
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                         .requestMatchers("/api/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
@@ -81,7 +75,6 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper), UsernamePasswordAuthenticationFilter.class);
-
 
 
         // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
