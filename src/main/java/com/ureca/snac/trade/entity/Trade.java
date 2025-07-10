@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.entity;
 
+import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
 import jakarta.persistence.*;
