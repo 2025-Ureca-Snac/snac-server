@@ -1,5 +1,6 @@
 package com.ureca.snac.money.controller;
 
+import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
@@ -7,7 +8,6 @@ import com.ureca.snac.money.service.MoneyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +17,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static com.ureca.snac.common.BaseCode.MONEY_RECHARGE_PREPARE_SUCCESS;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.FOUND;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestController
 @RequiredArgsConstructor

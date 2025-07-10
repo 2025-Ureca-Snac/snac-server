@@ -1,21 +1,21 @@
 package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.dto.request.JoinRequest;
-import com.ureca.snac.auth.exception.BusinessException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
+import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ureca.snac.member.Activated.*;
-import static com.ureca.snac.member.Role.*;
+import static com.ureca.snac.member.Activated.NORMAL;
+import static com.ureca.snac.member.Role.USER;
 
 @Service
 @RequiredArgsConstructor
-public class JoinServiceImpl implements JoinService{
+public class JoinServiceImpl implements JoinService {
 
     private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
