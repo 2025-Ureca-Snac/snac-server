@@ -1,6 +1,8 @@
 package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.jwt.JWTUtil;
+import com.ureca.snac.auth.refresh.Refresh;
+import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.exception.BusinessException;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class ReissueServiceImpl implements ReissueService {
 
     private final JWTUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
 
     @Override
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -38,6 +41,7 @@ public class ReissueServiceImpl implements ReissueService {
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
+            refreshRepository.deleteByRefresh(refresh);
             throw new BusinessException(BaseCode.REFRESH_TOKEN_EXPIRED);
         }
 
@@ -47,13 +51,21 @@ public class ReissueServiceImpl implements ReissueService {
             throw new BusinessException(BaseCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 4. 새로운 토큰 발급
+        // 4. 레디스에 저장된 토큰인지 확인
+        if (!refreshRepository.existsByRefresh(refresh)) {
+            throw new BusinessException(BaseCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 5. 새로운 토큰 발급
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
 
         String newAccess = jwtUtil.createJwt("access", username, role, 600000L);
         String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
+        // 6. 기존 리프레시 토큰 레디스에서 삭제, 새 거 저장
+        refreshRepository.deleteByRefresh(refresh);
+        refreshRepository.save(new Refresh(username, newRefresh));
 
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + newAccess);
         response.addCookie(createCookie("refresh", newRefresh));
