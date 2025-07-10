@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.ureca.snac.common.BaseCode.*;
 
@@ -44,13 +45,13 @@ public class CardController {
 
     @GetMapping("/scroll")
     public ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@RequestParam CardCategory cardCategory,
-                                                          @RequestParam(required = false) Carrier carrier,
-                                                          @RequestParam(defaultValue = "ALL") PriceRange priceRange,
-                                                          @RequestParam(defaultValue = "9") int size,
-                                                          @RequestParam(required = false) Long lastCardId,
-                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt) {
+                                                                       @RequestParam(required = false) Carrier carrier,
+                                                                       @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
+                                                                       @RequestParam(defaultValue = "54") int size,
+                                                                       @RequestParam(required = false) Long lastCardId,
+                                                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt) {
 
-        ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRange, size, lastCardId, lastUpdatedAt);
+        ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRanges, size, lastCardId, lastUpdatedAt);
 
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
     }

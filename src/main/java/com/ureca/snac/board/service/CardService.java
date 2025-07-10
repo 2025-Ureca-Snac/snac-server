@@ -8,6 +8,7 @@ import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CardService {
 
@@ -15,7 +16,7 @@ public interface CardService {
 
     void updateCard(Long memberId, Long cardId, UpdateCardRequest updateCardRequest);
 
-    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
+    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRange, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
 
     void deleteCard(Long memberId, Long cardId);
 }
