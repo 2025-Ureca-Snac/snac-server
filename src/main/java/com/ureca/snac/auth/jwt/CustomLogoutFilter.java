@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.jwt; // 패키지 경로는 맞게 수정해주세요.
+package com.ureca.snac.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.repository.RefreshRepository;
@@ -16,13 +16,13 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-public class LogoutFilter extends GenericFilterBean {
+public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
     private final ObjectMapper objectMapper;
 
-    public LogoutFilter(JWTUtil jwtUtil, RefreshRepository refreshRepository, ObjectMapper objectMapper) {
+    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshRepository refreshRepository, ObjectMapper objectMapper) {
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;
         this.objectMapper = objectMapper;
@@ -77,14 +77,8 @@ public class LogoutFilter extends GenericFilterBean {
             return;
         }
 
-        //레디스에 있는지
-        if (!refreshRepository.existsByRefresh(refresh)) {
-            sendErrorResponse(response, BaseCode.INVALID_REFRESH_TOKEN);
-            return;
-        }
-
-        // 리프레시 토큰 DB에서 지워버림
-        refreshRepository.deleteByRefresh(refresh);
+        //레디스에 토큰 존재하면 삭제
+        refreshRepository.findByRefresh(refresh).ifPresent(refreshRepository::delete);
 
 
         Cookie cookie = new Cookie("refresh", null);

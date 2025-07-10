@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.jwt.JWTFilter;
 import com.ureca.snac.auth.jwt.JWTUtil;
 import com.ureca.snac.auth.jwt.LoginFilter;
-import com.ureca.snac.auth.jwt.LogoutFilter;
+import com.ureca.snac.auth.jwt.CustomLogoutFilter;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -72,7 +73,7 @@ public class SecurityConfig {
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper,refreshRepository), UsernamePasswordAuthenticationFilter.class);
         http
-                .addFilterBefore(new LogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
 
         // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
         http
