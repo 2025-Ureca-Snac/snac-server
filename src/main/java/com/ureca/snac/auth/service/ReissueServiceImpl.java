@@ -1,8 +1,8 @@
 package com.ureca.snac.auth.service;
 
-import com.ureca.snac.auth.exception.BusinessException;
 import com.ureca.snac.auth.jwt.JWTUtil;
 import com.ureca.snac.common.BaseCode;
+import com.ureca.snac.common.exception.BusinessException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,7 +55,7 @@ public class ReissueServiceImpl implements ReissueService {
         String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
 
-        response.setHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ newAccess);
+        response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + newAccess);
         response.addCookie(createCookie("refresh", newRefresh));
     }
 
