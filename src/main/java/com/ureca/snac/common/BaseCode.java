@@ -57,6 +57,7 @@ public enum BaseCode {
 
     // 지갑 - 예외
     WALLET_NOT_FOUND("WALLET_NOT_FOUND_404", HttpStatus.NOT_FOUND, "지갑 정보를 찾을 수 없습니다"),
+    WALLET_ALREADY_EXISTS("WALLET_ALREADY_EXISTS_404", HttpStatus.NOT_FOUND, "이미 지갑이 있습니다"),
     INVALID_AMOUNT("INVALID_AMOUNT_400", HttpStatus.BAD_REQUEST, "금액은 0보다 커야합니다"),
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
