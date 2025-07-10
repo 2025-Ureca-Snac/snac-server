@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.jwt.JWTFilter;
 import com.ureca.snac.auth.jwt.JWTUtil;
 import com.ureca.snac.auth.jwt.LoginFilter;
-import jakarta.servlet.http.HttpServletRequest;
+import com.ureca.snac.auth.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,7 +40,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, RefreshRepository refreshRepository) throws Exception {
         http.
                 cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration cfg = new CorsConfiguration();
@@ -70,7 +69,7 @@ public class SecurityConfig {
         http
                 .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper,refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
 
         // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
