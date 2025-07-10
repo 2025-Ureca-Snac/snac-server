@@ -1,6 +1,6 @@
 package com.ureca.snac.auth.controller;
 
-import com.ureca.snac.auth.service.ReissueServiceImpl;
+import com.ureca.snac.auth.service.ReissueService;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.http.HttpServletRequest;
