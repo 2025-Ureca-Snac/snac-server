@@ -22,10 +22,11 @@ import static com.ureca.snac.common.BaseCode.*;
 @RestController
 @RequestMapping("/api/cards")
 @RequiredArgsConstructor
-public class CardController {
+public class CardController implements CardControllerSwagger{
 
     private final CardService cardService;
 
+    @Override
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createCard(@Validated @RequestBody CreateCardRequest request) {
         cardService.createCard(1L, request);
@@ -34,6 +35,7 @@ public class CardController {
                 .body(ApiResponse.ok(CARD_CREATE_SUCCESS));
     }
 
+    @Override
     @PutMapping("/{cardId}")
     public ResponseEntity<ApiResponse<?>> editCard(@PathVariable("cardId") Long cardId,
                                                    @Validated @RequestBody UpdateCardRequest updateCardRequest) {
@@ -43,6 +45,7 @@ public class CardController {
                 .body(ApiResponse.ok(CARD_UPDATE_SUCCESS));
     }
 
+    @Override
     @GetMapping("/scroll")
     public ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@RequestParam CardCategory cardCategory,
                                                                        @RequestParam(required = false) Carrier carrier,
@@ -56,6 +59,7 @@ public class CardController {
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
     }
 
+    @Override
     @DeleteMapping("/{cardId}")
     public ResponseEntity<ApiResponse<?>> removeCard(@PathVariable("cardId") Long cardId) {
         cardService.deleteCard(1L, cardId);
