@@ -2,6 +2,8 @@ package com.ureca.snac.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.dto.request.LoginRequest;
+import com.ureca.snac.auth.refresh.Refresh;
+import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.FilterChain;
@@ -27,11 +29,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
+    private final RefreshRepository refreshRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, ObjectMapper objectMapper) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, ObjectMapper objectMapper, RefreshRepository refreshRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.objectMapper = objectMapper;
+        this.refreshRepository = refreshRepository;
+
         setFilterProcessesUrl("/api/login");
     }
 
@@ -55,7 +60,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         String username = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -67,6 +72,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String access = jwtUtil.createJwt("access", username, role, 600000L);
         String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
+        refreshRepository.save(new Refresh(username, refresh));
 
         response.setHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ access);
         response.addCookie(createCookie("refresh", refresh));
@@ -79,7 +85,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().flush();
     }
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
 
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -88,7 +94,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().print(responseBody);
         response.getWriter().flush();
     }
-
 
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
