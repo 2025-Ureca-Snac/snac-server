@@ -72,10 +72,11 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/login", "/api/join", "/api/reissue").permitAll()
+                        .anyRequest().permitAll());
+/*//                        .requestMatchers("/api/login", "/api/join", "/api/reissue").permitAll()
                         .requestMatchers("/**").permitAll()
                         .requestMatchers("/api/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated());*/
 
         http
                 .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
