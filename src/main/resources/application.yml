@@ -1,6 +1,13 @@
 spring:
   application:
     name: snac-server
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_SNS_ACCESS_KEY}
+        secret-key: ${AWS_SNS_SECRET_KEY}
+      region:
+        static: ${REGION}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
