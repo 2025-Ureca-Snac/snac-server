@@ -16,11 +16,11 @@ import static com.ureca.snac.common.BaseCode.*;
 @RequiredArgsConstructor
 public class SnsController {
 
-    private final SnsServiceImpl snsServiceImpl;
+    private final SnsService snsService;
 
     @PostMapping("/api/send-verification-code")
     public ResponseEntity<ApiResponse<VerificationCodeResponse>> sendVerificationCode(@RequestBody PhoneRequest dto) {
-        String code = snsServiceImpl.sendVerificationCode(dto.getPhone());
+        String code = snsService.sendVerificationCode(dto.getPhone());
         VerificationCodeResponse response = new VerificationCodeResponse(code);
         return ResponseEntity.ok(ApiResponse.of(SMS_VERIFICATION_SENT, response));
     }
