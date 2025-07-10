@@ -2,7 +2,7 @@ package com.ureca.snac.auth.controller;
 
 import com.ureca.snac.auth.dto.request.PhoneRequest;
 import com.ureca.snac.auth.dto.response.VerificationCodeResponse;
-import com.ureca.snac.auth.service.SnsServiceImpl;
+import com.ureca.snac.auth.service.SnsService;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
