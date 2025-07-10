@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ReissueController {
 
-    private final ReissueServiceImpl reissueServiceImpl;
+    private final ReissueService reissueService;
 
     @PostMapping("/api/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        reissueServiceImpl.reissue(request, response);
+        reissueService.reissue(request, response);
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.REISSUE_SUCCESS));
     }
 }
