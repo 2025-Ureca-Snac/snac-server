@@ -4,6 +4,7 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
 import com.ureca.snac.money.entity.MoneyRecharge;
+import com.ureca.snac.money.entity.PaymentCategory;
 import com.ureca.snac.money.entity.RechargeStatus;
 import com.ureca.snac.money.exception.AlreadyProcessedOrderException;
 import com.ureca.snac.money.exception.AmountMismatchException;
@@ -31,7 +32,7 @@ public class MoneyServiceImpl implements MoneyService {
         MoneyRecharge newRecharge = MoneyRecharge.builder()
                 .member(member)
                 .paidAmountWon(request.getAmount())
-                .pg("toss")
+                .pg(PaymentCategory.TOSS)
                 .pgOrderId(pgOrderId)
                 .status(RechargeStatus.PENDING)
                 .build();
