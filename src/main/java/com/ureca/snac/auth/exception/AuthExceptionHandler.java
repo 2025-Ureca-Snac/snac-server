@@ -13,4 +13,9 @@ public class AuthExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
         return ResponseEntity.ok(ApiResponse.of(e.getBaseCode(),null));
     }
+
+    @ExceptionHandler(VerificationFailedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVerificationFailedException(VerificationFailedException e) {
+        return ResponseEntity.ok(ApiResponse.of(e.getBaseCode(),null));
+    }
 }
