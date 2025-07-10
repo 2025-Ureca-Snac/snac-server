@@ -1,6 +1,7 @@
 package com.ureca.snac.board.controller;
 
 
+import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.board.controller.request.CreateCardRequest;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
 import com.ureca.snac.board.entity.constants.CardCategory;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +39,7 @@ public interface CardControllerSwagger {
     @ErrorCode400(description = "등록 실패 - 입력값이 잘못되었습니다.")
     @ErrorCode401(description = "인증되지 않은 사용자 접근")
     @PostMapping
-    ResponseEntity<ApiResponse<?>> createCard(@Validated @RequestBody CreateCardRequest request);
+    ResponseEntity<ApiResponse<?>> createCard(@Validated @RequestBody CreateCardRequest request, @AuthenticationPrincipal CustomUserDetails customUserDetails);
 
     @Operation(
             summary = "판매글 또는 구매글 수정",
@@ -48,7 +50,7 @@ public interface CardControllerSwagger {
     @ErrorCode401(description = "인증되지 않은 사용자 접근")
     @ErrorCode404(description = "존재하지 않는 글 ID")
     @PutMapping("/{cardId}")
-    ResponseEntity<ApiResponse<?>> editCard(@PathVariable("cardId") Long cardId, @Validated @RequestBody UpdateCardRequest updateCardRequest);
+    ResponseEntity<ApiResponse<?>> editCard(@PathVariable("cardId") Long cardId, @Validated @RequestBody UpdateCardRequest updateCardRequest, @AuthenticationPrincipal CustomUserDetails customUserDetails);
 
     @Operation(
             summary = "판매글 또는 구매글 목록 조회 (스크롤)",
@@ -80,5 +82,5 @@ public interface CardControllerSwagger {
     @ErrorCode401(description = "인증되지 않은 사용자 접근")
     @ErrorCode404(description = "삭제 실패 - 존재하지 않는 글 ID")
     @DeleteMapping("/{cardId}")
-    ResponseEntity<ApiResponse<?>> removeCard(@PathVariable("cardId") Long cardId);
+    ResponseEntity<ApiResponse<?>> removeCard(@PathVariable("cardId") Long cardId, @AuthenticationPrincipal CustomUserDetails customUserDetails);
 }

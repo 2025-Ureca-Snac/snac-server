@@ -12,12 +12,12 @@ import java.util.List;
 
 public interface CardService {
 
-    Long createCard(Long memberId, CreateCardRequest request);
+    Long createCard(String username, CreateCardRequest request);
 
-    void updateCard(Long memberId, Long cardId, UpdateCardRequest updateCardRequest);
+    void updateCard(String username, Long cardId, UpdateCardRequest updateCardRequest);
 
     ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRange, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
 
-    void deleteCard(Long memberId, Long cardId);
+    void deleteCard(String username, Long cardId);
 }
 
