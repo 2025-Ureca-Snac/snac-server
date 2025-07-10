@@ -64,6 +64,7 @@ public class ReissueServiceImpl implements ReissueService {
         cookie.setMaxAge(24 * 60 * 60);
         cookie.setPath("/api");
         cookie.setHttpOnly(true);
+        cookie.setDomain("localhost");
         return cookie;
     }
 }
