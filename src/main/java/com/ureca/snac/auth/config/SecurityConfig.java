@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.jwt.JWTFilter;
 import com.ureca.snac.auth.jwt.JWTUtil;
 import com.ureca.snac.auth.jwt.LoginFilter;
+
 import com.ureca.snac.auth.jwt.CustomLogoutFilter;
+
 import com.ureca.snac.auth.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -72,8 +74,10 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper,refreshRepository), UsernamePasswordAuthenticationFilter.class);
+
         http
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
+
 
         // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
         http
