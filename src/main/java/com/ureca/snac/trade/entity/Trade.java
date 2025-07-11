@@ -52,7 +52,7 @@ public class Trade extends BaseTimeEntity {
 
     // 추가 (포인트/머니)
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_type", nullable = false)
+    @Column(name = "payment_type")
     private PaymentType paymentType;
 
     @Builder
