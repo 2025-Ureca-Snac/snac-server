@@ -26,7 +26,7 @@ public class SnsServiceImpl implements SnsService {
     private static final String VERIFICATION_CODE_PREFIX = "sms:code:";
     private static final String VERIFIED_FLAG_PREFIX = "sms:verified:";
     private static final Duration VERIFICATION_CODE_TTL = Duration.ofMinutes(3);
-    private static final Duration VERIFIED_FLAG_TTL = Duration.ofMinutes(3);
+    private static final Duration VERIFIED_FLAG_TTL = Duration.ofMinutes(10);
 
     @Override
     public void sendVerificationCode(String phoneNumber) {
