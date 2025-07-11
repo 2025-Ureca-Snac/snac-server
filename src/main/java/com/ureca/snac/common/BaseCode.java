@@ -49,6 +49,9 @@ public enum BaseCode {
     SMS_CODE_VERIFICATION_EXPIRED("SMS_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"인증번호가 만료되었거나 존재하지 않습니다."),
     SMS_CODE_VERIFICATION_MISMATCH("SMS_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "인증번호가 일치하지 않습니다."),
 
+    // 휴대폰번호 검증 - 실패
+    PHONE_NOT_VERIFIED("PHONE_NOT_VERIFIED_422", HttpStatus.UNPROCESSABLE_ENTITY, "휴대폰 인증이 완료되지 않았습니다."),
+
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
     BANK_READ_SUCCESS("BANK_READ_SUCCESS_200", HttpStatus.OK, "은행 정보를 성공적으로 조회했습니다."),

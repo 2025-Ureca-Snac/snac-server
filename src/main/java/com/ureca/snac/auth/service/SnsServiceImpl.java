@@ -24,7 +24,9 @@ public class SnsServiceImpl implements SnsService {
     private final StringRedisTemplate redisTemplate;
 
     private static final String VERIFICATION_CODE_PREFIX = "sms:code:";
+    private static final String VERIFIED_FLAG_PREFIX = "sms:verified:";
     private static final Duration VERIFICATION_CODE_TTL = Duration.ofMinutes(3);
+    private static final Duration VERIFIED_FLAG_TTL = Duration.ofMinutes(10);
 
     @Override
     public void sendVerificationCode(String phoneNumber) {
@@ -32,14 +34,14 @@ public class SnsServiceImpl implements SnsService {
         String message = String.format("[SNAC] 인증번호[%s]를 입력해주세요.", verificationCode);
         String formatPhoneNumber = formatToE164(phoneNumber);
 
-        PublishRequest request = PublishRequest.builder()
+        try{
+        PublishResponse response = snsClient.publish(PublishRequest.builder()
                 .message(message)
                 .phoneNumber(formatPhoneNumber)
-                .build();
+                .build());
 
-        try {
-            PublishResponse response = snsClient.publish(request);
             redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + phoneNumber, verificationCode, VERIFICATION_CODE_TTL);
+
             log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
         } catch (Exception e) {
             log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
@@ -49,7 +51,9 @@ public class SnsServiceImpl implements SnsService {
 
     @Override
     public void verifyCode(String phoneNumber, String code) {
-        String storedCode = redisTemplate.opsForValue().get(VERIFICATION_CODE_PREFIX + phoneNumber);
+
+        String key = VERIFICATION_CODE_PREFIX + phoneNumber;
+        String storedCode = redisTemplate.opsForValue().get(key);
 
         // 저장된 코드가 없는 경우 만료 or 요청x
         if (storedCode == null) {
@@ -62,7 +66,16 @@ public class SnsServiceImpl implements SnsService {
         }
 
         // 검증 성공 시 Redis에서 코드 삭제
-        redisTemplate.delete(VERIFICATION_CODE_PREFIX + phoneNumber);
+        redisTemplate.delete(key);
+
+        // 검증 완료 플래그
+        redisTemplate.opsForValue().set(VERIFIED_FLAG_PREFIX + phoneNumber, "true", VERIFIED_FLAG_TTL);
+    }
+
+    @Override
+    public boolean isPhoneVerified(String phoneNumber) {
+        String flag = redisTemplate.opsForValue().get(VERIFIED_FLAG_PREFIX + phoneNumber);
+        return "true".equals(flag);
     }
 
     private String generateRandomCode() {

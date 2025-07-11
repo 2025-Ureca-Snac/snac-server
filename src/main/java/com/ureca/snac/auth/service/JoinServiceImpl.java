@@ -7,7 +7,11 @@ import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.ApplicationEventPublisher;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,26 +21,38 @@ import static com.ureca.snac.member.Role.USER;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JoinServiceImpl implements JoinService {
 
     private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final SnsService snsService;
     private final ApplicationEventPublisher eventPublisher;
+
 
     @Override
     @Transactional
     public void joinProcess(JoinRequest joinRequest) {
-        String email = joinRequest.getEmail();
 
+        // 휴대폰 인증 여부 확인
+        String phone = joinRequest.getPhone();
+        if(!snsService.isPhoneVerified(phone)) {
+            throw new BusinessException(BaseCode.PHONE_NOT_VERIFIED);
+        }
+        log.info("Phone number {} is verified.", phone);
+
+        String email = joinRequest.getEmail();
+        // 이메일 중복 체크
         if (authRepository.existsByEmail(email)) {
             throw new BusinessException(BaseCode.EMAIL_DUPLICATE);
         }
+        log.info("Email {} is unique.", email);
 
         Member member = Member.builder()
                 .email(email)
                 .password(passwordEncoder.encode(joinRequest.getPassword()))
                 .name(joinRequest.getName())
-                .phone(joinRequest.getPhone())
+                .phone(phone)
                 .role(USER)
                 .ratingScore(1000)
                 .activated(NORMAL)
