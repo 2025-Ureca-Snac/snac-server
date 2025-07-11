@@ -25,6 +25,10 @@ spring:
         format_sql: true
     open-in-view: false
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
