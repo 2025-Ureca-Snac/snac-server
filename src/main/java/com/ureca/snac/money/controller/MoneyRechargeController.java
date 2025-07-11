@@ -5,6 +5,7 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
 import com.ureca.snac.money.service.MoneyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +32,7 @@ public class MoneyRechargeController implements MoneyRechargeSwagger {
 
     @Override
     public ResponseEntity<ApiResponse<MoneyRechargeResponse>> prepareRecharge(
-            @RequestBody MoneyRechargeRequest request,
+            @Valid @RequestBody MoneyRechargeRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         MoneyRechargeResponse response = moneyService.prepareRecharge(request, userDetails.getUsername());
 
@@ -39,7 +40,7 @@ public class MoneyRechargeController implements MoneyRechargeSwagger {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> rechargeSuccess(
+    public ResponseEntity<Void> rechargeSuccess(
             String paymentKey, String orderId, Long amount) {
         moneyService.processRechargeSuccess(paymentKey, orderId, amount);
 

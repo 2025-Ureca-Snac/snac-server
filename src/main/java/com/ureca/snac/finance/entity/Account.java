@@ -22,7 +22,7 @@ public class Account extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
