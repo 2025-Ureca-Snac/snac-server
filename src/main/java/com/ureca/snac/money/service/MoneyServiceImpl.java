@@ -1,6 +1,8 @@
 package com.ureca.snac.money.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
 import com.ureca.snac.money.entity.MoneyRecharge;
@@ -22,10 +24,15 @@ import java.util.UUID;
 public class MoneyServiceImpl implements MoneyService {
 
     private final MoneyRechargeRepository moneyRechargeRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     @Transactional
-    public MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, Member member) {
+    public MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, String email) {
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
+
         // 토스에서 UUID 사라고 그럼 보안과 고유성을 위해서
         String pgOrderId = "snac_order_" + UUID.randomUUID();
 
