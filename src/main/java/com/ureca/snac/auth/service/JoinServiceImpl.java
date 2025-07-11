@@ -19,12 +19,21 @@ public class JoinServiceImpl implements JoinService {
 
     private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final SnsService snsService;
 
     @Override
     @Transactional
     public void joinProcess(JoinRequest joinRequest) {
-        String email = joinRequest.getEmail();
 
+        // 휴대폰 인증 여부 확인
+        String phone = joinRequest.getPhone();
+        if(!snsService.isPhoneVerified(phone)) {
+            throw new BusinessException(BaseCode.PHONE_NOT_VERIFIED);
+        }
+
+
+        String email = joinRequest.getEmail();
+        // 이메일 중복 체크
         if (authRepository.existsByEmail(email)) {
             throw new BusinessException(BaseCode.EMAIL_DUPLICATE);
         }
@@ -33,7 +42,7 @@ public class JoinServiceImpl implements JoinService {
                 .email(email)
                 .password(passwordEncoder.encode(joinRequest.getPassword()))
                 .name(joinRequest.getName())
-                .phone(joinRequest.getPhone())
+                .phone(phone)
                 .role(USER)
                 .ratingScore(1000)
                 .activated(NORMAL)
