@@ -5,8 +5,13 @@ import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.ApplicationEventPublisher;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +27,8 @@ public class JoinServiceImpl implements JoinService {
     private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SnsService snsService;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Override
     @Transactional
@@ -52,5 +59,8 @@ public class JoinServiceImpl implements JoinService {
                 .build();
 
         authRepository.save(member);
+
+        // 여기서 이벤트 발행 서비스 동작하라고 알림
+        eventPublisher.publishEvent(new MemberJoinEvent(member));
     }
 }

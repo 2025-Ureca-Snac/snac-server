@@ -33,7 +33,7 @@ public class MoneyRechargeController implements MoneyRechargeSwagger {
     public ResponseEntity<ApiResponse<MoneyRechargeResponse>> prepareRecharge(
             @RequestBody MoneyRechargeRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MoneyRechargeResponse response = moneyService.prepareRecharge(request, userDetails.getMember());
+        MoneyRechargeResponse response = moneyService.prepareRecharge(request, userDetails.getUsername());
 
         return ResponseEntity.ok(ApiResponse.of(MONEY_RECHARGE_PREPARE_SUCCESS, response));
     }
