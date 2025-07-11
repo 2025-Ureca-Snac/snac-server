@@ -24,6 +24,10 @@ public enum BaseCode {
     // 로그인 시도 - 실패
     LOGIN_FAILED("LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
 
+    // 로그아웃 시도 - 성공
+    LOGOUT_SUCCESS("LOGOUT_SUCCESS_200", HttpStatus.OK, "로그아웃에 성공했습니다."),
+
+
     // 인증,인가
     TOKEN_EXPIRED("TOKEN_EXPIRED_401", HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
     TOKEN_INVALID("TOKEN_INVALID_401", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -38,6 +42,13 @@ public enum BaseCode {
     // 인증코드 발송- 예외
     SMS_SEND_FAILED("SMS_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "SMS 전송에 실패했습니다."),
 
+    //인증코드 인증- 성공
+    SMS_CODE_VERIFICATION_SUCCESS("SMS_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "인증에 성공했습니다."),
+
+    // 인증코드 인증- 예외
+    SMS_CODE_VERIFICATION_EXPIRED("SMS_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"인증번호가 만료되었거나 존재하지 않습니다."),
+    SMS_CODE_VERIFICATION_MISMATCH("SMS_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "인증번호가 일치하지 않습니다."),
+
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
     BANK_READ_SUCCESS("BANK_READ_SUCCESS_200", HttpStatus.OK, "은행 정보를 성공적으로 조회했습니다."),
@@ -48,13 +59,17 @@ public enum BaseCode {
     // 은행 - 예외
     BANK_NOT_FOUND("BANK_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 은행을 찾을 수 없습니다."),
 
-    // 머니 충전
+    // 머니 충전 - 예외
     ORDER_NOT_FOUND("ORDER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다"),
     AMOUNT_MISMATCH("AMOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "주문 금액이 일치하지 않습니다"),
     ALREADY_PROCESSED_ORDER("ALREADY_PROCESSED_ORDER_400", HttpStatus.BAD_REQUEST, "이미 처리된 주문입니다"),
     // 머니 충전 - 성공
     MONEY_RECHARGE_PREPARE_SUCCESS("MONEY_RECHARGE_PREPARE_SUCCESS_200", HttpStatus.OK, "머니 충전 요청에 성공했습니다"),
 
+    // 지갑 - 예외
+    WALLET_NOT_FOUND("WALLET_NOT_FOUND_404", HttpStatus.NOT_FOUND, "지갑 정보를 찾을 수 없습니다"),
+    WALLET_ALREADY_EXISTS("WALLET_ALREADY_EXISTS_404", HttpStatus.NOT_FOUND, "이미 지갑이 있습니다"),
+    INVALID_AMOUNT("INVALID_AMOUNT_400", HttpStatus.BAD_REQUEST, "금액은 0보다 커야합니다"),
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 

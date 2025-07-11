@@ -1,11 +1,10 @@
 package com.ureca.snac.money.service;
 
-import com.ureca.snac.member.Member;
 import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
 
 public interface MoneyService {
-    MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, Member member);
+    MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, String email);
 
     void processRechargeSuccess(String paymentKey, String orderId, Long amount);
 }
