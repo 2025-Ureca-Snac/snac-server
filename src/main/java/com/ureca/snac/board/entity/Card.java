@@ -14,7 +14,10 @@ import lombok.NoArgsConstructor;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
-@Table(name = "card")
+@Table(name = "card",
+        indexes = {
+            @Index(name = "idx_card_updated_at_id", columnList = "updated_at, card_id")
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Card extends BaseTimeEntity {

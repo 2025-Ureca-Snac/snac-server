@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CardRepositoryCustom {
-    List<Card> scroll(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, int size, Long lastCardId, LocalDateTime localDateTime);
+    List<Card> scroll(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
 }
