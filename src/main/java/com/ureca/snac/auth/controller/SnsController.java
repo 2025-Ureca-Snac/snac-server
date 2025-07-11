@@ -24,9 +24,9 @@ public class SnsController {
         return ResponseEntity.ok(ApiResponse.ok(SMS_VERIFICATION_SENT));
     }
 
-        @PostMapping("/api/verify-code")
-        public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody VerificationRequest dto) {
-            snsService.verifyCode(dto.getPhone(), dto.getCode());
-            return ResponseEntity.ok(ApiResponse.ok(SMS_CODE_VERIFICATION_SUCCESS));
-        }
+    @PostMapping("/api/verify-code")
+    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody VerificationRequest dto) {
+        snsService.verifyCode(dto.getPhone(), dto.getCode());
+        return ResponseEntity.ok(ApiResponse.ok(SMS_CODE_VERIFICATION_SUCCESS));
+    }
 }

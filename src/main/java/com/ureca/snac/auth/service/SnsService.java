@@ -5,4 +5,6 @@ public interface SnsService {
     void sendVerificationCode(String phoneNumber);
 
     void verifyCode(String phoneNumber, String code);
+
+    boolean isPhoneVerified(String phoneNumber);
 }
