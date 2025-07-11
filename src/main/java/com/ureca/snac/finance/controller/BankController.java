@@ -19,20 +19,23 @@ import static com.ureca.snac.common.BaseCode.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/banks")
-public class BankController {
+public class BankController implements BankControllerSwagger {
 
     private final BankService bankService;
 
+    @Override
     @GetMapping("/{bankId}")
     public ResponseEntity<ApiResponse<BankResponse>> getBank(@PathVariable("bankId") Long bankId) {
         return ResponseEntity.ok(ApiResponse.of(BANK_READ_SUCCESS, bankService.getBankById(bankId)));
     }
 
+    @Override
     @GetMapping
     public ResponseEntity<ApiResponse<List<BankResponse>>> getAllBanks() {
         return ResponseEntity.ok(ApiResponse.of(BANK_LIST_SUCCESS, bankService.getAllBanks()));
     }
 
+    @Override
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createBank(@Validated @RequestBody CreateBankRequest createBankRequest) {
         bankService.createBank(createBankRequest);
@@ -42,6 +45,7 @@ public class BankController {
                 .body(ApiResponse.ok(BANK_CREATE_SUCCESS));
     }
 
+    @Override
     @DeleteMapping("/{bankId}")
     public ResponseEntity<ApiResponse<?>> deleteBank(@PathVariable("bankId") Long bankId) {
         bankService.deleteBank(bankId);
