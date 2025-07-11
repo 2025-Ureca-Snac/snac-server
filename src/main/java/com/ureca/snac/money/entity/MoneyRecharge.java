@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "money_recharge")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MoneyRecharge extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,8 +30,8 @@ public class MoneyRecharge extends BaseTimeEntity {
     // 외부 결제 API 리팩토링 근거 1
     // 역핣 분리, 충전과 결제
 
-    @Column(length = 20)
-    private String pg;
+    @Enumerated(EnumType.STRING)
+    private PaymentCategory pg;
 
     @Column(length = 50)
     private String pgMethod;
@@ -49,7 +49,7 @@ public class MoneyRecharge extends BaseTimeEntity {
     private LocalDateTime paidAt;
 
     @Builder
-    public MoneyRecharge(Long id, Member member, Integer paidAmountWon, String pg, String pgMethod, String pgOrderId, String pgPaymentKey, RechargeStatus status) {
+    private MoneyRecharge(Long id, Member member, Integer paidAmountWon, PaymentCategory pg, String pgMethod, String pgOrderId, String pgPaymentKey, RechargeStatus status) {
         this.id = id;
         this.member = member;
         this.paidAmountWon = paidAmountWon;
