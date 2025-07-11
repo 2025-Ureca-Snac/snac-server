@@ -2,6 +2,7 @@ package com.ureca.snac.money.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.payments.dto.TossConfirmResponse;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -33,14 +34,14 @@ public class MoneyRecharge extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PaymentCategory pg;
 
-    @Column(length = 50)
-    private String pgMethod;
-
     @Column(unique = true, length = 64)
     private String pgOrderId;
 
     @Column(unique = true, length = 200)
     private String pgPaymentKey;
+
+    @Column(length = 50)
+    private String pgMethod;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,21 +50,18 @@ public class MoneyRecharge extends BaseTimeEntity {
     private LocalDateTime paidAt;
 
     @Builder
-    private MoneyRecharge(Long id, Member member, Integer paidAmountWon, PaymentCategory pg, String pgMethod, String pgOrderId, String pgPaymentKey, RechargeStatus status) {
-        this.id = id;
+    private MoneyRecharge(Member member, Integer paidAmountWon, PaymentCategory pg, String pgOrderId) {
         this.member = member;
         this.paidAmountWon = paidAmountWon;
         this.pg = pg;
-        this.pgMethod = pgMethod;
         this.pgOrderId = pgOrderId;
-        this.pgPaymentKey = pgPaymentKey;
-        this.status = status;
+        this.status = RechargeStatus.PENDING;
     }
 
-    public void confirmSuccess(String pgPaymentKey, String pgMethod) {
+    public void complete(TossConfirmResponse tossConfirmResponse) {
         this.status = RechargeStatus.SUCCESS;
-        this.pgPaymentKey = pgPaymentKey;
-        this.pgMethod = pgMethod;
-        this.paidAt = LocalDateTime.now();
+        this.pgPaymentKey = tossConfirmResponse.paymentKey();
+        this.pgMethod = tossConfirmResponse.method();
+        this.paidAt = tossConfirmResponse.approvedAt();
     }
 }

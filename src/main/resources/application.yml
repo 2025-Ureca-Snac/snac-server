@@ -38,8 +38,10 @@ springdoc:
 
 payments:
   toss:
-    success-url: 1
-    fail-url: 1
+    secret-key: ${TOSS_SECRET_KEY}
+    confirm-url: "https://api.tosspayments.com/v1/payments/confirm"
+    success-url: ${PAYMENT_SUCCESS_URL}
+    fail-url: ${PAYMENT_FAIL_URL}
 
 aes:
   passphrase: ${AES_PASSPHRASE}
