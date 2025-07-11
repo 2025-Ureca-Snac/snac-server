@@ -1,4 +1,4 @@
-package com.ureca.snac.trade.entity;
+package com.ureca.snac.notification.entity;
 
 public enum NotificationType {
     TRADE_REQUESTED,
