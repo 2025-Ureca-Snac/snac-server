@@ -40,3 +40,7 @@ payments:
   toss:
     success-url: 1
     fail-url: 1
+
+aes:
+  passphrase: ${AES_PASSPHRASE}
+  salt: ${AES_SALT}
