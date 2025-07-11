@@ -2,7 +2,7 @@ package com.ureca.snac.money.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.payments.dto.TossConfirmResponse;
+import com.ureca.snac.payments.TossConfirmResponse;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

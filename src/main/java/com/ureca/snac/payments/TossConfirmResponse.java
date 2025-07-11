@@ -1,4 +1,4 @@
-package com.ureca.snac.payments.dto;
+package com.ureca.snac.payments;
 
 import java.time.LocalDateTime;
 

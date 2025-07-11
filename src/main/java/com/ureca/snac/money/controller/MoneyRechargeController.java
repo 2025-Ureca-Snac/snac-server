@@ -2,8 +2,8 @@ package com.ureca.snac.money.controller;
 
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
-import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
-import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
+import com.ureca.snac.money.dto.MoneyRechargeRequest;
+import com.ureca.snac.money.dto.MoneyRechargeResponse;
 import com.ureca.snac.money.service.MoneyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

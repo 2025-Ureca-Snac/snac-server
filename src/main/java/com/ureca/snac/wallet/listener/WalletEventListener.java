@@ -18,7 +18,7 @@ public class WalletEventListener {
         log.info("신규 회원가입 시 이벤트 수신해서 지갑 생성함 {}", event.member().getEmail());
         walletService.createWallet(event.member());
     }
-    /**
+    /*
      * 회원가입 이벤트가 발생했을 때 해당 회원의 지갑을 생성
      * 이벤트 트랜잭션활용해서 커밋이 된 이후에만 실제로
      */

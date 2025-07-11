@@ -1,4 +1,4 @@
-package com.ureca.snac.money.dto.request;
+package com.ureca.snac.money.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;

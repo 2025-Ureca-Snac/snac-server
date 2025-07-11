@@ -1,7 +1,7 @@
 package com.ureca.snac.money.service;
 
-import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
-import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
+import com.ureca.snac.money.dto.MoneyRechargeRequest;
+import com.ureca.snac.money.dto.MoneyRechargeResponse;
 
 public interface MoneyService {
     MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, String email);
