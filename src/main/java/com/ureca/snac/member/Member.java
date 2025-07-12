@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Table(name = "member")
@@ -30,6 +32,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "phone", nullable = false, length = 11)
     private String phone;
 
+    @Column(name = "birth_date", nullable = false)
+    private LocalDate birthDate;
+
     @Column(name = "rating_score", nullable = false)
     private Integer ratingScore;
 
@@ -42,13 +47,14 @@ public class Member extends BaseTimeEntity {
     private Activated activated;
 
     @Builder
-    private Member(String email, String password, String name, String phone,
+    private Member(String email, String password, String name, String phone, LocalDate birthDate,
                    Integer ratingScore, Role role, Activated activated) {
 
         this.email = email;
         this.password = password;
         this.name = name;
         this.phone = phone;
+        this.birthDate = birthDate;
         this.ratingScore = ratingScore;
         this.role = role;
         this.activated = activated;

@@ -1,14 +1,14 @@
-package com.ureca.snac.auth.jwt;
+package com.ureca.snac.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.dto.request.LoginRequest;
 import com.ureca.snac.auth.refresh.Refresh;
 import com.ureca.snac.auth.repository.RefreshRepository;
+import com.ureca.snac.auth.util.CookieUtil;
+import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -75,7 +75,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         refreshRepository.save(new Refresh(username, refresh));
 
         response.setHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ access);
-        response.addCookie(createCookie("refresh", refresh));
+        response.addCookie(CookieUtil.createCookie("refresh", refresh));
 
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json; charset=UTF-8");
@@ -93,14 +93,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String responseBody = objectMapper.writeValueAsString(apiResponse);
         response.getWriter().print(responseBody);
         response.getWriter().flush();
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
-//        cookie.setSecure(true);
-        cookie.setPath("/api");
-        cookie.setHttpOnly(true);
-        return cookie;
     }
 }

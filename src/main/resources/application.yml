@@ -1,20 +1,8 @@
 spring:
   application:
     name: snac-server
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_SNS_ACCESS_KEY}
-        secret-key: ${AWS_SNS_SECRET_KEY}
-      region:
-        static: ${REGION}
-  jwt:
-    secret: ${JWT_SECRET_KEY}
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
 
+  # 데이터베이스 설정
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -29,22 +17,44 @@ spring:
         format_sql: true
     open-in-view: false
 
-rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
+  # AWS SNS 설정
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_SNS_ACCESS_KEY}
+        secret-key: ${AWS_SNS_SECRET_KEY}
+      region:
+        static: ${REGION}
+
+  # JWT 설정
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+
+# RabbitMQ 설정
+rabbitmq:
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+
+# Swagger UI (springdoc) 설정
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
     with-credentials: true
     oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
 
-
+# 결제 (Toss) 설정
 payments:
   toss:
     success-url: 1
     fail-url: 1
 
+# AES 암호화 설정
 aes:
   passphrase: ${AES_PASSPHRASE}
   salt: ${AES_SALT}

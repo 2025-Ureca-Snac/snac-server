@@ -1,11 +1,11 @@
 package com.ureca.snac.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureca.snac.auth.jwt.JWTFilter;
-import com.ureca.snac.auth.jwt.JWTUtil;
-import com.ureca.snac.auth.jwt.LoginFilter;
+import com.ureca.snac.auth.filter.JWTFilter;
+import com.ureca.snac.auth.util.JWTUtil;
+import com.ureca.snac.auth.filter.LoginFilter;
 
-import com.ureca.snac.auth.jwt.CustomLogoutFilter;
+import com.ureca.snac.auth.filter.CustomLogoutFilter;
 
 import com.ureca.snac.auth.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
