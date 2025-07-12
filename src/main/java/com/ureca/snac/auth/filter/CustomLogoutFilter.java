@@ -1,7 +1,8 @@
-package com.ureca.snac.auth.jwt;
+package com.ureca.snac.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.repository.RefreshRepository;
+import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import io.jsonwebtoken.ExpiredJwtException;

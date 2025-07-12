@@ -2,6 +2,7 @@ package com.ureca.snac.auth.controller;
 
 import com.ureca.snac.auth.dto.TokenDto;
 import com.ureca.snac.auth.service.ReissueService;
+import com.ureca.snac.auth.util.CookieUtil;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.http.Cookie;
@@ -20,13 +21,13 @@ public class ReissueController {
     private final ReissueService reissueService;
 
     @PostMapping("/api/reissue")
-    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = getRefreshFromCookie(request);
 
         TokenDto tokenDto = reissueService.reissue(refresh);
 
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + tokenDto.getAccessToken());
-        response.addCookie(createCookie("refresh", tokenDto.getRefreshToken()));
+        response.addCookie(CookieUtil.createCookie("refresh", tokenDto.getRefreshToken()));
 
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.REISSUE_SUCCESS));
     }
@@ -42,14 +43,5 @@ public class ReissueController {
             }
         }
         return refresh;
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
-        cookie.setPath("/api");
-        cookie.setHttpOnly(true);
-        cookie.setDomain("localhost");
-        return cookie;
     }
 }

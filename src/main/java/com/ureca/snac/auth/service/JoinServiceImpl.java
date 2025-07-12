@@ -1,9 +1,9 @@
 package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.dto.request.JoinRequest;
+import com.ureca.snac.auth.exception.EmailDuplicateException;
+import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.repository.AuthRepository;
-import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +37,14 @@ public class JoinServiceImpl implements JoinService {
         // 휴대폰 인증 여부 확인
         String phone = joinRequest.getPhone();
         if(!snsService.isPhoneVerified(phone)) {
-            throw new BusinessException(BaseCode.PHONE_NOT_VERIFIED);
+            throw new PhoneNotVerifiedException();
         }
         log.info("Phone number {} is verified.", phone);
 
         String email = joinRequest.getEmail();
         // 이메일 중복 체크
         if (authRepository.existsByEmail(email)) {
-            throw new BusinessException(BaseCode.EMAIL_DUPLICATE);
+            throw new EmailDuplicateException();
         }
         log.info("Email {} is unique.", email);
 
@@ -53,6 +53,7 @@ public class JoinServiceImpl implements JoinService {
                 .password(passwordEncoder.encode(joinRequest.getPassword()))
                 .name(joinRequest.getName())
                 .phone(phone)
+                .birthDate(joinRequest.getBirthDate())
                 .role(USER)
                 .ratingScore(1000)
                 .activated(NORMAL)

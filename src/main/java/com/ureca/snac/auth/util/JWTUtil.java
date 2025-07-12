@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.jwt;
+package com.ureca.snac.auth.util;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
