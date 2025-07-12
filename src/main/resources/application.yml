@@ -37,9 +37,9 @@ spring:
     secret: ${JWT_SECRET_KEY}
 
 # RabbitMQ 설정
-rabbitmq:
-  host: ${RABBITMQ_HOST:localhost}
-  port: ${RABBITMQ_PORT:5672}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
 
 # Swagger UI (springdoc) 설정
 springdoc:
