@@ -11,11 +11,14 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
-        return ResponseEntity.ok(ApiResponse.of(e.getBaseCode(),null));
+        return ResponseEntity.ok(ApiResponse.of(e.getBaseCode(), null));
     }
 
     @ExceptionHandler(VerificationFailedException.class)
     public ResponseEntity<ApiResponse<Void>> handleVerificationFailedException(VerificationFailedException e) {
-        return ResponseEntity.ok(ApiResponse.of(e.getBaseCode(),null));
+        return ResponseEntity.ok(ApiResponse.of(e.getBaseCode(), null));
     }
 }
+
+
+// 리스폰스엔티티 응답 코드 변경
