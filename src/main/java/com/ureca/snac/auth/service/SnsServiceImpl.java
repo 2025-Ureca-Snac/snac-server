@@ -33,11 +33,11 @@ public class SnsServiceImpl implements SnsService {
         String message = String.format("[SNAC] 인증번호[%s]를 입력해주세요.", verificationCode);
         String formatPhoneNumber = formatToE164(phoneNumber);
 
-        try{
-        PublishResponse response = snsClient.publish(PublishRequest.builder()
-                .message(message)
-                .phoneNumber(formatPhoneNumber)
-                .build());
+        try {
+            PublishResponse response = snsClient.publish(PublishRequest.builder()
+                    .message(message)
+                    .phoneNumber(formatPhoneNumber)
+                    .build());
 
             redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + phoneNumber, verificationCode, VERIFICATION_CODE_TTL);
 
