@@ -1,6 +1,9 @@
 package com.ureca.snac.wallet.listener;
 
+import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.event.MemberJoinEvent;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +14,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 public class WalletEventListener {
+    private final MemberRepository memberRepository;
     private final WalletService walletService;
 
     @TransactionalEventListener
     public void handleMemberJoinEvent(MemberJoinEvent event) {
-        log.info("신규 회원가입 시 이벤트 수신해서 지갑 생성함 {}", event.member().getEmail());
-        walletService.createWallet(event.member());
+        log.info("신규 회원가입 시 이벤트 수신해서 지갑 생성함 {}", event.memberId());
+
+        Member member = memberRepository.findById(event.memberId())
+                .orElseThrow(MemberNotFoundException::new);
+
+        walletService.createWallet(member);
     }
     /*
      * 회원가입 이벤트가 발생했을 때 해당 회원의 지갑을 생성

@@ -36,7 +36,7 @@ public class JoinServiceImpl implements JoinService {
 
         // 휴대폰 인증 여부 확인
         String phone = joinRequest.getPhone();
-        if(!snsService.isPhoneVerified(phone)) {
+        if (!snsService.isPhoneVerified(phone)) {
             throw new BusinessException(BaseCode.PHONE_NOT_VERIFIED);
         }
         log.info("Phone number {} is verified.", phone);
@@ -61,6 +61,6 @@ public class JoinServiceImpl implements JoinService {
         authRepository.save(member);
 
         // 여기서 이벤트 발행 서비스 동작하라고 알림
-        eventPublisher.publishEvent(new MemberJoinEvent(member));
+        eventPublisher.publishEvent(new MemberJoinEvent(member.getId()));
     }
 }
