@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class VerificationRequest {
-    private String phone;
+public class VerificationEmailRequest {
+    private String email;
     private String code;
 }
