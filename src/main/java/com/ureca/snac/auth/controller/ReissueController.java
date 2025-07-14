@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ReissueController {
+public class ReissueController implements ReissueControllerSwagger {
 
     private final ReissueService reissueService;
 
-    @PostMapping("/api/reissue")
+    @Override
     public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = getRefreshFromCookie(request);
 
