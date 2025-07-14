@@ -1,9 +1,12 @@
 package com.ureca.snac.payments;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.OffsetDateTime;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record TossConfirmResponse(
         String paymentKey,
         String method,
-        LocalDateTime approvedAt) {
+        OffsetDateTime approvedAt) {
 }
