@@ -1,4 +1,4 @@
-package com.ureca.snac.trade.dto;
+package com.ureca.snac.trade.service.response;
 
 import com.ureca.snac.trade.entity.TradeStatus;
 import lombok.AllArgsConstructor;

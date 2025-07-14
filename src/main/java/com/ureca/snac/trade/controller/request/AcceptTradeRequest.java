@@ -1,4 +1,4 @@
-package com.ureca.snac.trade.dto;
+package com.ureca.snac.trade.controller.request;
 
 import lombok.Getter;
 import lombok.Setter;
