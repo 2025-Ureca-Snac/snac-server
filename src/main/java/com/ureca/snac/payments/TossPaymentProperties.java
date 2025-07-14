@@ -5,6 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Base64;
 
+/**
+ * application.yml에 정의된 토스페이먼츠 관련 설정 객체 바인딩
+ */
 @Getter
 @ConfigurationProperties("payments.toss")
 public class TossPaymentProperties {

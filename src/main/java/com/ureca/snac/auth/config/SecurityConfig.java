@@ -48,9 +48,9 @@ public class SecurityConfig {
                     CorsConfiguration cfg = new CorsConfiguration();
                     cfg.setAllowedOrigins(List.of("http://localhost:3000",
                             "http://localhost:5500",
-                            "https://docs.tosspayments.com"
+                            "https://docs.tosspayments.com",
+                            "https://snac-app.com"
                     ));
-                    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("*"));
                     cfg.setExposedHeaders(List.of("Authorization"));
