@@ -37,17 +37,30 @@ public enum BaseCode {
     REFRESH_TOKEN_EXPIRED("REFRESH_TOKEN_EXPIRED_400", HttpStatus.BAD_REQUEST, "refresh 토큰이 만료되었습니다."),
     INVALID_REFRESH_TOKEN("INVALID_REFRESH_TOKEN_400", HttpStatus.BAD_REQUEST, "유효하지 않은 refresh 토큰입니다."),
 
-    // 인증코드 발송- 성공
-    SMS_VERIFICATION_SENT("SMS_VERIFICATION_SENT_200", HttpStatus.OK, "인증번호가 발송되었습니다."),
-    // 인증코드 발송- 예외
-    SMS_SEND_FAILED("SMS_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "SMS 전송에 실패했습니다."),
+    // 문자 인증코드 발송- 성공
+    SMS_VERIFICATION_SENT("SMS_VERIFICATION_SENT_200", HttpStatus.OK, "문자 인증번호가 발송되었습니다."),
+    // 문자 인증코드 발송- 예외
+    SMS_SEND_FAILED("SMS_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "문자 전송에 실패했습니다."),
 
-    //인증코드 인증- 성공
-    SMS_CODE_VERIFICATION_SUCCESS("SMS_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "인증에 성공했습니다."),
+    // 이메일 인증코드 발송- 성공
+    EMAIL_VERIFICATION_SENT("EMAIL_VERIFICATION_SENT_200", HttpStatus.OK, "Email 인증번호가 발송되었습니다."),
+    // 이메일 인증코드 발송- 예외
+    EMAIL_SEND_FAILED("EMAIL_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Email 인증번호 전송에 실패했습니다."),
 
-    // 인증코드 인증- 예외
-    SMS_CODE_VERIFICATION_EXPIRED("SMS_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"인증번호가 만료되었거나 존재하지 않습니다."),
-    SMS_CODE_VERIFICATION_MISMATCH("SMS_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "인증번호가 일치하지 않습니다."),
+
+    // 문자 인증코드 인증- 성공
+    SMS_CODE_VERIFICATION_SUCCESS("SMS_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "문자 인증에 성공했습니다."),
+
+    // 문자 인증코드 인증- 예외
+    SMS_CODE_VERIFICATION_EXPIRED("SMS_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"문자 인증번호가 만료되었거나 존재하지 않습니다."),
+    SMS_CODE_VERIFICATION_MISMATCH("SMS_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "문자 인증번호가 일치하지 않습니다."),
+
+    //이메일 인증코드 인증- 성공
+    EMAIL_CODE_VERIFICATION_SUCCESS("EMAIL_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "Email 인증에 성공했습니다."),
+
+    //이메일 인증코드 인증- 예외
+    EMAIL_CODE_VERIFICATION_EXPIRED("EMAIL_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"Email 인증번호가 만료되었거나 존재하지 않습니다."),
+    EMAIL_CODE_VERIFICATION_MISMATCH("EMAIL_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "Email 인증번호가 일치하지 않습니다."),
 
     // 휴대폰번호 검증 - 실패
     PHONE_NOT_VERIFIED("PHONE_NOT_VERIFIED_422", HttpStatus.UNPROCESSABLE_ENTITY, "휴대폰 인증이 완료되지 않았습니다."),
@@ -92,6 +105,8 @@ public enum BaseCode {
     INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE_409", HttpStatus.CONFLICT, "잔액이 부족합니다."),
     DUPLICATE_TRADE_REQUEST("DUPLICATE_TRADE_REQUEST_409", HttpStatus.CONFLICT, "이미 요청된 거래가 있습니다."),
     TRADE_SELF_REQUEST("TRADE_SELF_REQUEST_400", HttpStatus.BAD_REQUEST, "자신의 글에는 거래를 요청할 수 없습니다."),
+    TRADE_PERMISSION_DENIED("TRADE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래를 진행할 권한이 없습니다."),
+
 
 
     // 계좌 - 성공

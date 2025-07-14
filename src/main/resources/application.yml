@@ -1,20 +1,8 @@
 spring:
   application:
     name: snac-server
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_SNS_ACCESS_KEY}
-        secret-key: ${AWS_SNS_SECRET_KEY}
-      region:
-        static: ${REGION}
-  jwt:
-    secret: ${JWT_SECRET_KEY}
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
 
+  # 데이터베이스 설정
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -30,13 +18,55 @@ spring:
     open-in-view: false
     show-sql: true
 
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+  # AWS SNS 설정
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_SNS_ACCESS_KEY}
+        secret-key: ${AWS_SNS_SECRET_KEY}
+      region:
+        static: ${REGION}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # JWT 설정
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+
+# RabbitMQ 설정
+  rabbitmq:
+    addresses: ${RABBITMQ_ADDRESSES}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+# Swagger UI (springdoc) 설정
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
     with-credentials: true
     oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
 
-
+# 결제 (Toss) 설정
 payments:
   toss:
     secret-key: ${TOSS_SECRET_KEY}
@@ -44,6 +74,7 @@ payments:
     success-url: ${PAYMENT_SUCCESS_URL}
     fail-url: ${PAYMENT_FAIL_URL}
 
+# AES 암호화 설정
 aes:
   passphrase: ${AES_PASSPHRASE}
   salt: ${AES_SALT}

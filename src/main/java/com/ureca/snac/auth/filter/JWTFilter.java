@@ -1,7 +1,8 @@
-package com.ureca.snac.auth.jwt;
+package com.ureca.snac.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.dto.CustomUserDetails;
+import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
@@ -19,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
@@ -73,12 +73,9 @@ public class JWTFilter extends OncePerRequestFilter {
     private void sendErrorResponse(HttpServletResponse response, BaseCode code) throws IOException {
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(code.getStatus().value());
-
         ApiResponse<Void> apiResponse = ApiResponse.error(code);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
-
-        PrintWriter writer = response.getWriter();
-        writer.print(responseBody);
-        writer.flush();
+        response.getWriter().print(responseBody);
+        response.getWriter().flush();
     }
 }

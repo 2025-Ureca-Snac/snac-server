@@ -1,15 +1,14 @@
 package com.ureca.snac.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureca.snac.auth.jwt.CustomLogoutFilter;
-import com.ureca.snac.auth.jwt.JWTFilter;
-import com.ureca.snac.auth.jwt.JWTUtil;
-import com.ureca.snac.auth.jwt.LoginFilter;
+import com.ureca.snac.auth.filter.CustomLogoutFilter;
+import com.ureca.snac.auth.filter.JWTFilter;
+import com.ureca.snac.auth.filter.LoginFilter;
 import com.ureca.snac.auth.repository.RefreshRepository;
+import com.ureca.snac.auth.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,10 +46,11 @@ public class SecurityConfig {
         http.
                 cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration cfg = new CorsConfiguration();
-                    cfg.setAllowedOrigins(List.of(
-                            "http://localhost:3000",
+                    cfg.setAllowedOrigins(List.of("http://localhost:3000",
+                            "http://localhost:5500",
                             "https://docs.tosspayments.com"
                     ));
+                    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("*"));
                     cfg.setExposedHeaders(List.of("Authorization"));
@@ -58,27 +58,33 @@ public class SecurityConfig {
                     return cfg;
                 }));
 
-        http.csrf((auth) -> auth.disable());
+        http
+                .csrf((auth) -> auth.disable());
 
-        http.formLogin((auth) -> auth.disable());
+        http
+                .formLogin((auth) -> auth.disable());
 
-        http.httpBasic((auth) -> auth.disable());
+        http
+                .httpBasic((auth) -> auth.disable());
 
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .anyRequest().permitAll());
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll());
 
 
-        http.addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
+        http
+                .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
+        http
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper, refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
-        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper, refreshRepository), UsernamePasswordAuthenticationFilter.class);
-
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
 
 
         // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
-        http.sessionManagement((session) -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
 }
