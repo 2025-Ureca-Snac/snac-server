@@ -20,10 +20,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Member userData = authRepository.findByEmail(email);
 
-        if (userData == null) {
-            throw new UsernameNotFoundException("사용자를 찾지 못했어요.. email: " + email);
+        if (userData != null) {
+            return new CustomUserDetails(userData);
         }
-
-        return new CustomUserDetails(userData);
+        return null;
     }
 }
