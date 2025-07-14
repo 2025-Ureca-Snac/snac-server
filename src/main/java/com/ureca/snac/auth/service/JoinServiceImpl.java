@@ -1,44 +1,75 @@
 package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.dto.request.JoinRequest;
-import com.ureca.snac.auth.exception.BusinessException;
+import com.ureca.snac.auth.exception.EmailDuplicateException;
+import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.repository.AuthRepository;
-import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.ApplicationEventPublisher;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ureca.snac.member.Activated.*;
-import static com.ureca.snac.member.Role.*;
+import static com.ureca.snac.member.Activated.NORMAL;
+import static com.ureca.snac.member.Role.USER;
 
 @Service
 @RequiredArgsConstructor
-public class JoinServiceImpl implements JoinService{
+@Slf4j
+public class JoinServiceImpl implements JoinService {
 
     private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final SnsService snsService;
+    private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Override
     @Transactional
     public void joinProcess(JoinRequest joinRequest) {
+
+        // 휴대폰 인증 여부 확인
+        String phone = joinRequest.getPhone();
+        if(!snsService.isPhoneVerified(phone)) {
+            throw new PhoneNotVerifiedException();
+        }
+        log.info("휴대폰 < {} > 인증 되었음.", phone);
+
         String email = joinRequest.getEmail();
 
-        if (authRepository.existsByEmail(email)) {
-            throw new BusinessException(BaseCode.EMAIL_DUPLICATE);
+        // 이메일 인증 여부 확인
+        if(!emailService.isEmailVerified(email)) {
+            throw new PhoneNotVerifiedException();
         }
+        log.info("email < {} > 인증 되었음.", phone);
+
+        // 이메일 중복 체크
+        if (authRepository.existsByEmail(email)) {
+            throw new EmailDuplicateException();
+        }
+        log.info("Email < {} > 은 중복이 아님.", email);
 
         Member member = Member.builder()
                 .email(email)
                 .password(passwordEncoder.encode(joinRequest.getPassword()))
                 .name(joinRequest.getName())
-                .phone(joinRequest.getPhone())
+                .phone(phone)
+                .birthDate(joinRequest.getBirthDate())
                 .role(USER)
                 .ratingScore(1000)
                 .activated(NORMAL)
                 .build();
 
         authRepository.save(member);
+
+        // 여기서 이벤트 발행 서비스 동작하라고 알림
+        eventPublisher.publishEvent(new MemberJoinEvent(member));
     }
 }

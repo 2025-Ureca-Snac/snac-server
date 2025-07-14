@@ -33,8 +33,8 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public Long createCard(Long memberId, CreateCardRequest request) {
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+    public Long createCard(String username, CreateCardRequest request) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
         Card card = Card.builder().member(member)
                 .sellStatus(SellStatus.SELLING)
@@ -51,8 +51,9 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public void updateCard(Long memberId, Long cardId, UpdateCardRequest updateCardRequest) {
-        Card card = cardRepository.findByIdAndMemberId(cardId, memberId).orElseThrow(CardNotFoundException::new);
+    public void updateCard(String username, Long cardId, UpdateCardRequest updateCardRequest) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+        Card card = cardRepository.findByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
 
         card.update(
                 updateCardRequest.getCardCategory(),
@@ -63,8 +64,8 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, int size, Long lastCardId, LocalDateTime lastUpdatedAt) {
-        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRange, size + 1, lastCardId, lastUpdatedAt);
+    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, int size, Long lastCardId, LocalDateTime lastUpdatedAt) {
+        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, size + 1, lastCardId, lastUpdatedAt);
 
         boolean hasNext = raw.size() > size;
 
@@ -80,8 +81,10 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public void deleteCard(Long memberId, Long cardId) {
-        Card card = cardRepository.findByIdAndMemberId(cardId, memberId).orElseThrow(CardNotFoundException::new);
+    @Transactional
+    public void deleteCard(String username, Long cardId) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+        Card card = cardRepository.findByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
 
         cardRepository.delete(card);
     }

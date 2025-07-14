@@ -1,6 +1,9 @@
 package com.ureca.snac.auth.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Getter
 @Builder
@@ -11,4 +14,7 @@ public class JoinRequest {
     private String password;
     private String name;
     private String phone;
+
+    @JsonFormat(pattern = "yyyyMMdd")
+    private LocalDate birthDate;
 }

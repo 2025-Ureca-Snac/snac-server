@@ -1,7 +1,7 @@
 package com.ureca.snac.auth.controller;
 
 import com.ureca.snac.auth.dto.request.PhoneRequest;
-import com.ureca.snac.auth.dto.response.VerificationCodeResponse;
+import com.ureca.snac.auth.dto.request.VerificationPhoneRequest;
 import com.ureca.snac.auth.service.SnsService;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +19,14 @@ public class SnsController {
     private final SnsService snsService;
 
     @PostMapping("/api/send-verification-code")
-    public ResponseEntity<ApiResponse<VerificationCodeResponse>> sendVerificationCode(@RequestBody PhoneRequest dto) {
-        String code = snsService.sendVerificationCode(dto.getPhone());
-        VerificationCodeResponse response = new VerificationCodeResponse(code);
-        return ResponseEntity.ok(ApiResponse.of(SMS_VERIFICATION_SENT, response));
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestBody PhoneRequest dto) {
+        snsService.sendVerificationCode(dto.getPhone());
+        return ResponseEntity.ok(ApiResponse.ok(SMS_VERIFICATION_SENT));
+    }
+
+    @PostMapping("/api/verify-code")
+    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody VerificationPhoneRequest dto) {
+        snsService.verifyCode(dto.getPhone(), dto.getCode());
+        return ResponseEntity.ok(ApiResponse.ok(SMS_CODE_VERIFICATION_SUCCESS));
     }
 }

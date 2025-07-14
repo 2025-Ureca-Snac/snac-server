@@ -24,6 +24,10 @@ public enum BaseCode {
     // 로그인 시도 - 실패
     LOGIN_FAILED("LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
 
+    // 로그아웃 시도 - 성공
+    LOGOUT_SUCCESS("LOGOUT_SUCCESS_200", HttpStatus.OK, "로그아웃에 성공했습니다."),
+
+
     // 인증,인가
     TOKEN_EXPIRED("TOKEN_EXPIRED_401", HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
     TOKEN_INVALID("TOKEN_INVALID_401", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -33,12 +37,33 @@ public enum BaseCode {
     REFRESH_TOKEN_EXPIRED("REFRESH_TOKEN_EXPIRED_400", HttpStatus.BAD_REQUEST, "refresh 토큰이 만료되었습니다."),
     INVALID_REFRESH_TOKEN("INVALID_REFRESH_TOKEN_400", HttpStatus.BAD_REQUEST, "유효하지 않은 refresh 토큰입니다."),
 
+    // 문자 인증코드 발송- 성공
+    SMS_VERIFICATION_SENT("SMS_VERIFICATION_SENT_200", HttpStatus.OK, "문자 인증번호가 발송되었습니다."),
+    // 문자 인증코드 발송- 예외
+    SMS_SEND_FAILED("SMS_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "문자 전송에 실패했습니다."),
 
-    // 인증코드 발송- 성공
-    SMS_VERIFICATION_SENT("SMS_VERIFICATION_SENT_200", HttpStatus.OK, "인증번호가 발송되었습니다."),
-    // 인증코드 발송- 예외
-    SMS_SEND_FAILED("SMS_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "SMS 전송에 실패했습니다."),
+    // 이메일 인증코드 발송- 성공
+    EMAIL_VERIFICATION_SENT("EMAIL_VERIFICATION_SENT_200", HttpStatus.OK, "Email 인증번호가 발송되었습니다."),
+    // 이메일 인증코드 발송- 예외
+    EMAIL_SEND_FAILED("EMAIL_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Email 인증번호 전송에 실패했습니다."),
 
+
+    // 문자 인증코드 인증- 성공
+    SMS_CODE_VERIFICATION_SUCCESS("SMS_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "문자 인증에 성공했습니다."),
+
+    // 문자 인증코드 인증- 예외
+    SMS_CODE_VERIFICATION_EXPIRED("SMS_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"문자 인증번호가 만료되었거나 존재하지 않습니다."),
+    SMS_CODE_VERIFICATION_MISMATCH("SMS_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "문자 인증번호가 일치하지 않습니다."),
+
+    //이메일 인증코드 인증- 성공
+    EMAIL_CODE_VERIFICATION_SUCCESS("EMAIL_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "Email 인증에 성공했습니다."),
+
+    //이메일 인증코드 인증- 예외
+    EMAIL_CODE_VERIFICATION_EXPIRED("EMAIL_CODE_VERIFICATION_EXPIRED_401",HttpStatus.UNAUTHORIZED,"Email 인증번호가 만료되었거나 존재하지 않습니다."),
+    EMAIL_CODE_VERIFICATION_MISMATCH("EMAIL_CODE_VERIFICATION_MISMATCH_401",HttpStatus.UNAUTHORIZED, "Email 인증번호가 일치하지 않습니다."),
+
+    // 휴대폰번호 검증 - 실패
+    PHONE_NOT_VERIFIED("PHONE_NOT_VERIFIED_422", HttpStatus.UNPROCESSABLE_ENTITY, "휴대폰 인증이 완료되지 않았습니다."),
 
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
@@ -50,6 +75,17 @@ public enum BaseCode {
     // 은행 - 예외
     BANK_NOT_FOUND("BANK_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 은행을 찾을 수 없습니다."),
 
+    // 머니 충전 - 예외
+    ORDER_NOT_FOUND("ORDER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다"),
+    AMOUNT_MISMATCH("AMOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "주문 금액이 일치하지 않습니다"),
+    ALREADY_PROCESSED_ORDER("ALREADY_PROCESSED_ORDER_400", HttpStatus.BAD_REQUEST, "이미 처리된 주문입니다"),
+    // 머니 충전 - 성공
+    MONEY_RECHARGE_PREPARE_SUCCESS("MONEY_RECHARGE_PREPARE_SUCCESS_200", HttpStatus.OK, "머니 충전 요청에 성공했습니다"),
+
+    // 지갑 - 예외
+    WALLET_NOT_FOUND("WALLET_NOT_FOUND_404", HttpStatus.NOT_FOUND, "지갑 정보를 찾을 수 없습니다"),
+    WALLET_ALREADY_EXISTS("WALLET_ALREADY_EXISTS_404", HttpStatus.NOT_FOUND, "이미 지갑이 있습니다"),
+    INVALID_AMOUNT("INVALID_AMOUNT_400", HttpStatus.BAD_REQUEST, "금액은 0보다 커야합니다"),
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 
@@ -69,8 +105,19 @@ public enum BaseCode {
     INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE_409", HttpStatus.CONFLICT, "잔액이 부족합니다."),
     DUPLICATE_TRADE_REQUEST("DUPLICATE_TRADE_REQUEST_409", HttpStatus.CONFLICT, "이미 요청된 거래가 있습니다."),
     TRADE_SELF_REQUEST("TRADE_SELF_REQUEST_400", HttpStatus.BAD_REQUEST, "자신의 글에는 거래를 요청할 수 없습니다."),
-    TRADE_PERMISSION_DENIED("TRADE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래를 진행할 권한이 없습니다.");
+    TRADE_PERMISSION_DENIED("TRADE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래를 진행할 권한이 없습니다."),
 
+
+
+    // 계좌 - 성공
+    ACCOUNT_CREATE_SUCCESS("ACCOUNT_CREATE_SUCCESS_201", HttpStatus.CREATED, "계좌가 성공적으로 생성되었습니다."),
+    ACCOUNT_READ_SUCCESS("ACCOUNT_READ_SUCCESS_200", HttpStatus.OK, "계좌 정보를 성공적으로 조회했습니다."),
+    ACCOUNT_LIST_SUCCESS("ACCOUNT_LIST_SUCCESS_200", HttpStatus.OK, "계좌 목록을 성공적으로 조회했습니다."),
+    ACCOUNT_UPDATE_SUCCESS("ACCOUNT_UPDATE_SUCCESS_200", HttpStatus.OK, "계좌 정보가 성공적으로 수정되었습니다."),
+    ACCOUNT_DELETE_SUCCESS("ACCOUNT_DELETE_SUCCESS_200", HttpStatus.OK, "계좌가 성공적으로 삭제되었습니다."),
+
+    // 계좌 - 예외
+    ACCOUNT_NOT_FOUND("ACCOUNT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 계좌를 찾을 수 없습니다.");
 
     private final String code;
     private final HttpStatus status;

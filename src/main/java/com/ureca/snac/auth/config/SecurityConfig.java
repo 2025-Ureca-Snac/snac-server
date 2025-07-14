@@ -1,10 +1,13 @@
 package com.ureca.snac.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureca.snac.auth.jwt.JWTFilter;
-import com.ureca.snac.auth.jwt.JWTUtil;
-import com.ureca.snac.auth.jwt.LoginFilter;
-import jakarta.servlet.http.HttpServletRequest;
+import com.ureca.snac.auth.filter.JWTFilter;
+import com.ureca.snac.auth.util.JWTUtil;
+import com.ureca.snac.auth.filter.LoginFilter;
+
+import com.ureca.snac.auth.filter.CustomLogoutFilter;
+
+import com.ureca.snac.auth.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,10 +19,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -41,25 +44,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors
-                        .configurationSource(new CorsConfigurationSource() {
-                            @Override
-                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                                CorsConfiguration configuration = new CorsConfiguration();
-
-                                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                                configuration.setAllowedMethods(Collections.singletonList("*"));
-                                configuration.setAllowedHeaders(Collections.singletonList("*"));
-                                configuration.setAllowCredentials(true);
-                                configuration.setMaxAge(3600L);
-
-                                configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-
-                                return configuration;
-                            }
-                        }));
+    public SecurityFilterChain filterChain(HttpSecurity http, RefreshRepository refreshRepository) throws Exception {
+        http.
+                cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration cfg = new CorsConfiguration();
+                    cfg.setAllowedOrigins(List.of("http://localhost:3000"));
+                    cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+                    cfg.setAllowedHeaders(List.of("*"));
+                    cfg.setExposedHeaders(List.of("Authorization"));
+                    cfg.setAllowCredentials(true);
+                    return cfg;
+                }));
 
         http
                 .csrf((auth) -> auth.disable());
@@ -72,16 +67,16 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/login", "/api/join", "/api/reissue").permitAll()
-                        .requestMatchers("/**").permitAll()
-                        .requestMatchers("/api/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated());
+                        .anyRequest().permitAll());
+
 
         http
                 .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), LoginFilter.class);
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,objectMapper,refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
 
 
         // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
