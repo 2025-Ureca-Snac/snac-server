@@ -54,8 +54,7 @@ spring:
 
 # RabbitMQ 설정
   rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
+    addresses: ${RABBITMQ_ADDRESSES}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
 
