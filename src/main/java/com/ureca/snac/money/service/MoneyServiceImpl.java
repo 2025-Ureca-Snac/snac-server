@@ -16,6 +16,7 @@ import com.ureca.snac.payments.TossPaymentsClient;
 import com.ureca.snac.payments.TossConfirmResponse;
 import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class MoneyServiceImpl implements MoneyService {
 
     private final MoneyRechargeRepository moneyRechargeRepository;
@@ -68,13 +70,14 @@ public class MoneyServiceImpl implements MoneyService {
         MoneyRecharge recharge = moneyRechargeRepository.findByPgOrderId(orderId)
                 .orElseThrow(OrderNotFoundException::new);
 
-        if (!recharge.getPaidAmountWon().equals(amount.intValue())) {
+        if (!recharge.getPaidAmountWon().equals(amount)) {
             throw new AmountMismatchException();
         }
 
         if (recharge.getStatus() != RechargeStatus.PENDING) {
             throw new AlreadyProcessedOrderException();
         }
+        log.info("[결제] paymentKey={}, orderId={}, amount={}", paymentKey, orderId, amount);
 
         // 토스 페이먼츠에 직접 확인 외부 결제 시스템
         TossConfirmResponse tossConfirmResponse = tossPaymentsClient.confirmPayment(paymentKey, orderId, amount);

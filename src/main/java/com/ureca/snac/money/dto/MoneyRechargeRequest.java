@@ -13,5 +13,5 @@ public class MoneyRechargeRequest {
     @Schema(description = "충전 요청 금액", example = "5000")
     @NotNull(message = "충전 금액은 필수 항목입니다.")
     @Min(value = 1000, message = "충전 금액은 1000원 이상이어야 한다.")
-    private Integer amount;
+    private Long amount;
 }

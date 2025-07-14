@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "money_recharge")
@@ -26,7 +26,7 @@ public class MoneyRecharge extends BaseTimeEntity {
     private Member member;
 
     @Column(nullable = false)
-    private Integer paidAmountWon;
+    private Long paidAmountWon;
 
     // 외부 결제 API 리팩토링 근거 1
     // 역핣 분리, 충전과 결제
@@ -40,17 +40,16 @@ public class MoneyRecharge extends BaseTimeEntity {
     @Column(unique = true, length = 200)
     private String pgPaymentKey;
 
-    @Column(length = 50)
     private String pgMethod;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RechargeStatus status;
 
-    private LocalDateTime paidAt;
+    private OffsetDateTime paidAt;
 
     @Builder
-    private MoneyRecharge(Member member, Integer paidAmountWon, PaymentCategory pg, String pgOrderId) {
+    private MoneyRecharge(Member member, Long paidAmountWon, PaymentCategory pg, String pgOrderId) {
         this.member = member;
         this.paidAmountWon = paidAmountWon;
         this.pg = pg;
