@@ -99,15 +99,17 @@ public enum BaseCode {
     // 카드 - 실패
     CARD_NOT_FOUND("CARD_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 카드를 찾을 수 없습니다."),
 
-    // 거래 관련
+    // 거래 - 성공
+    TRADE_REQUEST_SUCCESS("TRADE_REQUEST_SUCCESS_200", HttpStatus.OK, "거래 요청에 성공하였습니다."),
+    TRADE_ACCEPT_SUCCESS ("TRADE_ACCEPT_SUCCESS_200",  HttpStatus.OK, "거래 수락에 성공하였습니다."),
+
+    // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),
     TRADE_STATUS_MISMATCH("TRADE_STATUS_MISMATCH_409", HttpStatus.CONFLICT, "현재 단계에서 수행할 수 없는 요청입니다."),
     INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE_409", HttpStatus.CONFLICT, "잔액이 부족합니다."),
     DUPLICATE_TRADE_REQUEST("DUPLICATE_TRADE_REQUEST_409", HttpStatus.CONFLICT, "이미 요청된 거래가 있습니다."),
     TRADE_SELF_REQUEST("TRADE_SELF_REQUEST_400", HttpStatus.BAD_REQUEST, "자신의 글에는 거래를 요청할 수 없습니다."),
     TRADE_PERMISSION_DENIED("TRADE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래를 진행할 권한이 없습니다."),
-
-
 
     // 계좌 - 성공
     ACCOUNT_CREATE_SUCCESS("ACCOUNT_CREATE_SUCCESS_201", HttpStatus.CREATED, "계좌가 성공적으로 생성되었습니다."),

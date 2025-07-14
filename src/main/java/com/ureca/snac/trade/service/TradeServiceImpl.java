@@ -4,10 +4,8 @@ import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.notification.dto.NotificationDTO;
 import com.ureca.snac.trade.controller.request.AcceptTradeRequest;
-import com.ureca.snac.trade.exception.TradeNotFoundException;
-import com.ureca.snac.trade.exception.TradePermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeSelfRequestException;
-import com.ureca.snac.trade.exception.DuplicateTradeRequestException;
+import com.ureca.snac.trade.dto.TradeSide;
+import com.ureca.snac.trade.exception.*;
 
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
@@ -35,64 +33,56 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     @Transactional
-    public Long requestTradeAsBuyer(TradeRequest tradeRequest, String username) {
+    public Long requestTrade(TradeRequest tradeRequest, String username, TradeSide tradeSide) {
         Card card = cardRepository.findById(tradeRequest.getCardId()).orElseThrow(CardNotFoundException::new);
-        Member buyer = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Member seller = memberRepository.findByEmail(card.getMember().getEmail()).orElseThrow(MemberNotFoundException::new);
+        Member me = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+        Member other = memberRepository.findByEmail(card.getMember().getEmail()).orElseThrow(MemberNotFoundException::new);
 
-        if (card.getMember().equals(buyer))
+        if (card.getMember().equals(me))
             throw new TradeSelfRequestException();
 
-        if (card.getCardCategory() != CardCategory.SELL)
-            throw new IllegalArgumentException("판매글이 아닌 글에는 구매자가 요청할 수 없습니다.");
+        Member buyer, seller;
+        TradeStatus initialStatus;
 
-        Trade trade = Trade.builder().cardId(card.getId()).seller(seller)
-                .buyer(buyer).carrier(card.getCarrier()).priceGb(card.getPrice())
-                .dataAmount(card.getDataAmount()).status(TradeStatus.BUY_REQUESTED)
-                .build();
+        switch (tradeSide) {
+            case BUY:
+                if (card.getCardCategory() != CardCategory.SELL) {
+                    throw new IllegalArgumentException("판매글이 아닌 글에는 구매자가 요청할 수 없습니다.");
+                }
+                initialStatus = TradeStatus.BUY_REQUESTED;
+                buyer  = me;
+                seller = other;
+                break;
 
-        tradeRepository.save(trade);
+            case SELL:
+                if (card.getCardCategory() != CardCategory.BUY) {
+                    throw new IllegalArgumentException("구매글이 아닌 글에는 판매자가 요청할 수 없습니다.");
+                }
+                initialStatus = TradeStatus.SELL_REQUESTED;
+                seller = me;
+                buyer  = other;
+                break;
 
-        NotificationDTO notificationDTO = new NotificationDTO(NotificationType.TRADE_REQUESTED, buyer.getEmail(), seller.getEmail(), trade.getId());
+            default:
+                throw new IllegalArgumentException("side는 BUY 또는 SELL만 가능합니다.");
+        }
 
-        notificationService.notify(notificationDTO);
-
-        return trade.getId();
-    }
-
-    @Override
-    @Transactional
-    public Long requestTradeAsSeller(TradeRequest tradeRequest, String username) {
-        Card card = cardRepository.findById(tradeRequest.getCardId()).orElseThrow(CardNotFoundException::new);
-        Member seller = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Member buyer = memberRepository.findByEmail(card.getMember().getEmail()).orElseThrow(MemberNotFoundException::new);
-
-        if (card.getMember().equals(seller))
-            throw new TradeSelfRequestException();
-
-        if (card.getCardCategory() != CardCategory.BUY)
-            throw new IllegalArgumentException("구매글이 아닌 글에는 판매자가 요청할 수 없습니다.");
-
-        tradeRepository.findByCardIdAndBuyerIdAndStatusNot(
-                card.getId(), seller.getId(), TradeStatus.CANCELED
-        ).ifPresent(t -> { throw new DuplicateTradeRequestException(); });
-
-        Trade trade = Trade.builder()
-                .cardId(card.getId())
+        Trade trade = Trade.builder().cardId(card.getId())
                 .seller(seller)
                 .buyer(buyer)
                 .carrier(card.getCarrier())
                 .priceGb(card.getPrice())
                 .dataAmount(card.getDataAmount())
-                .status(TradeStatus.SELL_REQUESTED)
+                .status(initialStatus)
                 .build();
+
         tradeRepository.save(trade);
 
 
         NotificationDTO notificationDTO = new NotificationDTO(
                 NotificationType.TRADE_REQUESTED,
-                seller.getEmail(),
-                buyer.getEmail(),
+                me.getEmail(),
+                other.getEmail(),
                 trade.getId()
         );
         notificationService.notify(notificationDTO);
@@ -107,8 +97,8 @@ public class TradeServiceImpl implements TradeService {
         Trade trade = tradeRepository.findById(acceptTradeRequest.getTradeId()).orElseThrow(TradeNotFoundException::new);
 
         boolean canAccept = switch (trade.getStatus()) {
-            case BUY_REQUESTED  -> accepter.equals(trade.getSeller());
-            case SELL_REQUESTED  -> accepter.equals(trade.getBuyer());
+            case BUY_REQUESTED -> accepter.equals(trade.getSeller());
+            case SELL_REQUESTED -> accepter.equals(trade.getBuyer());
             default -> false;
         };
 
