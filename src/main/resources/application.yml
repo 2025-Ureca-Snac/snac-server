@@ -16,6 +16,7 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+    show-sql: true
 
   # Redis 설정
   data:
@@ -68,8 +69,10 @@ springdoc:
 # 결제 (Toss) 설정
 payments:
   toss:
-    success-url: 1
-    fail-url: 1
+    secret-key: ${TOSS_SECRET_KEY}
+    confirm-url: "https://api.tosspayments.com/v1/payments/confirm"
+    success-url: ${PAYMENT_SUCCESS_URL}
+    fail-url: ${PAYMENT_FAIL_URL}
 
 # AES 암호화 설정
 aes:

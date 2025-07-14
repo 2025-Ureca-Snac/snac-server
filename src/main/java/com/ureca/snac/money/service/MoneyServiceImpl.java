@@ -3,8 +3,8 @@ package com.ureca.snac.money.service;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
-import com.ureca.snac.money.dto.request.MoneyRechargeRequest;
-import com.ureca.snac.money.dto.response.MoneyRechargeResponse;
+import com.ureca.snac.money.dto.MoneyRechargeRequest;
+import com.ureca.snac.money.dto.MoneyRechargeResponse;
 import com.ureca.snac.money.entity.MoneyRecharge;
 import com.ureca.snac.money.entity.PaymentCategory;
 import com.ureca.snac.money.entity.RechargeStatus;
@@ -12,7 +12,11 @@ import com.ureca.snac.money.exception.AlreadyProcessedOrderException;
 import com.ureca.snac.money.exception.AmountMismatchException;
 import com.ureca.snac.money.exception.OrderNotFoundException;
 import com.ureca.snac.money.repository.MoneyRechargeRepository;
+import com.ureca.snac.payments.TossPaymentsClient;
+import com.ureca.snac.payments.TossConfirmResponse;
+import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +25,14 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class MoneyServiceImpl implements MoneyService {
 
     private final MoneyRechargeRepository moneyRechargeRepository;
+    private final TossPaymentsClient tossPaymentsClient;
+    // 토스 통신
+    private final WalletService walletService;
+    // 지갑 관리
     private final MemberRepository memberRepository;
 
     @Override
@@ -41,7 +50,6 @@ public class MoneyServiceImpl implements MoneyService {
                 .paidAmountWon(request.getAmount())
                 .pg(PaymentCategory.TOSS)
                 .pgOrderId(pgOrderId)
-                .status(RechargeStatus.PENDING)
                 .build();
 
         moneyRechargeRepository.save(newRecharge);
@@ -58,19 +66,26 @@ public class MoneyServiceImpl implements MoneyService {
     @Override
     @Transactional
     public void processRechargeSuccess(String paymentKey, String orderId, Long amount) {
+        // 시스템 데이터 정합성 확인
         MoneyRecharge recharge = moneyRechargeRepository.findByPgOrderId(orderId)
                 .orElseThrow(OrderNotFoundException::new);
 
-        if (!recharge.getPaidAmountWon().equals(amount.intValue())) {
+        if (!recharge.getPaidAmountWon().equals(amount)) {
             throw new AmountMismatchException();
         }
 
         if (recharge.getStatus() != RechargeStatus.PENDING) {
             throw new AlreadyProcessedOrderException();
         }
+        log.info("[결제] paymentKey={}, orderId={}, amount={}", paymentKey, orderId, amount);
 
-        // TODO
-        // 토스 페이먼츠 결제 승인 API
+        // 토스 페이먼츠에 직접 확인 외부 결제 시스템
+        TossConfirmResponse tossConfirmResponse = tossPaymentsClient.confirmPayment(paymentKey, orderId, amount);
+
+        // 비즈니스 로직 실행 머니 입금 하고 주문상태 성공으로 멱등성 확보
+        walletService.depositMoney(recharge.getMember().getId(), amount);
+
+        recharge.complete(tossConfirmResponse);
     }
 }
 

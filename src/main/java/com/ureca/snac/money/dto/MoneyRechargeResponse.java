@@ -1,4 +1,4 @@
-package com.ureca.snac.money.dto.response;
+package com.ureca.snac.money.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ public class MoneyRechargeResponse {
     private final String orderName;
 
     @Schema(description = "결제 금액", example = "5000")
-    private final Integer amount;
+    private final Long amount;
 
     @Schema(description = "고객 이름 명", example = "김스낵")
     private final String customerName;

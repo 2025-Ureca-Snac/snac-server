@@ -2,13 +2,14 @@ package com.ureca.snac.money.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.payments.TossConfirmResponse;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "money_recharge")
@@ -25,7 +26,7 @@ public class MoneyRecharge extends BaseTimeEntity {
     private Member member;
 
     @Column(nullable = false)
-    private Integer paidAmountWon;
+    private Long paidAmountWon;
 
     // 외부 결제 API 리팩토링 근거 1
     // 역핣 분리, 충전과 결제
@@ -33,37 +34,33 @@ public class MoneyRecharge extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PaymentCategory pg;
 
-    @Column(length = 50)
-    private String pgMethod;
-
     @Column(unique = true, length = 64)
     private String pgOrderId;
 
     @Column(unique = true, length = 200)
     private String pgPaymentKey;
 
+    private String pgMethod;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RechargeStatus status;
 
-    private LocalDateTime paidAt;
+    private OffsetDateTime paidAt;
 
     @Builder
-    private MoneyRecharge(Long id, Member member, Integer paidAmountWon, PaymentCategory pg, String pgMethod, String pgOrderId, String pgPaymentKey, RechargeStatus status) {
-        this.id = id;
+    private MoneyRecharge(Member member, Long paidAmountWon, PaymentCategory pg, String pgOrderId) {
         this.member = member;
         this.paidAmountWon = paidAmountWon;
         this.pg = pg;
-        this.pgMethod = pgMethod;
         this.pgOrderId = pgOrderId;
-        this.pgPaymentKey = pgPaymentKey;
-        this.status = status;
+        this.status = RechargeStatus.PENDING;
     }
 
-    public void confirmSuccess(String pgPaymentKey, String pgMethod) {
+    public void complete(TossConfirmResponse tossConfirmResponse) {
         this.status = RechargeStatus.SUCCESS;
-        this.pgPaymentKey = pgPaymentKey;
-        this.pgMethod = pgMethod;
-        this.paidAt = LocalDateTime.now();
+        this.pgPaymentKey = tossConfirmResponse.paymentKey();
+        this.pgMethod = tossConfirmResponse.method();
+        this.paidAt = tossConfirmResponse.approvedAt();
     }
 }

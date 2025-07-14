@@ -69,7 +69,11 @@ public class JoinServiceImpl implements JoinService {
 
         authRepository.save(member);
 
-        // 여기서 이벤트 발행 서비스 동작하라고 알림
-        eventPublisher.publishEvent(new MemberJoinEvent(member));
+        // 여기서 이벤트 발행 서비스 동작
+        publishMemberJoinEvent(member);
+    }
+
+    private void publishMemberJoinEvent(Member member) {
+        eventPublisher.publishEvent(new MemberJoinEvent(member.getId()));
     }
 }

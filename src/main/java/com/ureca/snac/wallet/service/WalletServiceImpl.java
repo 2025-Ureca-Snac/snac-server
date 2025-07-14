@@ -6,9 +6,12 @@ import com.ureca.snac.wallet.entity.Wallet;
 import com.ureca.snac.wallet.exception.WalletAlreadyExistsException;
 import com.ureca.snac.wallet.exception.WalletNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -16,14 +19,20 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createWallet(Member member) {
+        log.info("[지갑생성] createWallet 진입 : memberId={}, email={}", member.getId(), member.getEmail());
+
         walletRepository.findByMemberId(member.getId()).ifPresent(
                 wallet -> {
-                    // 지갑 예외처리
+                    log.error("[지갑생성] 이미 지갑 존재 memberId={}", member.getId());
                     throw new WalletAlreadyExistsException();
                 });
-        walletRepository.save(Wallet.create(member));
+
+        Wallet wallet = Wallet.create(member);
+
+        walletRepository.save(wallet);
+        log.info("[지갑생성] 생성 완료 : walletId={}, memberId={}", wallet.getId(), member.getId());
     }
 
     @Override
