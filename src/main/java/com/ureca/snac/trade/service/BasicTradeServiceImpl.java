@@ -1,21 +1,19 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.board.entity.Card;
-import com.ureca.snac.board.exception.CardAlreadySellingException;
-import com.ureca.snac.board.exception.CardAlreadyTradingException;
+import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
-import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.wallet.Repository.WalletRepository;
 import com.ureca.snac.wallet.entity.Wallet;
-import com.ureca.snac.wallet.exception.InsufficientBalanceException;
 import com.ureca.snac.wallet.exception.WalletNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import static com.ureca.snac.board.entity.constants.SellStatus.*;
-import static com.ureca.snac.trade.entity.TradeStatus.*;
-import static com.ureca.snac.trade.entity.TradeStatus.CANCELED;
+import static com.ureca.snac.trade.entity.TradeStatus.DATA_SENT;
 import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 
 @Slf4j
@@ -42,96 +39,28 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     @Override
     @Transactional
     public Long createSellTrade(CreateTradeRequest createTradeRequest, String username) {
-        Member buyer = getMember(username);
-        Wallet wallet = getLockedWallet(buyer.getId());
-        Card card = getLockedCard(createTradeRequest);
-
-        if (card.getSellStatus() != SELLING) {
-            throw new CardAlreadyTradingException();
-        }
-
-        if (card.getMember() == buyer) {
-            throw new TradeSelfRequestException();
-        }
-
-        validate(createTradeRequest, wallet, card);
-        payment(createTradeRequest, wallet);
-
-        Trade trade = Trade.builder().cardId(card.getId())
-                .seller(card.getMember())
-                .buyer(buyer)
-                .carrier(card.getCarrier())
-                .priceGb(card.getPrice())
-                .dataAmount(card.getDataAmount())
-                .status(PAYMENT_CONFIRMED)
-                .phone(buyer.getPhone())
-                .point(createTradeRequest.getPoint())
-                .build();
-
-        tradeRepository.save(trade);
-        card.changeSellStatus(TRADING);
-
-        return trade.getId();
+        return buildTrade(createTradeRequest, username, SELLING);
     }
 
     @Override
     @Transactional
     public Long createBuyTrade(CreateTradeRequest createTradeRequest, String username) {
-        Member buyer = getMember(username);
-        Wallet wallet = getLockedWallet(buyer.getId());
-        Card card = getLockedCard(createTradeRequest);
-
-        if (card.getSellStatus() != PENDING) {
-            throw new CardAlreadySellingException();
-        }
-
-        if (card.getMember() != buyer) {
-            throw new TradePermissionDeniedException();
-        }
-
-        validate(createTradeRequest, wallet, card);
-        payment(createTradeRequest, wallet);
-
-        Trade trade = Trade.builder().cardId(card.getId())
-                .buyer(buyer)
-                .carrier(card.getCarrier())
-                .priceGb(card.getPrice())
-                .dataAmount(card.getDataAmount())
-                .status(PAYMENT_CONFIRMED)
-                .phone(buyer.getPhone())
-                .point(createTradeRequest.getPoint())
-                .build();
-
-        tradeRepository.save(trade);
-        card.changeSellStatus(SELLING);
-
-        return trade.getId();
+        return buildTrade(createTradeRequest, username, PENDING);
     }
 
     @Override
     @Transactional
     public void cancelTrade(Long tradeId, String username) {
-        Trade trade = tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
-        Member requester = getMember(username);
-        Wallet wallet = walletRepository.findByMemberIdWithLock(trade.getBuyer().getId()).orElseThrow(WalletNotFoundException::new);
-        Card card = getLockedCard(trade.getCardId());
+        Trade trade = findLockedTrade(tradeId);
+        Member member = findMember(username);
+        Wallet wallet = findLockedWallet(trade.getBuyer().getId());
+        Card card = findLockedCard(trade.getCardId());
 
-        if ((trade.getStatus() == DATA_SENT) || (trade.getStatus() == COMPLETED) || (trade.getStatus() == CANCELED)) {
-            throw new TradeCancelNotAllowedException();
-        }
+        trade.cancel(member);
 
-        if (!requester.equals(trade.getBuyer()) && !requester.equals(trade.getSeller())) {
-            throw new TradeCancelPermissionDeniedException();
-        }
-
-        if (requester.equals(trade.getBuyer())) {
-            trade.changeCancelReason(CancelReason.BUYER_REQUEST);
-        } else {
-            trade.changeCancelReason(CancelReason.SELLER_REQUEST);
-        }
-
-        trade.changeStatus(CANCELED);
-        refundToWallet(trade.getPriceGb() - trade.getPoint(), trade.getPoint(), wallet);
+        int refundMoney = trade.getPriceGb() - trade.getPoint();
+        if (refundMoney > 0) wallet.depositMoney(refundMoney);
+        if (trade.getPoint() > 0) wallet.depositPoint(trade.getPoint());
 
         cardRepository.delete(card);
     }
@@ -141,20 +70,22 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     public void sendTradeData(Long tradeId, String username, MultipartFile picture) {
         log.info("file Name : {}", picture.getOriginalFilename());
 
-        Trade trade = tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
-        Member seller = getMember(username);
-        Card card = getLockedCard(trade.getCardId());
-        
+        Trade trade = findLockedTrade(tradeId);
+        Member seller = findMember(username);
+        Card card = findLockedCard(trade.getCardId());
+
         if (trade.getStatus() != PAYMENT_CONFIRMED) {
             throw new TradeInvalidStatusException();
         }
 
+        if (trade.getBuyer() == seller)
+            throw new TradeSendPermissionDeniedException();
+
         if (trade.getSeller() == null) { // 구매글의 경우 판매자가 정해지지 않았기 때문에 지정
             trade.changeSeller(seller);
             card.changeSellStatus(TRADING);
-        }
 
-        else if (trade.getSeller() != seller) {
+        } else if (trade.getSeller() != seller) {
             throw new TradeSendPermissionDeniedException();
         }
 
@@ -164,70 +95,74 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     @Override
     @Transactional
     public void confirmTrade(Long tradeId, String username) {
-        Trade trade = tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
-        Member buyer = getMember(username);
-        Wallet wallet = getLockedWallet(trade.getSeller().getId());
-        Card card = getLockedCard(trade.getCardId());
+        Trade trade = findLockedTrade(tradeId);
+        Member buyer = findMember(username);
+        Wallet wallet = findLockedWallet(trade.getSeller().getId());
+        Card card = findLockedCard(trade.getCardId());
 
-        if (trade.getStatus() != DATA_SENT) {
-            throw new TradeInvalidStatusException();
-        }
-
-        if (trade.getBuyer() != buyer) {
-            throw new TradeConfirmPermissionDeniedException();
-        }
-
-        trade.changeStatus(COMPLETED);
+        trade.confirm(buyer);
         card.changeSellStatus(SOLD_OUT);
-
         wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
     }
 
-    private void refundToWallet(Integer money, Integer point, Wallet wallet) {
-        if (money != 0) {
-            wallet.depositMoney(money);
-        }
+    // === private helper === //
+    private Long buildTrade(CreateTradeRequest createTradeRequest, String username, SellStatus requiredStatus) {
+        Member member = findMember(username);
+        Wallet wallet = findLockedWallet(member.getId());
+        Card card = findLockedCard(createTradeRequest.getCardId());
 
-        if (point != 0) {
-            wallet.depositPoint(point);
-        }
-    }
+        ensureStatus(card, requiredStatus);
+        ensureOwnership(card, member, requiredStatus);
 
-    private void payment(CreateTradeRequest createTradeRequest, Wallet wallet) {
+        int totalPay = createTradeRequest.getMoney() + createTradeRequest.getPoint();
+
+        if (card.getPrice() != totalPay)
+            throw new TradePaymentMismatchException();
+
         if (createTradeRequest.getMoney() != 0) {
             wallet.withdrawMoney(createTradeRequest.getMoney());
         }
-
         if (createTradeRequest.getPoint() != 0) {
             wallet.withdrawPoint(createTradeRequest.getPoint());
         }
+
+        Trade trade = Trade.buildTrade(createTradeRequest.getPoint(), member, member.getPhone(), card, requiredStatus);
+        tradeRepository.save(trade);
+        card.changeSellStatus(requiredStatus == SELLING ? TRADING : SELLING);
+
+        return trade.getId();
     }
 
-    private void validate(CreateTradeRequest createTradeRequest, Wallet wallet, Card card) {
-        int totalPaymentMoney = createTradeRequest.getPoint() + createTradeRequest.getMoney();
-
-        if (wallet.getMoney() - createTradeRequest.getMoney() < 0) {
-            throw new InsufficientBalanceException();
-        }
-
-        if (card.getPrice() != totalPaymentMoney) {
-            throw new TradePaymentMismatchException();
-        }
+    private Member findMember(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
 
-    private Card getLockedCard(CreateTradeRequest createTradeRequest) {
-        return cardRepository.findLockedById(createTradeRequest.getCardId()).orElseThrow(CardNotFoundException::new);
-    }
-
-    private Card getLockedCard(Long cardId) {
-        return cardRepository.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
-    }
-
-    private Wallet getLockedWallet(Long memberId) {
+    private Wallet findLockedWallet(Long memberId) {
         return walletRepository.findByMemberIdWithLock(memberId).orElseThrow(WalletNotFoundException::new);
     }
 
-    private Member getMember(String username) {
-        return memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+    private Card findLockedCard(Long cardId) {
+        return cardRepository.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
+    }
+
+    private Trade findLockedTrade(Long tradeId) {
+        return tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
+    }
+
+    private void ensureStatus(Card card, SellStatus sellStatus) {
+        if (card.getSellStatus() != sellStatus) {
+            throw new CardInvalidStatusException();
+        }
+    }
+
+    private void ensureOwnership(Card card, Member member, SellStatus requiredStatus) {
+        boolean isOwner = card.getMember().equals(member);
+
+        if (requiredStatus == SELLING && isOwner) {
+            throw new TradeSelfRequestException();
+        }
+        if (requiredStatus == PENDING && !isOwner) {
+            throw new TradePermissionDeniedException();
+        }
     }
 }
