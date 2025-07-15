@@ -1,11 +1,15 @@
 package com.ureca.snac.payment.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
+import com.ureca.snac.common.exception.BusinessException;
+import com.ureca.snac.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import static com.ureca.snac.common.BaseCode.INVALID_INPUT;
 
 @Entity
 @Table(name = "payment")
@@ -18,6 +22,10 @@ public class Payment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(nullable = false, unique = true)
     private String orderId;
@@ -46,17 +54,19 @@ public class Payment extends BaseTimeEntity {
      * @param amount 결제 요청 금액
      * @return Payment 객체
      */
-    public static Payment prepare(Long amount) {
+    public static Payment prepare(Member member, Long amount) {
         if (amount == null || amount <= 0) {
-            throw new IllegalArgumentException("결제 요청 금액 필수, 0보다 커야 한다.");
+            throw new BusinessException(INVALID_INPUT);
         }
         return Payment.builder()
+                .member(member)
                 .orderId("snac_order_" + UUID.randomUUID())
                 .amount(amount)
                 .status(PaymentStatus.PENDING)
                 .build();
     }
 
+    // 상태 완료
     public void complete(String paymentKey, String method, OffsetDateTime paidAt) {
         this.paymentKey = paymentKey;
         this.method = method;
@@ -64,8 +74,27 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.SUCCESS;
     }
 
-    public void cancel(String reason) {
-        this.cancelReason = reason;
-        this.status = PaymentStatus.CANCELED;
+//    // 상태 취소
+//    public void cancel(String reason) {
+//        this.cancelReason = reason;
+//        this.status = PaymentStatus.CANCELED;
+//    }
+
+    // 소유주 검증
+    public boolean isOwner(Member member) {
+        if (this.member == null || member == null) {
+            return false;
+        }
+        return this.member.getId().equals(member.getId());
+    }
+
+    // 기록 금액 검증
+    public boolean isAmount(Long amount) {
+        return this.amount.equals(amount);
+    }
+
+    // 이미 처리된 건인지 증명
+    public boolean isAlreadyProcessed() {
+        return this.status != PaymentStatus.PENDING;
     }
 }
