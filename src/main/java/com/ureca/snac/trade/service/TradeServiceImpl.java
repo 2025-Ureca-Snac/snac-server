@@ -1,5 +1,7 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.notification.dto.NotificationDTO;
@@ -34,9 +36,12 @@ public class TradeServiceImpl implements TradeService {
     @Override
     @Transactional
     public Long requestTrade(TradeRequest tradeRequest, String username, TradeSide tradeSide) {
-        Card card = cardRepository.findById(tradeRequest.getCardId()).orElseThrow(CardNotFoundException::new);
+        Card card = cardRepository.findLockedById(tradeRequest.getCardId()).orElseThrow(CardNotFoundException::new);
         Member me = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         Member other = memberRepository.findByEmail(card.getMember().getEmail()).orElseThrow(MemberNotFoundException::new);
+
+        if (card.getSellStatus() != SellStatus.SELLING)
+            throw new CardAlreadyTradingException();
 
         if (card.getMember().equals(me))
             throw new TradeSelfRequestException();
@@ -95,6 +100,7 @@ public class TradeServiceImpl implements TradeService {
     public void acceptTrade(AcceptTradeRequest acceptTradeRequest, String username) {
         Member accepter = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         Trade trade = tradeRepository.findById(acceptTradeRequest.getTradeId()).orElseThrow(TradeNotFoundException::new);
+        Card card = cardRepository.findLockedById(trade.getCardId()).orElseThrow(CardNotFoundException::new);
 
         boolean canAccept = switch (trade.getStatus()) {
             case BUY_REQUESTED -> accepter.equals(trade.getSeller());
@@ -107,6 +113,7 @@ public class TradeServiceImpl implements TradeService {
         }
 
         trade.changeStatus(TradeStatus.ACCEPTED);
+        card.changeSellStatus(SellStatus.TRADING);
 
         NotificationDTO notificationDTO = new NotificationDTO(
                 NotificationType.TRADE_PAYMENT_REQUESTED,
