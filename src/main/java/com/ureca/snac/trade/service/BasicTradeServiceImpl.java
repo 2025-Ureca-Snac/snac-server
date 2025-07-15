@@ -1,7 +1,6 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.board.entity.Card;
-import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.exception.CardAlreadySellingException;
 import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardNotFoundException;
@@ -114,7 +113,7 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     public void cancelTrade(Long tradeId, String username) {
         Trade trade = tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
         Member requester = getMember(username);
-        Wallet wallet = walletRepository.findByMemberIdWithLock(requester.getId()).orElseThrow(WalletNotFoundException::new);
+        Wallet wallet = walletRepository.findByMemberIdWithLock(trade.getBuyer().getId()).orElseThrow(WalletNotFoundException::new);
         Card card = getLockedCard(trade.getCardId());
 
         if ((trade.getStatus() == DATA_SENT) || (trade.getStatus() == COMPLETED) || (trade.getStatus() == CANCELED)) {
@@ -132,15 +131,9 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         }
 
         trade.changeStatus(CANCELED);
-        wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
-        wallet.depositPoint(trade.getPoint());
+        refundToWallet(trade.getPriceGb() - trade.getPoint(), trade.getPoint(), wallet);
 
-        if (card.getCardCategory() == CardCategory.SELL) {
-            card.changeSellStatus(SELLING);
-
-        } else if (card.getCardCategory() == CardCategory.BUY) {
-            card.changeSellStatus(PENDING);
-        }
+        cardRepository.delete(card);
     }
 
     @Override
@@ -150,16 +143,18 @@ public class BasicTradeServiceImpl implements BasicTradeService {
 
         Trade trade = tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
         Member seller = getMember(username);
-
+        Card card = getLockedCard(trade.getCardId());
+        
         if (trade.getStatus() != PAYMENT_CONFIRMED) {
             throw new TradeInvalidStatusException();
         }
 
         if (trade.getSeller() == null) { // 구매글의 경우 판매자가 정해지지 않았기 때문에 지정
             trade.changeSeller(seller);
+            card.changeSellStatus(TRADING);
         }
 
-        if (trade.getSeller() != seller) {
+        else if (trade.getSeller() != seller) {
             throw new TradeSendPermissionDeniedException();
         }
 
@@ -172,6 +167,7 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         Trade trade = tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
         Member buyer = getMember(username);
         Wallet wallet = getLockedWallet(trade.getSeller().getId());
+        Card card = getLockedCard(trade.getCardId());
 
         if (trade.getStatus() != DATA_SENT) {
             throw new TradeInvalidStatusException();
@@ -182,8 +178,19 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         }
 
         trade.changeStatus(COMPLETED);
+        card.changeSellStatus(SOLD_OUT);
 
         wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
+    }
+
+    private void refundToWallet(Integer money, Integer point, Wallet wallet) {
+        if (money != 0) {
+            wallet.depositMoney(money);
+        }
+
+        if (point != 0) {
+            wallet.depositPoint(point);
+        }
     }
 
     private void payment(CreateTradeRequest createTradeRequest, Wallet wallet) {
