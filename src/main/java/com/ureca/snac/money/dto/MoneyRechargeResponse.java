@@ -18,4 +18,7 @@ public class MoneyRechargeResponse {
 
     @Schema(description = "고객 이름 명", example = "김스낵")
     private final String customerName;
+
+    @Schema(description = "고객 이메일 (결제 내역 통지 및 위젯 편의성 제공)")
+    private final String customerEmail;
 }

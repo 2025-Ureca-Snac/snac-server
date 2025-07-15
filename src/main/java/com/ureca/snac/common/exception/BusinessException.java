@@ -4,11 +4,9 @@ import com.ureca.snac.common.BaseCode;
 import lombok.Getter;
 
 @Getter
-public class BusinessException extends RuntimeException {
-    private final BaseCode baseCode;
+public class BusinessException extends BaseCustomException {
 
     public BusinessException(BaseCode baseCode) {
-        super((baseCode.getMessage()));
-        this.baseCode = baseCode;
+        super(baseCode);
     }
 }

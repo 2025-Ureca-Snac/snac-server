@@ -1,4 +1,4 @@
-package com.ureca.snac.payments;
+package com.ureca.snac.infra.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
