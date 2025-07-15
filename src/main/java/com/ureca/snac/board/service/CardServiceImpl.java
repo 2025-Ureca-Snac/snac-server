@@ -36,17 +36,23 @@ public class CardServiceImpl implements CardService {
     public Long createCard(String username, CreateCardRequest request) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
-        Card card = Card.builder().member(member)
-                .sellStatus(SellStatus.SELLING)
+        Card card = getBuildCard(request, member);
+
+        Card savedCard = cardRepository.save(card);
+
+        return savedCard.getId();
+    }
+
+    private static Card getBuildCard(CreateCardRequest request, Member member) {
+        SellStatus sellStatus = (request.getCardCategory() == CardCategory.BUY) ? SellStatus.PENDING : SellStatus.SELLING;
+
+        return Card.builder().member(member)
+                .sellStatus(sellStatus)
                 .cardCategory(request.getCardCategory())
                 .carrier(request.getCarrier())
                 .dataAmount(request.getDataAmount())
                 .price(request.getPrice())
                 .build();
-
-        Card savedCard = cardRepository.save(card);
-
-        return savedCard.getId();
     }
 
     @Override

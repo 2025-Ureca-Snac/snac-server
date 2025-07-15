@@ -99,10 +99,16 @@ public enum BaseCode {
     // 카드 - 실패
     CARD_NOT_FOUND("CARD_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 카드를 찾을 수 없습니다."),
     CARD_ALREADY_TRADING("CARD_ALREADY_TRADING_400", HttpStatus.BAD_REQUEST, "이미 거래 중인 카드입니다."),
+    CARD_ALREADY_SELLING("CARD_ALREADY_SELLING_400", HttpStatus.BAD_REQUEST, "이미 판매 중인 카드입니다."),
+
 
     // 거래 - 성공
+    TRADE_CREATE_SUCCESS("TRADE_CREATE_SUCCESS_201", HttpStatus.CREATED, "거래가 정상적으로 생성되었습니다."),
     TRADE_REQUEST_SUCCESS("TRADE_REQUEST_SUCCESS_200", HttpStatus.OK, "거래 요청에 성공하였습니다."),
     TRADE_ACCEPT_SUCCESS ("TRADE_ACCEPT_SUCCESS_200",  HttpStatus.OK, "거래 수락에 성공하였습니다."),
+    TRADE_CANCEL_SUCCESS("TRADE_CANCEL_SUCCESS_200", HttpStatus.OK, "거래 취소에 성공하였습니다."),
+    TRADE_DATA_SENT_SUCCESS("TRADE_DATA_SENT_SUCCESS_200", HttpStatus.OK, "거래 데이터 전송에 성공하였습니다."),
+    TRADE_CONFIRM_SUCCESS("TRADE_CONFIRM_SUCCESS_200", HttpStatus.OK, "거래 확정에 성공하였습니다."),
 
     // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),
@@ -111,6 +117,12 @@ public enum BaseCode {
     DUPLICATE_TRADE_REQUEST("DUPLICATE_TRADE_REQUEST_409", HttpStatus.CONFLICT, "이미 요청된 거래가 있습니다."),
     TRADE_SELF_REQUEST("TRADE_SELF_REQUEST_400", HttpStatus.BAD_REQUEST, "자신의 글에는 거래를 요청할 수 없습니다."),
     TRADE_PERMISSION_DENIED("TRADE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래를 진행할 권한이 없습니다."),
+    TRADE_PAYMENT_MISMATCH("TRADE_PAYMENT_MISMATCH_400", HttpStatus.BAD_REQUEST, "결제 금액이 카드 가격과 일치하지 않습니다."),
+    TRADE_CANCEL_NOT_ALLOWED("TRADE_CANCEL_NOT_ALLOWED_400", HttpStatus.BAD_REQUEST, "취소할 수 없는 거래 상태입니다."),
+    TRADE_CANCEL_PERMISSION_DENIED("TRADE_CANCEL_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "해당 거래를 취소할 권한이 없습니다."),
+    TRADE_INVALID_STATUS("TRADE_INVALID_STATUS_400", HttpStatus.BAD_REQUEST, "잘못된 거래 상태입니다."),
+    TRADE_SEND_PERMISSION_DENIED("TRADE_SEND_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "판매자만 거래 데이터를 전송할 수 있습니다."),
+    TRADE_CONFIRM_PERMISSION_DENIED("TRADE_CONFIRM_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "구매자만 거래를 완료할 수 있습니다."),
 
     // 계좌 - 성공
     ACCOUNT_CREATE_SUCCESS("ACCOUNT_CREATE_SUCCESS_201", HttpStatus.CREATED, "계좌가 성공적으로 생성되었습니다."),
