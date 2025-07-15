@@ -30,14 +30,13 @@ public class Notification {
     @Column(name = "type", nullable = false)
     private NotificationType type;
 
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead;
+//    @Column(name = "is_read", nullable = false)
+//    private boolean isRead;
 
     @Builder
-    public Notification(Member memberFrom, Member memberTo, NotificationType type, boolean isRead) {
+    public Notification(Member memberFrom, Member memberTo, NotificationType type) {
         this.memberFrom = memberFrom;
         this.memberTo = memberTo;
         this.type = type;
-        this.isRead = isRead;
     }
 }
