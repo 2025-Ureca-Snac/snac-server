@@ -50,12 +50,15 @@ public class Trade extends BaseTimeEntity {
     @Column(name = "status", nullable = false)
     private TradeStatus status;
 
+    @Column(name = "point")
+    private Integer point;
+
     @Column(name = "phone", nullable = false, length = 11)
     private String phone;
 
     @Builder
     private Trade(Long cardId, Member seller, Member buyer,
-                  Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, String phone) {
+                  Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, String phone, Integer point) {
         this.cardId = cardId;
         this.seller = seller;
         this.buyer  = buyer;
@@ -64,10 +67,15 @@ public class Trade extends BaseTimeEntity {
         this.dataAmount = dataAmount;
         this.status = status;
         this.phone = phone;
+        this.point = point;
     }
 
     // 거래 상태 변경
     public void changeStatus(TradeStatus status) {
         this.status = status;
+    }
+
+    public void changeCancelReason(CancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }

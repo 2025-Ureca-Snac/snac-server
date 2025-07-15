@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -37,5 +34,13 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
         basicTradeService.createBuyTrade(createTradeRequest, userDetails.getUsername());
 
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.TRADE_CREATE_SUCCESS));
+    }
+
+    @PatchMapping("/{tradeId}/cancel")
+    public ResponseEntity<?> cancelTrade(@PathVariable Long tradeId,
+                                         @AuthenticationPrincipal UserDetails userDetails) {
+        basicTradeService.cancelTrade(tradeId, userDetails.getUsername());
+
+        return ResponseEntity.ok(ApiResponse.ok(BaseCode.TRADE_CANCEL_SUCCESS));
     }
 }
