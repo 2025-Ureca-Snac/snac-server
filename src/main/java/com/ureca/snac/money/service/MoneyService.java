@@ -6,7 +6,7 @@ import com.ureca.snac.money.dto.MoneyRechargeResponse;
 public interface MoneyService {
     MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, String email);
 
-    void processRechargeSuccess(String paymentKey, String orderId, Long amount);
+    void processRechargeSuccess(String paymentKey, String orderId, Long amount, String email);
 }
 // 사용자의 충전 요청을 받아서 PG사와 연동 준비
 // 대기 상태의 MoneyRecharge 엔티티 생성 저장

@@ -2,6 +2,7 @@ package com.ureca.snac.money.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.money.exception.InvalidPaymentForRechargeException;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.entity.PaymentStatus;
 import jakarta.persistence.*;
@@ -47,14 +48,13 @@ public class MoneyRecharge extends BaseTimeEntity {
     /**
      * Payment 객체를 기반으로 머니 충전 내역 생성
      *
-     * @param member  충전한 회원
      * @param payment 결제 정보
      * @return MoneyRecharge 객체
      */
-    private static MoneyRecharge create(Member member, Payment payment) {
+    public static MoneyRecharge create(Payment payment) {
         if (payment.getStatus() != PaymentStatus.SUCCESS) {
-            throw new IllegalStateException("완료된 결제에 대해서 충전 내역 생성가능");
+            throw new InvalidPaymentForRechargeException();
         }
-        return new MoneyRecharge(member, payment);
+        return new MoneyRecharge(payment.getMember(), payment);
     }
 }
