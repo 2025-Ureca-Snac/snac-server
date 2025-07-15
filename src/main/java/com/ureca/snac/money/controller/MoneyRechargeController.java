@@ -6,29 +6,28 @@ import com.ureca.snac.money.dto.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.MoneyRechargeResponse;
 import com.ureca.snac.money.service.MoneyService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.springframework.web.servlet.view.RedirectView;
 
 import static com.ureca.snac.common.BaseCode.MONEY_RECHARGE_PREPARE_SUCCESS;
-import static org.springframework.http.HttpStatus.FOUND;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+@Slf4j
 @RestController
-@RequiredArgsConstructor
 public class MoneyRechargeController implements MoneyRechargeSwagger {
 
     private final MoneyService moneyService;
+    private final String successUrl;
 
-    @Value("${payments.toss.success-url}")
-    private String successUrl;
+    public MoneyRechargeController(MoneyService moneyService,
+                                   @Value("${payments.toss.success-url}") String successUrl) {
+        this.moneyService = moneyService;
+        this.successUrl = successUrl;
+    }
 
     @Override
     public ResponseEntity<ApiResponse<MoneyRechargeResponse>> prepareRecharge(
@@ -40,21 +39,12 @@ public class MoneyRechargeController implements MoneyRechargeSwagger {
     }
 
     @Override
-    public ResponseEntity<Void> rechargeSuccess(
-            String paymentKey, String orderId, Long amount) {
-        moneyService.processRechargeSuccess(paymentKey, orderId, amount);
+    public RedirectView rechargeSuccess(
+            String paymentKey, String orderId, Long amount, CustomUserDetails userDetails) {
 
-        URI redirectUri;
+        moneyService.processRechargeSuccess(paymentKey, orderId, amount, userDetails.getUsername());
 
-        try {
-            redirectUri = new URI(successUrl + "?orderId=" + orderId);
-        } catch (URISyntaxException e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(redirectUri);
-
-        return new ResponseEntity<>(headers, FOUND);
+        log.info("결제 성공 및 머니 충전 완료, 리다이렉트 실행. 목적지 : {}", successUrl);
+        return new RedirectView(successUrl);
     }
 }

@@ -25,11 +25,11 @@ public class Trade extends BaseTimeEntity {
     private Long cardId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
+    @JoinColumn(name = "seller_id")
     private Member seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id", nullable = false)
+    @JoinColumn(name = "buyer_id")
     private Member buyer;
 
     @Enumerated(EnumType.STRING)
@@ -50,10 +50,15 @@ public class Trade extends BaseTimeEntity {
     @Column(name = "status", nullable = false)
     private TradeStatus status;
 
+    @Column(name = "point")
+    private Integer point;
+
+    @Column(name = "phone", nullable = false, length = 11)
+    private String phone;
 
     @Builder
     private Trade(Long cardId, Member seller, Member buyer,
-                  Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status) {
+                  Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, String phone, Integer point) {
         this.cardId = cardId;
         this.seller = seller;
         this.buyer  = buyer;
@@ -61,10 +66,20 @@ public class Trade extends BaseTimeEntity {
         this.priceGb = priceGb;
         this.dataAmount = dataAmount;
         this.status = status;
+        this.phone = phone;
+        this.point = point;
     }
 
     // 거래 상태 변경
     public void changeStatus(TradeStatus status) {
         this.status = status;
+    }
+
+    public void changeCancelReason(CancelReason cancelReason) {
+        this.cancelReason = cancelReason;
+    }
+
+    public void changeSeller(Member member) {
+        this.seller = member;
     }
 }

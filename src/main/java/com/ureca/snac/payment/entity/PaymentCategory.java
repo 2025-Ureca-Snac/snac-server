@@ -1,4 +1,4 @@
-package com.ureca.snac.money.entity;
+package com.ureca.snac.payment.entity;
 
 public enum PaymentCategory {
     TOSS,
