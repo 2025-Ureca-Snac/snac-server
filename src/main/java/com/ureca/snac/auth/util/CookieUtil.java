@@ -10,6 +10,7 @@ public class CookieUtil {
 //        cookie.setSecure(true);
         cookie.setPath("/api");
 //        cookie.setHttpOnly(true);
+        cookie.setDomain("snac-app.com");
         return cookie;
     }
 }
