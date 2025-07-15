@@ -78,4 +78,8 @@ public class Trade extends BaseTimeEntity {
     public void changeCancelReason(CancelReason cancelReason) {
         this.cancelReason = cancelReason;
     }
+
+    public void changeSeller(Member member) {
+        this.seller = member;
+    }
 }
