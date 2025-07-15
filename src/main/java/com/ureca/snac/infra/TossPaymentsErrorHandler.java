@@ -1,6 +1,8 @@
-package com.ureca.snac.payments;
+package com.ureca.snac.infra;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ureca.snac.infra.dto.TossErrorResponse;
+import com.ureca.snac.payment.exception.TossPaymentsAPiCallException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -18,7 +20,8 @@ public class TossPaymentsErrorHandler implements ResponseErrorHandler {
 
     @Override
     public boolean hasError(final ClientHttpResponse response) throws IOException {
-        return response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError();
+        return response.getStatusCode().is4xxClientError() ||
+                response.getStatusCode().is5xxServerError();
     }
 
     @Override
@@ -31,6 +34,6 @@ public class TossPaymentsErrorHandler implements ResponseErrorHandler {
                 errorResponse.code()
         );
 
-        throw new RuntimeException(detailedErrorMessage);
+        throw new TossPaymentsAPiCallException(detailedErrorMessage);
     }
 }

@@ -1,11 +1,11 @@
 package com.ureca.snac.config;
 
-import com.ureca.snac.payments.TossPaymentProperties;
-import com.ureca.snac.payments.TossPaymentsClient;
-import com.ureca.snac.payments.TossPaymentsErrorHandler;
+import com.ureca.snac.infra.TossPaymentProperties;
+import com.ureca.snac.infra.TossPaymentsErrorHandler;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 @Configuration
@@ -17,16 +17,16 @@ public class PaymentConfig {
     }
 
     @Bean
-    public TossPaymentsClient tossPaymentsClient(
-            RestClient.Builder builder,
+    public RestClient tossRestClient(
             TossPaymentProperties properties,
             TossPaymentsErrorHandler errorHandler
     ) {
-        RestClient restClient = builder
+        return RestClient.builder()
+                .defaultHeader("Authorization", "Basic " +
+                        properties.getEncodedSecretKey())
+                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .defaultStatusHandler(errorHandler)
                 .build();
-
-        return new TossPaymentsClient(restClient, properties);
     }
 }
 

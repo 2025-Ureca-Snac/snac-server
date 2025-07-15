@@ -1,10 +1,10 @@
-package com.ureca.snac.payments;
+package com.ureca.snac.infra;
 
+import com.ureca.snac.infra.dto.TossConfirmRequest;
+import com.ureca.snac.infra.dto.TossConfirmResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestClient;
-
-import java.util.Map;
 
 /**
  * PaymentConfig가 연결해준 API 통신 전담 클래스
@@ -12,6 +12,7 @@ import java.util.Map;
  * 에러 처리, 설정 관리, 책임 분리
  */
 
+@Slf4j
 @RequiredArgsConstructor
 public class TossPaymentsClient {
 
@@ -28,17 +29,14 @@ public class TossPaymentsClient {
      */
     public TossConfirmResponse confirmPayment(String paymentKey, String orderId, Long amount) {
 
+        log.info("[외부 API] 토스 페이먼츠 결제 승인 API 호출 시작. 주문번호 : {}", orderId);
+
+        // Map -> DTO로 개선
+        TossConfirmRequest request = new TossConfirmRequest(paymentKey, orderId, amount);
+
         return restClient.post()
                 .uri(properties.getConfirmUrl())
-                .headers(httpHeaders -> {
-                    httpHeaders.set("Authorization", "Basic " +
-                            properties.getEncodedSecretKey());
-                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                })
-                .body(Map.of(
-                        "paymentKey", paymentKey,
-                        "orderId", orderId,
-                        "amount", amount))
+                .body(request)
                 .retrieve()
                 .body(TossConfirmResponse.class);
     }
