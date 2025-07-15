@@ -65,4 +65,8 @@ public class Card extends BaseTimeEntity {
         this.dataAmount = dataAmount;
         this.price = price;
     }
+
+    public void changeSellStatus(SellStatus sellStatus) {
+        this.sellStatus = sellStatus;
+    }
 }
