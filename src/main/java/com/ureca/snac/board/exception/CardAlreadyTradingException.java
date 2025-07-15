@@ -6,6 +6,6 @@ import static com.ureca.snac.common.BaseCode.*;
 
 public class CardAlreadyTradingException extends BusinessException {
     public CardAlreadyTradingException() {
-        super(CARD_ALREADY_TRADING_400);
+        super(CARD_ALREADY_TRADING);
     }
 }
