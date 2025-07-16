@@ -32,7 +32,7 @@ com.ureca.snac
 └── wallet         # 지갑 및 잔액 기록
 ```
 
-# 🔰 실행 방법
+# 🔰 인프라
 <img width="1407" height="948" alt="Image" src="https://github.com/user-attachments/assets/5aa7c1cf-c36b-4a47-95e4-6b18ee513a68" />
 
 ## 📚 Tech Stack
