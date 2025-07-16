@@ -111,6 +111,7 @@ public enum BaseCode {
     CARD_NOT_FOUND("CARD_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 카드를 찾을 수 없습니다."),
     CARD_ALREADY_TRADING("CARD_ALREADY_TRADING_400", HttpStatus.BAD_REQUEST, "이미 거래 중인 카드입니다."),
     CARD_ALREADY_SELLING("CARD_ALREADY_SELLING_400", HttpStatus.BAD_REQUEST, "이미 판매 중인 카드입니다."),
+    CARD_INVALID_STATUS("CARD_INVALID_STATUS_400", HttpStatus.BAD_REQUEST, "카드 상태가 유효하지 않습니다."),
 
     // 거래 - 성공
     TRADE_CREATE_SUCCESS("TRADE_CREATE_SUCCESS_201", HttpStatus.CREATED, "거래가 정상적으로 생성되었습니다."),
@@ -119,6 +120,7 @@ public enum BaseCode {
     TRADE_CANCEL_SUCCESS("TRADE_CANCEL_SUCCESS_200", HttpStatus.OK, "거래 취소에 성공하였습니다."),
     TRADE_DATA_SENT_SUCCESS("TRADE_DATA_SENT_SUCCESS_200", HttpStatus.OK, "거래 데이터 전송에 성공하였습니다."),
     TRADE_CONFIRM_SUCCESS("TRADE_CONFIRM_SUCCESS_200", HttpStatus.OK, "거래 확정에 성공하였습니다."),
+    TRADE_SCROLL_SUCCESS("TRADE_SCROLL_SUCCESS_200", HttpStatus.OK, "거래 내역 조회에 성공하였습니다."),
 
     // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),
@@ -142,8 +144,17 @@ public enum BaseCode {
     ACCOUNT_DELETE_SUCCESS("ACCOUNT_DELETE_SUCCESS_200", HttpStatus.OK, "계좌가 성공적으로 삭제되었습니다."),
 
     // 계좌 - 예외
-    ACCOUNT_NOT_FOUND("ACCOUNT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 계좌를 찾을 수 없습니다.");
+    ACCOUNT_NOT_FOUND("ACCOUNT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 계좌를 찾을 수 없습니다."),
 
+    // 거래 이미지 첨부
+    ATTACHMENT_ALREADY_EXISTS("ATTACHMENT_ALREADY_EXISTS_409", HttpStatus.CONFLICT, "이미 해당 거래에 첨부 이미지가 존재합니다."),
+    ATTACHMENT_NOT_FOUND("ATTACHMENT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "첨부된 이미지를 찾을 수 없습니다."),
+    ATTACHMENT_PERMISSION_DENIED("ATTACHMENT_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "이미지를 업로드할 권한이 없습니다."),
+
+    // S3
+    S3_UPLOAD_FAILED("S3_UPLOAD_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),
+    ATTACHMENT_UPLOAD_SUCCESS("ATTACHMENT_UPLOAD_SUCCESS_201", HttpStatus.CREATED, "이미지가 성공적으로 업로드되었습니다."),
+    ATTACHMENT_PRESIGNED_URL_ISSUED("ATTACHMENT_PRESIGNED_URL_ISSUED_200", HttpStatus.OK, "첨부 이미지에 대한 접근 URL이 발급되었습니다.");
     private final String code;
     private final HttpStatus status;
     private final String message;

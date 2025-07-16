@@ -78,3 +78,12 @@ payments:
 aes:
   passphrase: ${AES_PASSPHRASE}
   salt: ${AES_SALT}
+
+# s3
+aws:
+  s3:
+    region: ap-northeast-2
+    bucket: snac-static
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    attachment-dir: trade/attachments/
