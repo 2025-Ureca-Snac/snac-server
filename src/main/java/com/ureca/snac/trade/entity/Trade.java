@@ -1,13 +1,22 @@
 package com.ureca.snac.trade.entity;
 
+import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.Carrier;
+import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.exception.TradeCancelNotAllowedException;
+import com.ureca.snac.trade.exception.TradeCancelPermissionDeniedException;
+import com.ureca.snac.trade.exception.TradeConfirmPermissionDeniedException;
+import com.ureca.snac.trade.exception.TradeInvalidStatusException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static com.ureca.snac.board.entity.constants.SellStatus.SELLING;
+import static com.ureca.snac.trade.entity.TradeStatus.*;
 
 @Getter
 @Entity
@@ -75,11 +84,46 @@ public class Trade extends BaseTimeEntity {
         this.status = status;
     }
 
-    public void changeCancelReason(CancelReason cancelReason) {
-        this.cancelReason = cancelReason;
-    }
-
     public void changeSeller(Member member) {
         this.seller = member;
+    }
+
+    // === 팩토리 메서드 ===
+    public static Trade buildTrade(int point, Member member, String phone, Card card, SellStatus requiredStatus) {
+        return Trade.builder().cardId(card.getId())
+                .seller(requiredStatus == SELLING ? card.getMember() : null)
+                .buyer(member)
+                .carrier(card.getCarrier())
+                .priceGb(card.getPrice())
+                .dataAmount(card.getDataAmount())
+                .status(PAYMENT_CONFIRMED)
+                .phone(phone)
+                .point(point)
+                .build();
+    }
+
+    public void confirm(Member buyer) {
+        if (this.status != DATA_SENT)
+            throw new TradeInvalidStatusException();
+
+        if (this.buyer != buyer) {
+            throw new TradeConfirmPermissionDeniedException();
+        }
+
+        this.status = COMPLETED;
+    }
+
+    public void cancel(Member requester) {
+        if (this.status == DATA_SENT || this.status == COMPLETED || this.status == CANCELED)
+            throw new TradeCancelNotAllowedException();
+
+        boolean isBuyer = requester.equals(this.buyer);
+        boolean isSeller = requester.equals(this.seller);
+
+        if (!isBuyer && !isSeller)
+            throw new TradeCancelPermissionDeniedException();
+
+        this.cancelReason = isBuyer ? CancelReason.BUYER_REQUEST : CancelReason.SELLER_REQUEST;
+        this.status = CANCELED;
     }
 }

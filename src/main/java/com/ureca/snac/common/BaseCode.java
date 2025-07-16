@@ -109,6 +109,7 @@ public enum BaseCode {
     CARD_NOT_FOUND("CARD_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 카드를 찾을 수 없습니다."),
     CARD_ALREADY_TRADING("CARD_ALREADY_TRADING_400", HttpStatus.BAD_REQUEST, "이미 거래 중인 카드입니다."),
     CARD_ALREADY_SELLING("CARD_ALREADY_SELLING_400", HttpStatus.BAD_REQUEST, "이미 판매 중인 카드입니다."),
+    CARD_INVALID_STATUS("CARD_INVALID_STATUS_400", HttpStatus.BAD_REQUEST, "카드 상태가 유효하지 않습니다."),
 
 
     // 거래 - 성공
@@ -118,6 +119,7 @@ public enum BaseCode {
     TRADE_CANCEL_SUCCESS("TRADE_CANCEL_SUCCESS_200", HttpStatus.OK, "거래 취소에 성공하였습니다."),
     TRADE_DATA_SENT_SUCCESS("TRADE_DATA_SENT_SUCCESS_200", HttpStatus.OK, "거래 데이터 전송에 성공하였습니다."),
     TRADE_CONFIRM_SUCCESS("TRADE_CONFIRM_SUCCESS_200", HttpStatus.OK, "거래 확정에 성공하였습니다."),
+    TRADE_SCROLL_SUCCESS("TRADE_SCROLL_SUCCESS_200", HttpStatus.OK, "거래 내역 조회에 성공하였습니다."),
 
     // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),
