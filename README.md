@@ -14,37 +14,32 @@
 
 
 # 🗂️ 디렉토리 구조
-안녕하세요? 저는 홍석준입니다.
 
 ```
-
+com.ureca.snac
+├── auth           # 인증/인가 (로그인, 회원가입, 소셜 연동 등)
+├── board          # 게시글 관련 (카드 등록, 상태 등)
+├── common         # 공통 유틸, 예외 처리, 응답 구조 등
+├── config         # 전역 설정 (Swagger, S3, Jpa)
+├── finance        # 계좌 도메인
+├── infra          # 외부 인프라 연동
+├── member         # 사용자 도메인
+├── money          # 머니 관리 (충전, 환불, 이체 등)
+├── notification   # 알림 기능 (WebSocket,  RabbitMQ 등)
+├── payment        # 결제 처리 (PG사 연동, 결제 승인 등)
+├── swagger        # Swagger 관련 설정 및 문서화
+├── trade          # 거래 처리 (구매/판매 흐름, 상태 전환 등)
+└── wallet         # 지갑 및 잔액 기록
 ```
 
 # 🔰 실행 방법
-
-```bash
-# 1. 의존성 설치 (루트 디렉토리에서 실행)
-npm install
-
-# 2. 빌드 (서버, 클라이언트 등 모든 패키지 빌드)
-npm run build
-
-# 3. 개발 서버 실행 (서버와 클라이언트가 동시에 실행됨)
-npm run dev
-```
-
-
-**BE 환경변수**
-```env
-
-```
-
+<img width="1407" height="948" alt="Image" src="https://github.com/user-attachments/assets/5aa7c1cf-c36b-4a47-95e4-6b18ee513a68" />
 
 ## 📚 Tech Stack
 
 ### 💻 BE Development
 
-[![My Skills](https://skillicons.dev/icons?i=java,spring,aws&theme=dark)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=idea,java,spring,gradle,hibernate,mysql,redis,rabbitmq,docker,aws&theme=dark)](https://skillicons.dev)
 
 ### ⌛ Developed Period
 
