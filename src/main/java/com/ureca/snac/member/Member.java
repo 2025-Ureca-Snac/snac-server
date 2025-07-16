@@ -46,10 +46,15 @@ public class Member extends BaseTimeEntity {
     @Column(name = "activated", nullable = false)
     private Activated activated;
 
+    private String naverId;
+
+    private String googleId;
+
+    private String kakaoId;
+
     @Builder
     private Member(String email, String password, String name, String phone, LocalDate birthDate,
-                   Integer ratingScore, Role role, Activated activated) {
-
+                   Integer ratingScore, Role role, Activated activated,String naverId, String googleId, String kakaoId) {
         this.email = email;
         this.password = password;
         this.name = name;
@@ -58,5 +63,23 @@ public class Member extends BaseTimeEntity {
         this.ratingScore = ratingScore;
         this.role = role;
         this.activated = activated;
+        this.naverId = naverId;
+        this.googleId = googleId;
+        this.kakaoId = kakaoId;
+    }
+
+    // 소셜 아이디 업데이트 용
+    public void updateSocialId(String provider, String providerId) {
+        switch (provider) {
+            case "naver":
+                this.naverId = providerId;
+                break;
+            case "google":
+                this.googleId = providerId;
+                break;
+            case "kakao":
+                this.kakaoId = providerId;
+                break;
+        }
     }
 }
