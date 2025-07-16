@@ -4,6 +4,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.money.dto.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.MoneyRechargeResponse;
+import com.ureca.snac.swagger.annotation.UserInfo;
 import com.ureca.snac.swagger.annotation.error.ErrorCode400;
 import com.ureca.snac.swagger.annotation.error.ErrorCode401;
 import com.ureca.snac.swagger.annotation.error.ErrorCode404;
@@ -15,7 +16,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +36,7 @@ public interface MoneyRechargeSwagger {
     @PostMapping("/api/money/recharge/prepare")
     ResponseEntity<ApiResponse<MoneyRechargeResponse>> prepareRecharge(
             @Valid @RequestBody MoneyRechargeRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails
+            @UserInfo CustomUserDetails userDetails
     );
 
     @Operation(
@@ -53,7 +53,7 @@ public interface MoneyRechargeSwagger {
             @Parameter(description = "토스페이먼츠 결제 고유 키", required = true) @RequestParam String paymentKey,
             @Parameter(description = "우리 시스템의 고유 주문번호", required = true) @RequestParam String orderId,
             @Parameter(description = "실제 결제된 금액", required = true) @RequestParam Long amount,
-            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails
+            @UserInfo CustomUserDetails userDetails
     );
 
     // 성공 응답은 DTO 로 명시, 에러 응답은 어노테이션으로 처리
