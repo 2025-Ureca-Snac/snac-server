@@ -1,8 +1,9 @@
 package com.ureca.snac.config;
 
-import com.ureca.snac.infra.TossPaymentProperties;
-import com.ureca.snac.infra.TossPaymentsClient;
 import com.ureca.snac.infra.TossPaymentsErrorHandler;
+import com.ureca.snac.infra.config.TossAuthInterceptor;
+import com.ureca.snac.infra.config.TossPaymentProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,11 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 @EnableConfigurationProperties(TossPaymentProperties.class)
-public class PaymentConfig {
+@RequiredArgsConstructor
+public class RestClientConfig {
+
+    private final TossPaymentProperties tossPaymentProperties;
+
     @Bean
     public TossPaymentsErrorHandler tossPaymentsErrorHandler() {
         return new TossPaymentsErrorHandler();
@@ -30,21 +35,18 @@ public class PaymentConfig {
     }
 
     @Bean
-    public TossPaymentsClient tossRestClient(
-            TossPaymentProperties properties,
+    public RestClient tossRestClient(
             TossPaymentsErrorHandler errorHandler,
             ClientHttpRequestFactory clientHttpRequestFactory
     ) {
-
-        RestClient tossRestClient = RestClient.builder()
+        return RestClient.builder()
+                .baseUrl(tossPaymentProperties.getUrl())
+                .requestInterceptor(new
+                        TossAuthInterceptor(tossPaymentProperties.getSecretKey()))
                 .requestFactory(clientHttpRequestFactory)
-                .defaultHeader("Authorization", "Basic " +
-                        properties.getEncodedSecretKey())
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .defaultStatusHandler(errorHandler)
                 .build();
-
-        return new TossPaymentsClient(tossRestClient, properties);
     }
 }
 

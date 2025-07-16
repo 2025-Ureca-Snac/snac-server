@@ -1,7 +1,7 @@
 package com.ureca.snac.money.service;
 
 import com.ureca.snac.infra.TossPaymentsClient;
-import com.ureca.snac.infra.dto.TossConfirmResponse;
+import com.ureca.snac.infra.dto.response.TossConfirmResponse;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
@@ -77,7 +77,7 @@ public class MoneyServiceImpl implements MoneyService {
         }
 
         // 결제 멤버랑 현재 요청자 검토
-        if (!payment.isOwner(member)) {
+        if (payment.validateOwner(member)) {
             log.error("[에러] 결제 소유권 불일치, 주문번호 : {}, 결제한 멤버 ID  : {}, 요청 ID : {}", orderId, payment.getMember().getId(), member.getId());
             throw new PaymentRedirectException(PAYMENT_OWNERSHIP_MISMATCH);
         }
@@ -86,6 +86,7 @@ public class MoneyServiceImpl implements MoneyService {
             log.error("[에러] 결제 금액 불일치, 주문번호 : {}, DB 금액  : {}, 요청 금액 : {}", orderId, payment.getAmount(), amount);
             throw new PaymentRedirectException(AMOUNT_MISMATCH);
         }
+
         log.info("[외부 API] 토스 페이먼츠 결제 승인 요청 시작. 주문번호 : {}", orderId);
 
         // 토스 페이먼츠에 직접 확인 외부 결제 시스템
@@ -95,7 +96,6 @@ public class MoneyServiceImpl implements MoneyService {
         log.info("[데이터] Payment 상태 SUCCESS 변경");
 
         MoneyRecharge recharge = MoneyRecharge.create(payment);
-
         moneyRechargeRepository.save(recharge);
         log.info("[데이터] MoneyRecharge 기록 생성 완료. 충전 ID : {}", recharge.getId());
 
@@ -104,4 +104,3 @@ public class MoneyServiceImpl implements MoneyService {
         log.info("[머니 충전 처리] 최종 완료 회원 ID : {}, 금액 : {}", payment.getMember().getId(), payment.getAmount());
     }
 }
-

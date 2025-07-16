@@ -4,8 +4,8 @@ import com.ureca.snac.common.exception.BusinessException;
 
 import static com.ureca.snac.common.BaseCode.PAYMENT_OWNERSHIP_MISMATCH;
 
-public class PaymentOwnershipException extends BusinessException {
-    public PaymentOwnershipException() {
+public class PaymentOwnershipMismatchException extends BusinessException {
+    public PaymentOwnershipMismatchException() {
         super(PAYMENT_OWNERSHIP_MISMATCH);
     }
 }

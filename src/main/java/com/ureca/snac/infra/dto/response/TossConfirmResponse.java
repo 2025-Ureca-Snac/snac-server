@@ -1,4 +1,4 @@
-package com.ureca.snac.infra.dto;
+package com.ureca.snac.infra.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
