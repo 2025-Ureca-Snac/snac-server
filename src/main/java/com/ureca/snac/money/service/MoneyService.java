@@ -4,12 +4,16 @@ import com.ureca.snac.money.dto.MoneyRechargeRequest;
 import com.ureca.snac.money.dto.MoneyRechargeResponse;
 
 public interface MoneyService {
+    /**
+     * 머니 충전 서비스
+     *
+     * @param request 요청 DTO
+     * @param email   사용자 식별
+     * @return 결제 준비 DTO
+     */
     MoneyRechargeResponse prepareRecharge(MoneyRechargeRequest request, String email);
 
+    // 토스로부터 성공 콜백 받아서 머니 충전 처리
     void processRechargeSuccess(String paymentKey, String orderId, Long amount, String email);
 }
-// 사용자의 충전 요청을 받아서 PG사와 연동 준비
-// 대기 상태의 MoneyRecharge 엔티티 생성 저장
 
-
-// 토스로부터 결제 완료 응답으로 결제 승인 비즈니스 로직

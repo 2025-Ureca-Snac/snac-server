@@ -1,9 +1,10 @@
 package com.ureca.snac.infra;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureca.snac.infra.dto.TossErrorResponse;
+import com.ureca.snac.infra.dto.response.TossErrorResponse;
 import com.ureca.snac.payment.exception.PaymentRedirectException;
 import com.ureca.snac.payment.exception.TossPaymentsAPiCallException;
+import lombok.NonNull;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -28,14 +29,16 @@ public class TossPaymentsErrorHandler implements ResponseErrorHandler {
     }
 
     @Override
-    public void handleError(final URI url, final HttpMethod method, final ClientHttpResponse response) throws IOException {
+    public void handleError(@NonNull final URI url,
+                            @NonNull final HttpMethod method,
+                            final ClientHttpResponse response) throws IOException {
         TossErrorResponse errorResponse =
                 objectMapper.readValue(response.getBody(), TossErrorResponse.class);
 
         if ("ALREADY_PROCESSED_PAYMENT".equals(errorResponse.code())) {
             throw new PaymentRedirectException(ALREADY_PROCESSED_PAYMENT);
         }
-        
+
         String detailedErrorMessage = String.format(
                 "토스페이먼츠 결제 승인 실패 : %s (코드 : %s)",
                 errorResponse.message(),

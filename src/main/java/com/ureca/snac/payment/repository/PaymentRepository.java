@@ -14,4 +14,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * @return Payment 객체 optional
      */
     Optional<Payment> findByOrderId(String orderId);
+
+    /**
+     * 결제 키를 사용하여 엔티티 조히
+     *
+     * @param paymentKey 토스가 발급한 결제 식별자
+     * @return 조회된 Payment 담은 객체
+     */
+    Optional<Payment> findByPaymentKey(String paymentKey);
 }

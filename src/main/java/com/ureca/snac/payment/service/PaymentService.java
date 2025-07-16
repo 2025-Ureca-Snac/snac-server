@@ -16,4 +16,13 @@ public interface PaymentService {
      * @return 생성된 객체
      */
     Payment preparePayment(Member member, Long amount);
+
+    /**
+     * 결제 취소 기능
+     *
+     * @param paymentKey 취소할 결제 ID
+     * @param reason     취소 사유
+     * @param email      취소요청한 사람
+     */
+    void cancelPayment(String paymentKey, String reason, String email);
 }
