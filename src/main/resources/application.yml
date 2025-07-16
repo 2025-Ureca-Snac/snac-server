@@ -53,7 +53,7 @@ spring:
   jwt:
     secret: ${JWT_SECRET_KEY}
 
-# RabbitMQ 설정
+  # RabbitMQ 설정
   rabbitmq:
     addresses: ${RABBITMQ_ADDRESSES}
     username: ${RABBITMQ_USERNAME}
@@ -69,10 +69,10 @@ springdoc:
 # 결제 (Toss) 설정
 payments:
   toss:
-    secret-key: ${TOSS_SECRET_KEY}
-    confirm-url: "https://api.tosspayments.com/v1/payments/confirm"
+    url: "https://api.tosspayments.com/"
     success-url: ${PAYMENT_SUCCESS_URL}
     fail-url: ${PAYMENT_FAIL_URL}
+    secret-key: ${TOSS_SECRET_KEY}
 
 # AES 암호화 설정
 aes:
