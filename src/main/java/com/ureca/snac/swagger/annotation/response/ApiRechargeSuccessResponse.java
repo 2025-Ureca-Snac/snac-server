@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
         content = @Content(schema = @Schema(implementation = com.ureca.snac.common.ApiResponse.class)))
 public @interface ApiRechargeSuccessResponse {
     @AliasFor(annotation = ApiResponse.class, attribute = "description")
-    String description() default "인증 실패";
+    String description() default "머니 충전 요청 성공";
 }
