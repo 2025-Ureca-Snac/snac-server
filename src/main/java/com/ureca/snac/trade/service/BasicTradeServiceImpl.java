@@ -13,6 +13,7 @@ import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
+import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import com.ureca.snac.trade.service.response.TradeResponse;
 import com.ureca.snac.wallet.Repository.WalletRepository;
@@ -86,11 +87,11 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         if (trade.getBuyer() == seller)
             throw new TradeSendPermissionDeniedException();
 
-        if (trade.getSeller() == null) { // 구매글의 경우 판매자가 정해지지 않았기 때문에 지정
+        if (trade.getSeller() == null) { // 판매자 미지정된 거래(구매글)에 대해서는 현재 판매자로 지정
             trade.changeSeller(seller);
             card.changeSellStatus(TRADING);
 
-        } else if (trade.getSeller() != seller) {
+        } else if (trade.getSeller() != seller) { // 이미 지정된 판매자가 현재 요청자가 아닐 경우 권한 없음
             throw new TradeSendPermissionDeniedException();
         }
 
@@ -110,6 +111,7 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
     }
 
+    @Override
     public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
         Member member = findMember(username);
 
@@ -125,6 +127,22 @@ public class BasicTradeServiceImpl implements BasicTradeService {
                 .toList();
 
         return new ScrollTradeResponse(dto, hasNext);
+    }
+
+    @Override
+    public ProgressTradeCountResponse countSellingProgress(String username) {
+        Member seller = findMember(username);
+
+        return new ProgressTradeCountResponse(tradeRepository.countBySellerAndStatusIn(seller,
+                List.of(DATA_SENT, PAYMENT_CONFIRMED)));
+    }
+
+    @Override
+    public ProgressTradeCountResponse countBuyingProgress(String username) {
+        Member buyer = findMember(username);
+
+        return new ProgressTradeCountResponse(tradeRepository.countByBuyerAndStatusIn(buyer,
+                List.of(DATA_SENT, PAYMENT_CONFIRMED)));
     }
 
     // === private helper === //
@@ -150,6 +168,8 @@ public class BasicTradeServiceImpl implements BasicTradeService {
 
         Trade trade = Trade.buildTrade(createTradeRequest.getPoint(), member, member.getPhone(), card, requiredStatus);
         tradeRepository.save(trade);
+
+        // 카드 상태 변경 (판매글이면 TRADING, 구매글이면 SELLING)
         card.changeSellStatus(requiredStatus == SELLING ? TRADING : SELLING);
 
         return trade.getId();
@@ -180,9 +200,11 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     private void ensureOwnership(Card card, Member member, SellStatus requiredStatus) {
         boolean isOwner = card.getMember().equals(member);
 
+        // 판매 요청 시 자기 글 요청 방지
         if (requiredStatus == SELLING && isOwner) {
             throw new TradeSelfRequestException();
         }
+        // 구매 요청 시 타인의 글만 허용
         if (requiredStatus == PENDING && !isOwner) {
             throw new TradePermissionDeniedException();
         }

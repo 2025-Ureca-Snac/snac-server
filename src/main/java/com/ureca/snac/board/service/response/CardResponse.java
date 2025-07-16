@@ -15,22 +15,26 @@ import java.time.LocalDateTime;
 public class CardResponse {
     private Long id;
     private String name;
+    private String email;
     private SellStatus sellStatus;
     private CardCategory cardCategory;
     private Carrier carrier;
     private Integer dataAmount;
     private Integer price;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public static CardResponse from(Card card) {
         return new CardResponse(
                 card.getId(),
                 card.getMember().getName(),
+                card.getMember().getEmail(),
                 card.getSellStatus(),
                 card.getCardCategory(),
                 card.getCarrier(),
                 card.getDataAmount(),
                 card.getPrice(),
+                card.getCreatedAt(),
                 card.getUpdatedAt()
         );
     }

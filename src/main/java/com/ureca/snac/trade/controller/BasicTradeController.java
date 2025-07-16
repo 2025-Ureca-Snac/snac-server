@@ -4,6 +4,7 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.BasicTradeService;
+import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,20 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
 
     private final BasicTradeService basicTradeService;
 
+    @GetMapping("/count/buy")
+    public ResponseEntity<ApiResponse<ProgressTradeCountResponse>> countProgressBuyTrades(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.of(TRADE_PROGRESS_COUNT_SUCCESS,
+                basicTradeService.countBuyingProgress(userDetails.getUsername())));
+    }
+
+    @GetMapping("/count/sell")
+    public ResponseEntity<ApiResponse<ProgressTradeCountResponse>> countProgressSellTrades(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.of(TRADE_PROGRESS_COUNT_SUCCESS,
+                basicTradeService.countSellingProgress(userDetails.getUsername())));
+    }
+
     @PostMapping("/sell")
-    public ResponseEntity<?> createSellTrade(@RequestBody CreateTradeRequest createTradeRequest,
+    public ResponseEntity<ApiResponse<?>> createSellTrade(@RequestBody CreateTradeRequest createTradeRequest,
                                              @AuthenticationPrincipal UserDetails userDetails) {
 
         basicTradeService.createSellTrade(createTradeRequest, userDetails.getUsername());
@@ -34,7 +47,7 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     }
 
     @PostMapping("/buy")
-    public ResponseEntity<?> createBuyTrade(@RequestBody CreateTradeRequest createTradeRequest,
+    public ResponseEntity<ApiResponse<?>> createBuyTrade(@RequestBody CreateTradeRequest createTradeRequest,
                                             @AuthenticationPrincipal UserDetails userDetails) {
         basicTradeService.createBuyTrade(createTradeRequest, userDetails.getUsername());
 
@@ -42,7 +55,7 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     }
 
     @PatchMapping("/{tradeId}/cancel")
-    public ResponseEntity<?> cancelTrade(@PathVariable Long tradeId,
+    public ResponseEntity<ApiResponse<?>> cancelTrade(@PathVariable Long tradeId,
                                          @AuthenticationPrincipal UserDetails userDetails) {
         basicTradeService.cancelTrade(tradeId, userDetails.getUsername());
 
@@ -50,7 +63,7 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     }
 
     @PatchMapping(value = "/{tradeId}/send-data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> sendTradeData(@PathVariable Long tradeId,
+    public ResponseEntity<ApiResponse<?>> sendTradeData(@PathVariable Long tradeId,
                                            @RequestPart("file") MultipartFile file,
                                            @AuthenticationPrincipal UserDetails userDetails) {
         basicTradeService.sendTradeData(tradeId, userDetails.getUsername(), file);
@@ -59,7 +72,7 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     }
 
     @PatchMapping("/{tradeId}/confirm")
-    public ResponseEntity<?> confirmTrade(@PathVariable Long tradeId,
+    public ResponseEntity<ApiResponse<?>> confirmTrade(@PathVariable Long tradeId,
                                           @AuthenticationPrincipal UserDetails userDetails) {
         basicTradeService.confirmTrade(tradeId, userDetails.getUsername());
 
