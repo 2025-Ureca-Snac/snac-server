@@ -13,6 +13,7 @@ import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
+import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import com.ureca.snac.trade.service.response.TradeResponse;
 import com.ureca.snac.wallet.Repository.WalletRepository;
@@ -110,6 +111,7 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
     }
 
+    @Override
     public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
         Member member = findMember(username);
 
@@ -125,6 +127,22 @@ public class BasicTradeServiceImpl implements BasicTradeService {
                 .toList();
 
         return new ScrollTradeResponse(dto, hasNext);
+    }
+
+    @Override
+    public ProgressTradeCountResponse countSellingProgress(String username) {
+        Member seller = findMember(username);
+
+        return new ProgressTradeCountResponse(tradeRepository.countBySellerAndStatusIn(seller,
+                List.of(DATA_SENT, PAYMENT_CONFIRMED)));
+    }
+
+    @Override
+    public ProgressTradeCountResponse countBuyingProgress(String username) {
+        Member buyer = findMember(username);
+
+        return new ProgressTradeCountResponse(tradeRepository.countByBuyerAndStatusIn(buyer,
+                List.of(DATA_SENT, PAYMENT_CONFIRMED)));
     }
 
     // === private helper === //
