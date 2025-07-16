@@ -9,9 +9,12 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
+import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import com.ureca.snac.wallet.Repository.WalletRepository;
 import com.ureca.snac.wallet.entity.Wallet;
 import com.ureca.snac.wallet.exception.WalletNotFoundException;
@@ -20,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 import static com.ureca.snac.board.entity.constants.SellStatus.*;
 import static com.ureca.snac.trade.entity.TradeStatus.DATA_SENT;
@@ -103,6 +108,23 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         trade.confirm(buyer);
         card.changeSellStatus(SOLD_OUT);
         wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
+    }
+
+    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
+        Member member = findMember(username);
+
+        List<Trade> trades = (side == TradeSide.BUY)
+                ? tradeRepository.findTradesByBuyerInfinite(member.getId(), lastTradeId, size + 1)
+                : tradeRepository.findTradesBySellerInfinite(member.getId(), lastTradeId, size + 1);
+
+        boolean hasNext = trades.size() > size;
+
+        List<TradeResponse> dto = trades.stream()
+                .limit(size)
+                .map(t -> TradeResponse.from(t, side))
+                .toList();
+
+        return new ScrollTradeResponse(dto, hasNext);
     }
 
     // === private helper === //

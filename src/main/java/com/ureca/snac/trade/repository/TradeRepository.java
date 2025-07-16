@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Lock;
 
 import java.util.Optional;
 
-public interface TradeRepository extends JpaRepository<Trade, Long> {
+public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTradeRepository {
     Optional<Trade> findByCardIdAndBuyerIdAndStatusNot(Long cardId, Long buyerId, TradeStatus status);
     Optional<Trade> findByIdAndStatus(Long id, TradeStatus status);   // 수락용
 
