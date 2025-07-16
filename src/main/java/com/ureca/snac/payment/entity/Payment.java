@@ -3,6 +3,7 @@ package com.ureca.snac.payment.entity;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.payment.exception.PaymentNotCancellableException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,7 +48,7 @@ public class Payment extends BaseTimeEntity {
     private String cancelReason;
 
     /**
-     * prepare 상태의 객체 생성 팩토리 메소드
+     * prepare 상태의 객체 생성 팩토리 메소드 + private 빌더 객체 생성 통제
      * Builder 반환 대신 Payment 객체 반환
      * 외부에서 Builder 모름
      *
@@ -74,27 +75,35 @@ public class Payment extends BaseTimeEntity {
         this.status = PaymentStatus.SUCCESS;
     }
 
-//    // 상태 취소
-//    public void cancel(String reason) {
-//        this.cancelReason = reason;
-//        this.status = PaymentStatus.CANCELED;
-//    }
-
-    // 소유주 검증
-    public boolean isOwner(Member member) {
-        if (this.member == null || member == null) {
-            return false;
+    // 상태 취소
+    public void cancel(String reason) {
+        if (!isCancellable()) {
+            throw new PaymentNotCancellableException();
         }
-        return this.member.getId().equals(member.getId());
+        this.cancelReason = reason;
+        this.status = PaymentStatus.CANCELED;
     }
 
-    // 기록 금액 검증
-    public boolean isAmount(Long amount) {
-        return this.amount.equals(amount);
+    // 취소 검증
+    public boolean isCancellable() {
+        return this.status == PaymentStatus.SUCCESS;
     }
 
     // 이미 처리된 건인지 증명
     public boolean isAlreadyProcessed() {
         return this.status != PaymentStatus.PENDING;
+    }
+
+    // 소유주 검증
+    public boolean validateOwner(Member member) {
+        if (this.member == null || member == null) {
+            return true;
+        }
+        return !this.member.getId().equals(member.getId());
+    }
+
+    // 기록 금액 검증
+    public boolean isAmount(Long amount) {
+        return this.amount.equals(amount);
     }
 }
