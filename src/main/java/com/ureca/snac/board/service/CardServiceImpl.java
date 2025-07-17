@@ -1,6 +1,7 @@
 package com.ureca.snac.board.service;
 
 import com.ureca.snac.board.controller.request.CreateCardRequest;
+import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
@@ -70,8 +71,11 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, int size, Long lastCardId, LocalDateTime lastUpdatedAt) {
-        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, size + 1, lastCardId, lastUpdatedAt);
+    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
+                                          Integer size, Long lastCardId, LocalDateTime lastUpdatedAt) {
+
+        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, sellStatusFilter, highRatingFirst,
+                size + 1, lastCardId, lastUpdatedAt);
 
         boolean hasNext = raw.size() > size;
 
