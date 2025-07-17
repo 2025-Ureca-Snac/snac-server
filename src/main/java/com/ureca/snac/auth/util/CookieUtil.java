@@ -9,8 +9,8 @@ public class CookieUtil {
         cookie.setMaxAge(24 * 60 * 60);
 //        cookie.setSecure(true);
         cookie.setPath("/api");
-//        cookie.setHttpOnly(true);
-        cookie.setDomain("snac-app.com");
+        cookie.setHttpOnly(true);
+//        cookie.setDomain("snac-app.com");
         return cookie;
     }
 }
