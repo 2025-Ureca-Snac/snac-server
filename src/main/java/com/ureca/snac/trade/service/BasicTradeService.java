@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -76,4 +77,12 @@ public interface BasicTradeService {
      * @return 진행 중 거래 건수
      */
     ProgressTradeCountResponse countBuyingProgress(String username);
+
+    /**
+     * 구매글에 판매자가 거래 신청을 하고, 카드 상태를 TRADING으로 변경합니다.
+     *
+     * @param claimBuyRequest 구매글을 식별할 카드 ID를 포함한 DTO
+     * @param username        거래 신청을 수행하는 판매자 이메일
+     */
+    void acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username);
 }
