@@ -20,26 +20,6 @@ public class AttachmentController {
 
     private final AttachmentService attachmentService;
 
-    // 거래 스크린샷 업로드
-    // Content-Type: multipart/form-data
-    // image: <file>
-    @PostMapping(value = "/{tradeId}/attachment",
-                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<AttachmentResponseDto>> upload(
-            @PathVariable Long tradeId,
-            @RequestPart("image") MultipartFile image,
-            // SecurityContext 에서 id 꺼내기 (expression = "id" 는 사용자 정의 UserDetails 구현체 기준)
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        AttachmentRequestDto dto = new AttachmentRequestDto(image);
-        String email = userDetails.getUsername();
-
-        AttachmentResponseDto result =
-                attachmentService.upload(tradeId, email, dto);
-
-        return ResponseEntity.ok(ApiResponse.of(BaseCode.ATTACHMENT_UPLOAD_SUCCESS, result));
-    }
-
     // 거래 이미지 Presigned URL 발급
     @GetMapping("/{tradeId}/attachment-url")
     public ResponseEntity<ApiResponse<String>> getPresignedUrl(

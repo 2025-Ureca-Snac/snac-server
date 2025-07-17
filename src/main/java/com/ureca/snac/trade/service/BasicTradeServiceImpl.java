@@ -41,6 +41,7 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final WalletRepository walletRepository;
+    private final AttachmentService attachmentService;
 
     @Override
     @Transactional
@@ -94,6 +95,9 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         } else if (trade.getSeller() != seller) { // 이미 지정된 판매자가 현재 요청자가 아닐 경우 권한 없음
             throw new TradeSendPermissionDeniedException();
         }
+
+        // 파일 업로드
+        attachmentService.upload(tradeId, username, picture);
 
         trade.changeStatus(DATA_SENT);
     }
