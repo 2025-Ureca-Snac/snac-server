@@ -17,6 +17,7 @@ import com.ureca.snac.trade.repository.TradeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     private final S3Uploader s3Uploader;
 
     @Override
-    public AttachmentResponseDto upload(Long tradeId, String userEmail, AttachmentRequestDto dto) {
+    public void upload(Long tradeId, String userEmail, MultipartFile image) {
 
         // 거래, 회원 검증 :
         Trade trade = tradeRepository.findById(tradeId)
@@ -49,7 +50,7 @@ public class AttachmentServiceImpl implements AttachmentService {
         }
 
         // S3 업로드, 객체 키 반환받음
-        String s3Key = s3Uploader.upload(dto.getImage(), S3Path.TRADE_ATTACHMENT);
+        String s3Key = s3Uploader.upload(image, S3Path.TRADE_ATTACHMENT);
 
         // 엔티티 저장
         Attachment attachment = Attachment.builder()
@@ -59,8 +60,6 @@ public class AttachmentServiceImpl implements AttachmentService {
                 .build();
 
         attachmentRepository.save(attachment);
-
-        return new AttachmentResponseDto(attachment.getId(), s3Key); // 여기선 객체키로 응답 (나중에 Presigned URL로 변경될 수 있음)
     }
 
     @Override
