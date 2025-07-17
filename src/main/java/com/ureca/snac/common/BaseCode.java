@@ -46,8 +46,10 @@ public enum BaseCode {
     EMAIL_VERIFICATION_SENT("EMAIL_VERIFICATION_SENT_200", HttpStatus.OK, "Email 인증번호가 발송되었습니다."),
     // 이메일 인증코드 발송- 예외
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Email 인증번호 전송에 실패했습니다."),
-
-
+    // 이메일 휴대폰번호로 조회 - 성공
+    EMAIL_FOUND_BY_PHONE("EMAIL_FOUND_BY_PHONE_200", HttpStatus.OK, "휴대폰 번호로 EMAIL 을 찾았습니다"),
+    // 이메일
+    EMAIL_IS_EXIST("EMAIL_IS_EXIST_200", HttpStatus.OK, "이메일이 있는지 확인하였습니다."),
     // 문자 인증코드 인증- 성공
     SMS_CODE_VERIFICATION_SUCCESS("SMS_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "문자 인증에 성공했습니다."),
 
@@ -99,6 +101,12 @@ public enum BaseCode {
 
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
+
+    // 비밀번호 변경 – 성공
+    PASSWORD_CHANGED("PASSWORD_CHANGED_200", HttpStatus.OK, "비밀번호가 변경되었습니다."),
+
+    // 비밀번호 변경 – 예외
+    INVALID_CURRENT_PASSWORD("INVALID_CURRENT_PASSWORD_400", HttpStatus.BAD_REQUEST, "현재 비밀번호가 올바르지 않습니다."),
 
     // 카드 - 성공
     CARD_CREATE_SUCCESS("CARD_CREATE_SUCCESS_201", HttpStatus.CREATED, "카드가 성공적으로 등록되었습니다."),
