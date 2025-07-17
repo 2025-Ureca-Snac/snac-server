@@ -3,11 +3,13 @@ package com.ureca.snac.board.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.QCard;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
+import com.ureca.snac.board.entity.constants.SellStatus;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +29,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
     public List<Card> scroll(CardCategory cardCategory,
                              Carrier carrier,
                              List<PriceRange> priceRanges,
+                             SellStatusFilter sellStatusFilter,
                              int size,
                              Long lastCardId, LocalDateTime lastUpdatedAt) {
 
@@ -37,11 +40,23 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                         c.cardCategory.eq(cardCategory),
                         ltCursor(lastCardId, lastUpdatedAt, c),
                         carrierEq(carrier, c),
-                        priceRangeIn(priceRanges, c)
+                        priceRangeIn(priceRanges, c),
+                        sellStatusCond(sellStatusFilter, c)
                 )
                 .orderBy(c.updatedAt.desc(), c.id.desc())
                 .limit(size)
                 .fetch();
+    }
+
+    private BooleanExpression sellStatusCond(SellStatusFilter sellStatusFilter, QCard c) {
+        if (sellStatusFilter == null || sellStatusFilter == SellStatusFilter.ALL) {
+            return c.sellStatus.ne(SellStatus.PENDING);
+        }
+        return switch (sellStatusFilter) {
+            case SELLING  -> c.sellStatus.eq(SellStatus.SELLING);
+            case SOLD_OUT -> c.sellStatus.eq(SellStatus.SOLD_OUT);
+            default -> null;
+        };
     }
 
     private BooleanExpression priceRangeIn(List<PriceRange> prList, QCard c) {

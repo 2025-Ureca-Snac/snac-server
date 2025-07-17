@@ -1,6 +1,7 @@
 package com.ureca.snac.board.service;
 
 import com.ureca.snac.board.controller.request.CreateCardRequest;
+import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
@@ -41,7 +42,7 @@ public interface CardService {
      * @param lastUpdatedAt 커서: 마지막으로 조회된 카드의 수정 시각 (선택)
      * @return 스크롤 방식으로 응답하는 카드 목록과 다음 페이지 존재 여부
      */
-    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRange, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
+    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRange, SellStatusFilter sellStatusFilter, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
 
     /**
      * 카드(판매글/구매글)를 삭제합니다.
