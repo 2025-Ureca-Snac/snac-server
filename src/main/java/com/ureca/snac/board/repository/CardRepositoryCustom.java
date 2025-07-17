@@ -14,7 +14,8 @@ public interface CardRepositoryCustom {
                       Carrier carrier,
                       List<PriceRange> priceRanges,
                       SellStatusFilter sellStatusFilter,
-                      int size,
+                      Boolean highRatingFirst,
+                      Integer size,
                       Long lastCardId,
                       LocalDateTime lastUpdatedAt);
 }

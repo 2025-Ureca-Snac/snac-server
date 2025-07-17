@@ -56,11 +56,13 @@ public class CardController implements CardControllerSwagger{
                                                                        @RequestParam(required = false) Carrier carrier,
                                                                        @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
                                                                        @RequestParam SellStatusFilter sellStatusFilter,
-                                                                       @RequestParam(defaultValue = "54") int size,
+                                                                       @RequestParam(defaultValue = "true") Boolean highRatingFirst,
+                                                                       @RequestParam(defaultValue = "54") Integer size,
                                                                        @RequestParam(required = false) Long lastCardId,
                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt) {
 
-        ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRanges, sellStatusFilter, size, lastCardId, lastUpdatedAt);
+        ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRanges,
+                sellStatusFilter, highRatingFirst, size, lastCardId, lastUpdatedAt);
 
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
     }

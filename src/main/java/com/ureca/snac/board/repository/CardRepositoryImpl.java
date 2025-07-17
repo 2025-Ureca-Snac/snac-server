@@ -2,6 +2,7 @@ package com.ureca.snac.board.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.entity.Card;
@@ -10,6 +11,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.member.QMember;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
@@ -30,22 +32,31 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                              Carrier carrier,
                              List<PriceRange> priceRanges,
                              SellStatusFilter sellStatusFilter,
-                             int size,
+                             Boolean highRatingFirst,
+                             Integer size,
                              Long lastCardId, LocalDateTime lastUpdatedAt) {
 
         QCard c = QCard.card;
+        QMember m = QMember.member;
 
-        return query.selectFrom(c)
+        JPAQuery<Card> q = query
+                .selectFrom(c)
+                .join(c.member, m).fetchJoin()
                 .where(
                         c.cardCategory.eq(cardCategory),
                         ltCursor(lastCardId, lastUpdatedAt, c),
                         carrierEq(carrier, c),
                         priceRangeIn(priceRanges, c),
                         sellStatusCond(sellStatusFilter, c)
-                )
-                .orderBy(c.updatedAt.desc(), c.id.desc())
-                .limit(size)
-                .fetch();
+                );
+
+        if (highRatingFirst) {
+            q.orderBy(m.ratingScore.desc(), c.updatedAt.desc(), c.id.desc());
+        } else {
+            q.orderBy(c.updatedAt.desc(), c.id.desc());
+        }
+
+        return q.limit(size).fetch();
     }
 
     private BooleanExpression sellStatusCond(SellStatusFilter sellStatusFilter, QCard c) {
