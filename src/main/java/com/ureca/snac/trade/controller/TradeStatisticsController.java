@@ -16,7 +16,7 @@ import static com.ureca.snac.common.BaseCode.TRADE_STATISTICS_READ_SUCCESS;
 @RestController
 @RequestMapping("/api/trade-statistics")
 @RequiredArgsConstructor
-public class TradeStatisticsController {
+public class TradeStatisticsController implements TradeStatisticsControllerSwagger {
 
     private final TradeStatisticsService tradeStatisticsService;
 
