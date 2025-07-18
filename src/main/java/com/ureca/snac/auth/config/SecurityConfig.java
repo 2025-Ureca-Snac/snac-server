@@ -49,7 +49,8 @@ public class SecurityConfig {
                     cfg.setAllowedOrigins(List.of("http://localhost:3000",
                             "http://localhost:5500",
                             "https://docs.tosspayments.com",
-                            "https://snac-app.com"
+                            "https://snac-app.com",
+                            "https://develop.df83wi2m9axuw.amplifyapp.com"
                     ));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("*"));
