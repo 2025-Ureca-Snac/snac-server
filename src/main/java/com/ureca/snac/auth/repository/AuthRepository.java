@@ -12,7 +12,7 @@ public interface AuthRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
-    Optional<Member> findByNaverId(String naverId);
-    Optional<Member> findByGoogleId(String googleId);
-    Optional<Member> findByKakaoId(String kakaoId);
+    Member findByNaverId(String naverId);
+    Member findByGoogleId(String googleId);
+    Member findByKakaoId(String kakaoId);
 }
