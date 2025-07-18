@@ -26,4 +26,7 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     long countByBuyerAndStatusIn(Member buyer, Collection<TradeStatus> statuses);
 
     List<Trade> findAllByStatusAndCarrierAndCreatedAtBetween(TradeStatus status, Carrier carrier, LocalDateTime start, LocalDateTime end);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Trade> findLockedByCardId(Long cardId);
 }

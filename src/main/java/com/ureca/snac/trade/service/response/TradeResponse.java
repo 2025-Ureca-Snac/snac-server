@@ -27,13 +27,22 @@ public class TradeResponse {
     private LocalDateTime createdAt;
 
     public static TradeResponse from(Trade trade, TradeSide side) {
-        String maskedPhone = (side == TradeSide.SELL) ? null : trade.getPhone();
+        String phoneToShow = null;
+
+        // 구매자 측면에서는 언제나 본인 번호를 보여주고,
+        if (side == TradeSide.BUY) {
+            phoneToShow = trade.getPhone();
+        }
+        // 판매자 측면에서는 결제 확정 단계(PAYMENT_CONFIRMED)일 때만 보여줌
+        else if (side == TradeSide.SELL && trade.getStatus() == TradeStatus.PAYMENT_CONFIRMED) {
+            phoneToShow = trade.getPhone();
+        }
 
         return new TradeResponse(
                 trade.getId(),
                 trade.getPriceGb(),
                 trade.getDataAmount(),
-                maskedPhone,
+                phoneToShow,
                 trade.getCarrier(),
                 trade.getCancelReason(),
                 trade.getStatus(),
