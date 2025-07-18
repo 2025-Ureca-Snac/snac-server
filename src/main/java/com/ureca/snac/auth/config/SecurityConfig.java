@@ -1,7 +1,6 @@
 package com.ureca.snac.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.auth.filter.CustomLogoutFilter;
 import com.ureca.snac.auth.filter.JWTFilter;
 import com.ureca.snac.auth.filter.LoginFilter;
@@ -10,34 +9,23 @@ import com.ureca.snac.auth.oauth2.CustomOAuth2SuccessHandler;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.service.CustomOAuth2UserService;
 import com.ureca.snac.auth.util.JWTUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 @Slf4j

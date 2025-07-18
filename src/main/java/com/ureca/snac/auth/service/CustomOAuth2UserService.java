@@ -1,7 +1,6 @@
 package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.dto.CustomOAuth2User;
-import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.auth.dto.response.GoogleResponse;
 import com.ureca.snac.auth.dto.response.KakaoResponse;
 import com.ureca.snac.auth.dto.response.NaverResponse;
@@ -21,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Optional;
-
 
 @Service
 @Slf4j
@@ -35,19 +32,23 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        log.info("loadUser 메소드 시작");
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        log.info("oAuth2User: {}", oAuth2User.getAttributes());
+        log.info("OAuth2 사용자 정보: {}", oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        log.info("registrationId: {}", registrationId);
         OAuth2Response oAuth2Response = switch (registrationId) {
             case "naver" -> new NaverResponse(oAuth2User.getAttributes());
             case "google" -> new GoogleResponse(oAuth2User.getAttributes());
             case "kakao" -> new KakaoResponse(oAuth2User.getAttributes());
             default -> throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         };
+        log.info("OAuth2Response: {}", oAuth2Response);
 
         String provider   = oAuth2Response.getProvider();
         String providerId = oAuth2Response.getProviderId();
+        log.info("provider: {}, providerId: {}", provider, providerId);
 
         Member existingMember = switch (provider) {
             case "naver" -> authRepository.findByNaverId(providerId);
@@ -55,20 +56,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             default -> authRepository.findByKakaoId(providerId);
         };
         if (existingMember != null) {
+            log.info("기존 회원: {}", existingMember.getEmail());
             return new CustomOAuth2User(existingMember);
         }
+        log.info("기존 회원이 아님. 새로 연동");
 
         // 사용자 정보 state 에서 꺼내서 확인
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String state = request.getParameter("state");
+        log.info("state: {}", state);
 
         String email = jwtUtil.getUsername(state);
+        log.info("email from state: {}", email);
         Member member = authRepository.findByEmail(email)
-                .orElseThrow(() -> new OAuth2AuthenticationException("존재하지 않는 회원입니다. 신규로 소셜 로그인 계정을 등록하겠습니다."));
+                .orElseThrow(() -> new OAuth2AuthenticationException("존재하지 않는 회원입니다."));
+        log.info("회원 발견: {}", member);
 
         member.updateSocialId(provider, providerId);
         authRepository.save(member);
+        log.info("소셜 ID를 업데이트 및 저장");
 
+        log.info("loadUser 메소드 종료");
         return new CustomOAuth2User(member);
     }
 }
