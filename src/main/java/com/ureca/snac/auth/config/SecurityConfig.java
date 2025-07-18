@@ -5,6 +5,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.auth.filter.CustomLogoutFilter;
 import com.ureca.snac.auth.filter.JWTFilter;
 import com.ureca.snac.auth.filter.LoginFilter;
+import com.ureca.snac.auth.oauth2.CustomAuthorizationRequestResolver;
 import com.ureca.snac.auth.oauth2.CustomOAuth2SuccessHandler;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.service.CustomOAuth2UserService;
@@ -35,6 +36,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -48,6 +51,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customSuccessHandler;
+    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -57,59 +61,6 @@ public class SecurityConfig {
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(
-            ClientRegistrationRepository clientRegistrationRepository) {
-
-        DefaultOAuth2AuthorizationRequestResolver defaultResolver =
-                new DefaultOAuth2AuthorizationRequestResolver(
-                        clientRegistrationRepository,
-                        "/oauth2/authorization"
-                );
-
-        return new OAuth2AuthorizationRequestResolver() {
-            @Override
-            public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
-                return customize(defaultResolver.resolve(request));
-            }
-
-            @Override
-            public OAuth2AuthorizationRequest resolve(HttpServletRequest request, String clientRegistrationId) {
-                return customize(defaultResolver.resolve(request, clientRegistrationId));
-            }
-
-            private OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest originalRequest) {
-                if (originalRequest == null) {
-                    return null;
-                }
-
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-                log.info("authentication: {}", authentication.getName());
-
-                if (authentication == null
-                        || !authentication.isAuthenticated()
-                        || authentication instanceof AnonymousAuthenticationToken) {
-                    return originalRequest;
-                }
-
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                String username = userDetails.getUsername();
-                String role = authentication.getAuthorities().stream()
-                        .findFirst()
-                        .map(GrantedAuthority::getAuthority)
-                        .orElse("");
-
-                String linkingJwt = jwtUtil.createJwt("link", username, role, 300000L);
-
-                // state에 jwt 담기
-                return OAuth2AuthorizationRequest.from(originalRequest)
-                        .state(linkingJwt)
-                        .build();
-            }
-        };
     }
 
 
@@ -125,7 +76,8 @@ public class SecurityConfig {
                             "http://127.0.0.1:3000",
                             "https://docs.tosspayments.com",
                             "https://snac-app.com",
-                            "https://develop.df83wi2m9axuw.amplifyapp.com"
+                            "https://develop.df83wi2m9axuw.amplifyapp.com",
+                            "https://seungwoo.i234.me"
                     ));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("*"));
@@ -144,14 +96,15 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
 
         http
-                .oauth2Login((oauth2) -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestResolver(
-                                        customAuthorizationRequestResolver(clientRegistrationRepository)
-                                ))
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(customSuccessHandler)
+//                        .failureHandler()
+                        .userInfoEndpoint(userinfo -> userinfo
                                 .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler));
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(customAuthorizationRequestResolver))
+                );
+
 
         http
                 .authorizeHttpRequests(auth -> auth

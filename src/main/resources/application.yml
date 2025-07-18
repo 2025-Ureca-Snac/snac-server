@@ -109,3 +109,7 @@ payments:
 aes:
   passphrase: ${AES_PASSPHRASE}
   salt: ${AES_SALT}
+
+logging:
+  level:
+    com.ureca.snac.auth.config.SecurityConfig: DEBUG
