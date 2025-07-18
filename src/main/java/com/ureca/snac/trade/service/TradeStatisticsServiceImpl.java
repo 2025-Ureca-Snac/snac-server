@@ -4,6 +4,7 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.trade.entity.TradeStatistics;
 import com.ureca.snac.trade.exception.TradeStatisticsNotFoundException;
 import com.ureca.snac.trade.repository.TradeStatisticsRepository;
+import com.ureca.snac.trade.service.interfaces.TradeStatisticsService;
 import com.ureca.snac.trade.service.response.TradeStatisticsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;

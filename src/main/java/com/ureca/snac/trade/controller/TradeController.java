@@ -5,7 +5,7 @@ import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.trade.controller.request.AcceptTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
-import com.ureca.snac.trade.service.TradeService;
+import com.ureca.snac.trade.service.interfaces.TradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

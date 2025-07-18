@@ -98,4 +98,10 @@ public class CardServiceImpl implements CardService {
 
         cardRepository.delete(card);
     }
+
+    @Override
+    @Transactional
+    public void deleteCardByTrade(Long cardId) {
+        cardRepository.deleteById(cardId);
+    }
 }

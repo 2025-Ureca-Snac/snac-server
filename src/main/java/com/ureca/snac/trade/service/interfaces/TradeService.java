@@ -1,4 +1,4 @@
-package com.ureca.snac.trade.service;
+package com.ureca.snac.trade.service.interfaces;
 
 import com.ureca.snac.trade.controller.request.AcceptTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeRequest;

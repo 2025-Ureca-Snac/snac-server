@@ -52,5 +52,7 @@ public interface CardService {
      * @param cardId 삭제할 카드 ID
      */
     void deleteCard(String username, Long cardId);
+
+    void deleteCardByTrade(Long cardId);
 }
 

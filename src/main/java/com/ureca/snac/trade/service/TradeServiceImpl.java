@@ -20,6 +20,7 @@ import com.ureca.snac.trade.controller.request.TradeRequest;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.repository.TradeRepository;
+import com.ureca.snac.trade.service.interfaces.TradeService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
