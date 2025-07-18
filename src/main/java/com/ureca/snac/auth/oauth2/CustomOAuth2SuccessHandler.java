@@ -1,9 +1,13 @@
 package com.ureca.snac.auth.oauth2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.dto.CustomOAuth2User;
 import com.ureca.snac.auth.refresh.Refresh;
 import com.ureca.snac.auth.repository.RefreshRepository;
+import com.ureca.snac.auth.util.CookieUtil;
 import com.ureca.snac.auth.util.JWTUtil;
+import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,6 +28,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private final ObjectMapper objectMapper;
+
 
     @Override
     @Transactional
@@ -52,13 +60,16 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         log.info("Refresh 토큰 저장 완료.");
 
         log.info("토큰 전송 시도");
-        response.setHeader("Authorization", "Bearer " + newAccess);
-        response.addHeader("refresh", newRefresh);
+        response.setHeader(AUTHORIZATION, "Bearer " + newAccess);
+        response.addCookie(CookieUtil.createCookie("refresh", newRefresh));
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json; charset=UTF-8");
+        ApiResponse<Void> apiResponse = ApiResponse.ok(BaseCode.OAUTH_LOGIN_SUCCESS);
+        String responseBody = objectMapper.writeValueAsString(apiResponse);
+        response.getWriter().print(responseBody);
+        response.getWriter().flush();
         log.debug("응답 헤더 설정 완료: Authorization, refresh");
         log.debug("응답 상태 코드 설정 완료: {}", HttpServletResponse.SC_OK);
-
-        response.getWriter().flush();
         response.getWriter().close();
 
         log.info("CustomOAuth2SuccessHandler 처리 완료");

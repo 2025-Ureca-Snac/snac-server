@@ -5,6 +5,7 @@ import com.ureca.snac.auth.filter.CustomLogoutFilter;
 import com.ureca.snac.auth.filter.JWTFilter;
 import com.ureca.snac.auth.filter.LoginFilter;
 import com.ureca.snac.auth.oauth2.CustomAuthorizationRequestResolver;
+import com.ureca.snac.auth.oauth2.CustomOAuth2FailHandler;
 import com.ureca.snac.auth.oauth2.CustomOAuth2SuccessHandler;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.service.CustomOAuth2UserService;
@@ -39,6 +40,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customSuccessHandler;
+    private final CustomOAuth2FailHandler customFailHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
@@ -86,7 +88,7 @@ public class SecurityConfig {
         http
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(customSuccessHandler)
-//                        .failureHandler()
+                        .failureHandler(customFailHandler)
                         .userInfoEndpoint(userinfo -> userinfo
                                 .userService(customOAuth2UserService))
                         .authorizationEndpoint(endpoint -> endpoint

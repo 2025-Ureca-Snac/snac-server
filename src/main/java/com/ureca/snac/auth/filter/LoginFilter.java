@@ -82,7 +82,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ access);
         response.addCookie(CookieUtil.createCookie("refresh", refresh));
 
-        response.setStatus(HttpStatus.OK.value());
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json; charset=UTF-8");
         ApiResponse<Void> apiResponse = ApiResponse.ok(BaseCode.LOGIN_SUCCESS);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
@@ -94,7 +94,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        ApiResponse<Void> apiResponse = ApiResponse.error(BaseCode.LOGIN_FAILED);
+        ApiResponse<Void> apiResponse = ApiResponse.error(BaseCode.OAUTH_LOGIN_FAILED);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
         response.getWriter().print(responseBody);
         response.getWriter().flush();
