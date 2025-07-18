@@ -58,8 +58,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (existingMember != null) {
             log.info("기존 회원: {}", existingMember.getEmail());
             return new CustomOAuth2User(existingMember);
+        }else {
+            // 예외처리
         }
-        log.info("기존 회원이 아님. 새로 연동");
 
         // 사용자 정보 state 에서 꺼내서 확인
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

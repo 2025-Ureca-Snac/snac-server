@@ -16,6 +16,6 @@ public class KakaoResponse implements OAuth2Response{
 
     @Override
     public String getProviderId() {
-        return attribute.get("sub").toString();
+        return attribute.get("id").toString();
     }
 }
