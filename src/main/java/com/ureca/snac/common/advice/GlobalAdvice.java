@@ -23,7 +23,7 @@ public class GlobalAdvice {
         if (e instanceof ExternalApiException) {
             log.error("외부 API 호출 예외 발생 : {}", e.getMessage(), e);
         } else {
-            log.warn("내부 비즈니스 예외 발생 : {}", e.getMessage());
+            log.warn("내부 비즈니스 예외 발생 : ", e);
         }
 
         return ResponseEntity

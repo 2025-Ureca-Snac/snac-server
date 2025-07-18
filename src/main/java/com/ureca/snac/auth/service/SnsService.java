@@ -7,4 +7,6 @@ public interface SnsService {
     void verifyCode(String phoneNumber, String code);
 
     boolean isPhoneVerified(String phoneNumber);
+
+    void sendSms(String phoneNumber, String message);
 }

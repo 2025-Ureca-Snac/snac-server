@@ -1,6 +1,8 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.auth.service.SnsService;
 import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
@@ -13,6 +15,7 @@ import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -43,7 +46,9 @@ public class BasicTradeServiceImpl implements BasicTradeService {
     private final MemberRepository memberRepository;
     private final CardRepository cardRepository;
     private final WalletRepository walletRepository;
+
     private final AttachmentService attachmentService;
+    private final SnsService snsService;
 
     @Override
     @Transactional
@@ -93,6 +98,9 @@ public class BasicTradeServiceImpl implements BasicTradeService {
 
         trade.changeSeller(seller);
         card.changeSellStatus(TRADING);
+
+        String message = buildTradeMessage(trade, card);
+//        snsService.sendSms(trade.getSeller().getPhone(), message);
     }
 
     @Override
@@ -117,6 +125,9 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         attachmentService.upload(tradeId, username, picture);
 
         trade.changeStatus(DATA_SENT);
+
+        String message = buildTradeMessage(trade, card);
+//        snsService.sendSms(trade.getBuyer().getPhone(), message);
     }
 
     @Override
@@ -130,6 +141,9 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         trade.confirm(buyer);
         card.changeSellStatus(SOLD_OUT);
         wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
+
+        String message = buildTradeMessage(trade, card);
+//        snsService.sendSms(trade.getSeller().getPhone(), message);
     }
 
     @Override
@@ -197,6 +211,11 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         // 카드 상태 변경 (판매글이면 TRADING, 구매글이면 SELLING)
         card.changeSellStatus(requiredStatus == SELLING ? TRADING : SELLING);
 
+        if (requiredStatus == SELLING) {
+            String message = buildTradeMessage(trade, card);
+//            snsService.sendSms(trade.getSeller().getPhone(), message);
+        }
+
         return trade.getId();
     }
 
@@ -233,5 +252,41 @@ public class BasicTradeServiceImpl implements BasicTradeService {
         if (requiredStatus == PENDING && !isOwner) {
             throw new TradePermissionDeniedException();
         }
+    }
+
+
+    private String buildTradeMessage(Trade trade, Card card) {
+        TradeStatus status = trade.getStatus();
+
+        String statusText;
+        if (status == TradeStatus.PAYMENT_CONFIRMED && card.getCardCategory() == CardCategory.BUY && card.getSellStatus() == TRADING) {
+            statusText = "구매글 거래가 시작되었습니다";
+        } else {
+            switch (status) {
+                case PAYMENT_CONFIRMED:
+                    statusText = "결제가 완료되었습니다";
+                    break;
+                case DATA_SENT:
+                    statusText = "데이터 전송이 완료되었습니다";
+                    break;
+                case COMPLETED:
+                    statusText = "거래가 확정되었습니다";
+                    break;
+                case CANCELED:
+                    statusText = "거래가 취소되었습니다";
+                    break;
+                default:
+                    statusText = "상태가 변경되었습니다";
+            }
+        }
+
+        // 데이터량 GB, 가격 원 단위 포맷
+        int dataGb = trade.getDataAmount();
+        String priceText = String.format("%,d원", trade.getPriceGb());
+
+        return String.format(
+                "[SNAC] 거래 ID %d: %s.\n 데이터 %dGB, 거래 금액 %s.\n",
+                trade.getId(), statusText, dataGb, priceText
+        );
     }
 }

@@ -2,7 +2,11 @@ package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.exception.SmsSendFailedException;
 import com.ureca.snac.auth.exception.VerificationFailedException;
+import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseCode;
+import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.entity.TradeStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -69,6 +73,24 @@ public class SnsServiceImpl implements SnsService {
 
         // 검증 완료 플래그
         redisTemplate.opsForValue().set(VERIFIED_FLAG_PREFIX + phoneNumber, "true", VERIFIED_FLAG_TTL);
+    }
+
+    @Override
+    public void sendSms(String phoneNumber, String message) {
+        String formatPhoneNumber = formatToE164(phoneNumber);
+
+        try {
+            PublishResponse response = snsClient.publish(PublishRequest.builder()
+                    .message(message)
+                    .phoneNumber(formatPhoneNumber)
+                    .build());
+
+            log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
+
+        } catch (Exception e) {
+            log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
+            throw new SmsSendFailedException();
+        }
     }
 
     @Override
