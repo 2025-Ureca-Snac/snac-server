@@ -21,7 +21,7 @@ spring:
             client-secret: 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
             redirect-uri: http://localhost:8080/login/oauth2/code/google
             authorization-grant-type: authorization_code
-            scope:
+            scope: email
 
         provider:
           naver:
