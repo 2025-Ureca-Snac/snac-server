@@ -1,5 +1,6 @@
 package com.ureca.snac.auth.service;
 
+import com.ureca.snac.auth.dto.CustomOAuth2User;
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.auth.dto.response.GoogleResponse;
 import com.ureca.snac.auth.dto.response.KakaoResponse;
@@ -34,39 +35,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        log.info("oAuth2User: {}", oAuth2User);
+        log.info("oAuth2User: {}", oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        OAuth2Response oAuth2Response = null;
-        if (registrationId.equals("naver")) {
+        OAuth2Response oAuth2Response = switch (registrationId) {
+            case "naver" -> new NaverResponse(oAuth2User.getAttributes());
+            case "google" -> new GoogleResponse(oAuth2User.getAttributes());
+            case "kakao" -> new KakaoResponse(oAuth2User.getAttributes());
+            default -> throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
+        };
 
-            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-        } else if (registrationId.equals("google")) {
-
-            oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        } else if (registrationId.equals("kakao")) {
-
-            oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
-        } else {
-            return null;
-        }
-
-        String provider = oAuth2Response.getProvider();
+        String provider   = oAuth2Response.getProvider();
         String providerId = oAuth2Response.getProviderId();
 
-        Optional<Member> existData;
-        if (provider.equals("naver")) {
-            existData = authRepository.findByNaverId(providerId);
-        } else if (provider.equals("google")) {
-            existData = authRepository.findByGoogleId(providerId);
-        } else {
-            existData = authRepository.findByKakaoId(providerId);
-        }
-
-        if (existData.isPresent()) {
-            return new CustomUserDetails(existData.get());
+        Member existingMember = switch (provider) {
+            case "naver" -> authRepository.findByNaverId(providerId);
+            case "google" -> authRepository.findByGoogleId(providerId);
+            default -> authRepository.findByKakaoId(providerId);
+        };
+        if (existingMember != null) {
+            return new CustomOAuth2User(existingMember);
         }
 
         // 사용자 정보 state 에서 꺼내서 확인
@@ -80,6 +69,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         member.updateSocialId(provider, providerId);
         authRepository.save(member);
 
-        return new CustomUserDetails(member);
+        return new CustomOAuth2User(member);
     }
 }
