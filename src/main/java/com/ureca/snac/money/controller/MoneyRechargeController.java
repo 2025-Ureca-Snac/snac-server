@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -36,7 +37,10 @@ public class MoneyRechargeController implements MoneyRechargeSwagger {
 
     @Override
     public RedirectView rechargeSuccess(
-            String paymentKey, String orderId, Long amount, CustomUserDetails userDetails) {
+            @RequestParam String paymentKey,
+            @RequestParam String orderId,
+            @RequestParam Long amount,
+            @UserInfo CustomUserDetails userDetails) {
 
         moneyService.processRechargeSuccess(paymentKey, orderId, amount, userDetails.getUsername());
 
