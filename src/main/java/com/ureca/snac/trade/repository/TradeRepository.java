@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.repository;
 
+import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.entity.TradeStatus;
@@ -8,7 +9,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTradeRepository {
@@ -21,4 +24,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
 
     long countBySellerAndStatusIn(Member seller, Collection<TradeStatus> statuses);
     long countByBuyerAndStatusIn(Member buyer, Collection<TradeStatus> statuses);
+
+    List<Trade> findAllByStatusAndCarrierAndCreatedAtBetween(TradeStatus status, Carrier carrier, LocalDateTime start, LocalDateTime end);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Trade> findLockedByCardId(Long cardId);
 }

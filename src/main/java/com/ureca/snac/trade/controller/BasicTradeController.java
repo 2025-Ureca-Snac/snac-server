@@ -1,6 +1,7 @@
 package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.BasicTradeService;
@@ -52,6 +53,14 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
         basicTradeService.createBuyTrade(createTradeRequest, userDetails.getUsername());
 
         return ResponseEntity.ok(ApiResponse.ok(TRADE_CREATE_SUCCESS));
+    }
+
+    @PostMapping("/buy/accept")
+    public ResponseEntity<ApiResponse<?>> acceptBuyRequest(@RequestBody ClaimBuyRequest claimBuyRequest,
+                                                            @AuthenticationPrincipal UserDetails userDetails) {
+        basicTradeService.acceptBuyRequest(claimBuyRequest, userDetails.getUsername());
+        return ResponseEntity
+                .ok(ApiResponse.ok(TRADE_ACCEPT_SUCCESS));
     }
 
     @PatchMapping("/{tradeId}/cancel")

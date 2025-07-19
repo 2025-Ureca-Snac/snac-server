@@ -135,6 +135,7 @@ public enum BaseCode {
     TRADE_CONFIRM_SUCCESS("TRADE_CONFIRM_SUCCESS_200", HttpStatus.OK, "거래 확정에 성공하였습니다."),
     TRADE_SCROLL_SUCCESS("TRADE_SCROLL_SUCCESS_200", HttpStatus.OK, "거래 내역 조회에 성공하였습니다."),
     TRADE_PROGRESS_COUNT_SUCCESS("TRADE_PROGRESS_COUNT_SUCCESS_200", HttpStatus.OK, "진행 중인 거래 건수를 성공적으로 조회했습니다."),
+    TRADE_STATISTICS_READ_SUCCESS("STATISTICS_READ_SUCCESS_200", HttpStatus.OK, "거래 통계 데이터를 성공적으로 조회했습니다."),
 
     // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),
@@ -149,6 +150,8 @@ public enum BaseCode {
     TRADE_INVALID_STATUS("TRADE_INVALID_STATUS_400", HttpStatus.BAD_REQUEST, "잘못된 거래 상태입니다."),
     TRADE_SEND_PERMISSION_DENIED("TRADE_SEND_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "판매자만 거래 데이터를 전송할 수 있습니다."),
     TRADE_CONFIRM_PERMISSION_DENIED("TRADE_CONFIRM_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "구매자만 거래를 완료할 수 있습니다."),
+    TRADE_STATISTICS_NOT_FOUND("STATISTICS_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 통신사의 통계 데이터가 존재하지 않습니다."),
+
 
     // 계좌 - 성공
     ACCOUNT_CREATE_SUCCESS("ACCOUNT_CREATE_SUCCESS_201", HttpStatus.CREATED, "계좌가 성공적으로 생성되었습니다."),

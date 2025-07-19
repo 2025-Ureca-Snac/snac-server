@@ -4,6 +4,7 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.swagger.annotation.error.*;
 import com.ureca.snac.swagger.annotation.response.ApiCreatedResponse;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
+import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -93,4 +94,13 @@ public interface BasicTradeControllerSwagger {
                                                                   @RequestParam(defaultValue = "10") int size,
                                                                   @RequestParam(required = false, name = "cursorId") Long cursorId,
                                                                   @AuthenticationPrincipal UserDetails userDetails);
+
+    @Operation(summary = "구매글 거래 수락", description = "판매자가 구매글에 대해 거래를 수락하고, 카드 상태를 TRADING으로 변경합니다.")
+    @ApiSuccessResponse(description = "거래 수락 성공")
+    @ErrorCode400(description = "잘못된 거래 상태로 인해 수락할 수 없습니다.")
+    @ErrorCode401(description = "인증되지 않은 사용자 접근")
+    @ErrorCode404(description = "거래를 찾을 수 없습니다.")
+    @PostMapping("/buy/accept")
+    ResponseEntity<ApiResponse<?>> acceptBuyRequest(@RequestBody ClaimBuyRequest claimBuyRequest,
+                                                    @AuthenticationPrincipal UserDetails userDetails);
 }
