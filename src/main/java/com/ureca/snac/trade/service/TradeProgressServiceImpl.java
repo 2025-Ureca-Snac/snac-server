@@ -40,12 +40,9 @@ public class TradeProgressServiceImpl implements TradeProgressService {
             throw new TradeInvalidStatusException();
         }
 
-        if (trade.getBuyer() == seller)
-            throw new TradeSendPermissionDeniedException();
-
-        if (trade.getSeller() != seller) { // 이미 지정된 판매자가 현재 요청자가 아닐 경우 권한 없음
-            throw new TradeSendPermissionDeniedException();
-        }
+        if (trade.getBuyer() == seller || trade.getSeller() != seller) { // 이미 지정된 판매자가 현재 요청자가 아닐 경우 권한 없음
+             throw new TradeSendPermissionDeniedException();
+         }
 
         trade.changeStatus(DATA_SENT);
 
