@@ -8,20 +8,17 @@ import com.ureca.snac.board.entity.QCard;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class CardRepositoryImpl implements CardRepositoryCustom {
 
     private final JPAQueryFactory query;
-
-    public CardRepositoryImpl(EntityManager entityManager) {
-        this.query = new JPAQueryFactory(entityManager);
-    }
 
     @Override
     public List<Card> scroll(CardCategory cardCategory,
