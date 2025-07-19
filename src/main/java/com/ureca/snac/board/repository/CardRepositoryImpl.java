@@ -10,6 +10,8 @@ import com.ureca.snac.board.entity.QCard;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
+import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.member.QMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -59,7 +61,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
             return c.sellStatus.ne(SellStatus.PENDING);
         }
         return switch (sellStatusFilter) {
-            case SELLING  -> c.sellStatus.eq(SellStatus.SELLING);
+            case SELLING -> c.sellStatus.eq(SellStatus.SELLING);
             case SOLD_OUT -> c.sellStatus.eq(SellStatus.SOLD_OUT);
             default -> null;
         };
