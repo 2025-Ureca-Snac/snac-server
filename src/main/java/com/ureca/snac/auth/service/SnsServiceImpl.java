@@ -2,11 +2,7 @@ package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.exception.SmsSendFailedException;
 import com.ureca.snac.auth.exception.VerificationFailedException;
-import com.ureca.snac.board.entity.Card;
-import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.entity.TradeStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,6 +12,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -76,20 +73,23 @@ public class SnsServiceImpl implements SnsService {
     }
 
     @Override
-    public void sendSms(String phoneNumber, String message) {
-        String formatPhoneNumber = formatToE164(phoneNumber);
+    public void sendSms(List<String> phoneNumberList, String message) {
+        for (String phoneNumber : phoneNumberList) {
+            String formatPhoneNumber = formatToE164(phoneNumber);
 
-        try {
-            PublishResponse response = snsClient.publish(PublishRequest.builder()
-                    .message(message)
-                    .phoneNumber(formatPhoneNumber)
-                    .build());
+            try {
+                PublishResponse response = snsClient.publish(PublishRequest.builder()
+                        .message(message)
+                        .phoneNumber(formatPhoneNumber)
+                        .build());
+                log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
 
-            log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
+                Thread.sleep(3000);
 
-        } catch (Exception e) {
-            log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
-            throw new SmsSendFailedException();
+            } catch (Exception e) {
+                log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
+                throw new SmsSendFailedException();
+            }
         }
     }
 

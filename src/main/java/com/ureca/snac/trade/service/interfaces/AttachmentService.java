@@ -1,7 +1,5 @@
-package com.ureca.snac.trade.service;
+package com.ureca.snac.trade.service.interfaces;
 
-import com.ureca.snac.trade.dto.AttachmentRequestDto;
-import com.ureca.snac.trade.dto.AttachmentResponseDto;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface AttachmentService {

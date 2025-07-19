@@ -8,6 +8,8 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardAlreadySoldOutException;
+import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.board.service.response.CardResponse;
@@ -60,7 +62,15 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public void updateCard(String username, Long cardId, UpdateCardRequest updateCardRequest) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Card card = cardRepository.findByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+
+        if (card.getSellStatus() == SellStatus.TRADING) {
+            throw new CardAlreadyTradingException();
+        }
+
+        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
 
         card.update(
                 updateCardRequest.getCardCategory(),
@@ -94,8 +104,22 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public void deleteCard(String username, Long cardId) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Card card = cardRepository.findByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+
+        if (card.getSellStatus() == SellStatus.TRADING) {
+            throw new CardAlreadyTradingException();
+        }
+
+        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
 
         cardRepository.delete(card);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCardByTrade(Long cardId) {
+        cardRepository.deleteById(cardId);
     }
 }
