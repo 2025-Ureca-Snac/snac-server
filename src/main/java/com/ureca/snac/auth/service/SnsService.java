@@ -1,5 +1,7 @@
 package com.ureca.snac.auth.service;
 
+import java.util.List;
+
 public interface SnsService {
 
     void sendVerificationCode(String phoneNumber);
@@ -8,5 +10,5 @@ public interface SnsService {
 
     boolean isPhoneVerified(String phoneNumber);
 
-    void sendSms(String phoneNumber, String message);
+    void sendSms(List<String> phoneNumberList, String message);
 }

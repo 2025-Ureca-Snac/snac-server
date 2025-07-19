@@ -2,16 +2,12 @@ package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.trade.dto.AttachmentRequestDto;
-import com.ureca.snac.trade.dto.AttachmentResponseDto;
-import com.ureca.snac.trade.service.AttachmentService;
+import com.ureca.snac.trade.service.interfaces.AttachmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/trades")

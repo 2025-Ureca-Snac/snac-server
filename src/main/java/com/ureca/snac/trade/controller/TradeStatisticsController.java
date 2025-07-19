@@ -2,7 +2,7 @@ package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.common.ApiResponse;
-import com.ureca.snac.trade.service.TradeStatisticsService;
+import com.ureca.snac.trade.service.interfaces.TradeStatisticsService;
 import com.ureca.snac.trade.service.response.TradeStatisticsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
