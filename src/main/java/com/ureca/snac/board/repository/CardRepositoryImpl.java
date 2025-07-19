@@ -12,20 +12,17 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.member.QMember;
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class CardRepositoryImpl implements CardRepositoryCustom {
 
     private final JPAQueryFactory query;
-
-    public CardRepositoryImpl(EntityManager entityManager) {
-        this.query = new JPAQueryFactory(entityManager);
-    }
 
     @Override
     public List<Card> scroll(CardCategory cardCategory,
@@ -64,7 +61,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
             return c.sellStatus.ne(SellStatus.PENDING);
         }
         return switch (sellStatusFilter) {
-            case SELLING  -> c.sellStatus.eq(SellStatus.SELLING);
+            case SELLING -> c.sellStatus.eq(SellStatus.SELLING);
             case SOLD_OUT -> c.sellStatus.eq(SellStatus.SOLD_OUT);
             default -> null;
         };

@@ -37,22 +37,26 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public void depositMoney(Long memberId, long amount) {
+    public Long depositMoney(Long memberId, long amount) {
         // 락걸린 조회 메소드 사용 동시성 제어일단
         Wallet wallet = walletRepository.findByMemberIdWithLock(memberId)
                 .orElseThrow(WalletNotFoundException::new);
         // 잔액 변경 엔티티에 위임
         wallet.depositMoney(amount);
+
+        return wallet.getMoney();
     }
 
     @Override
     @Transactional
-    public void withdrawMoney(Long memberId, long amount) {
+    public Long withdrawMoney(Long memberId, long amount) {
         // 락걸린 조회 메소드 사용 동시성 제어일단
         Wallet wallet = walletRepository.findByMemberIdWithLock(memberId)
                 .orElseThrow(WalletNotFoundException::new);
         // 잔액 부족도 엔티티가 검증
         wallet.withdrawMoney(amount);
+
+        return wallet.getMoney();
     }
 
     @Override

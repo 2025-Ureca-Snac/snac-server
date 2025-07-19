@@ -8,10 +8,10 @@ public interface WalletService {
     void createWallet(Member member);
 
     // 머니 충전
-    void depositMoney(Long memberId, long amount);
+    Long depositMoney(Long memberId, long amount);
 
     // 머니 출금
-    void withdrawMoney(Long memberId, long amount);
+    Long withdrawMoney(Long memberId, long amount);
 
     // 머니 잔액 조회
     long getMoneyBalance(Long memberId);
