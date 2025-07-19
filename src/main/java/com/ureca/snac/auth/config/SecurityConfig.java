@@ -69,7 +69,7 @@ public class SecurityConfig {
                             "https://develop.df83wi2m9axuw.amplifyapp.com",
                             "https://seungwoo.i234.me"
                     ));
-                    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("*"));
                     cfg.setExposedHeaders(List.of("Authorization"));
                     cfg.setAllowCredentials(true);
