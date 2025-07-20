@@ -36,7 +36,7 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         Member seller = tradeSupport.findMember(username);
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
-        if (trade.getStatus() != PAYMENT_CONFIRMED) {
+        if (trade.getStatus() != PAYMENT_CONFIRMED) { // 결제가 완료되지 않은 상태에서는 판매자가 데이터를 전송할 수 없음
             throw new TradeInvalidStatusException();
         }
 
@@ -57,9 +57,9 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         Wallet wallet = tradeSupport.findLockedWallet(trade.getSeller().getId());
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
-        trade.confirm(buyer);
-        card.changeSellStatus(SOLD_OUT);
-        wallet.depositMoney(trade.getPriceGb() - trade.getPoint());
+        trade.confirm(buyer); // 거래 상태를 확정으로 변경
+        card.changeSellStatus(SOLD_OUT); // 카드 상태를 판매 완료로 변경
+        wallet.depositMoney(trade.getPriceGb()); // 판매 금액을 판매자 지갑에 입금
 
         return trade.getId();
     }
@@ -72,12 +72,12 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         Wallet wallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
-        trade.cancel(member);
+        trade.cancel(member); // 거래 상태를 취소로 변경
 
+        // 구매자에게 금액 환불
         int refundMoney = trade.getPriceGb() - trade.getPoint();
         if (refundMoney > 0) wallet.depositMoney(refundMoney);
-        if (trade.getPoint() > 0) wallet.depositPoint(trade.getPoint());
-
+        if (trade.getPoint() > 0) wallet.depositPoint(trade.getPoint());  // 구매자에게 사용한 포인트 환불
 
         return card.getId();
     }
