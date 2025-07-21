@@ -14,6 +14,7 @@ public class JoinRequest {
     private String password;
     private String name;
     private String phone;
+    private String nickname;
 
     @JsonFormat(pattern = "yyyyMMdd")
     private LocalDate birthDate;

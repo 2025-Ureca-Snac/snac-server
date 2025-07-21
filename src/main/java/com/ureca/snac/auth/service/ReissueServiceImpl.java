@@ -49,7 +49,7 @@ public class ReissueServiceImpl implements ReissueService {
         }
         String role = jwtUtil.getRole(refresh);
 
-        String newAccess = jwtUtil.createJwt("access", username, role, 600000L);
+        String newAccess = jwtUtil.createJwt("access", username, role, 43200000L);
         String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
 
