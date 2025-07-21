@@ -49,7 +49,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         log.debug("socialToken 생성 완료: {}", socialToken);
 
         log.info("리다이렉트 URL 생성 및 토큰 추가");
-        String redirectUrl = UriComponentsBuilder.fromUriString("https://seungwoo.i234.me/certification")
+        String redirectUrl = UriComponentsBuilder.fromUriString("https://snac-app.com/certification")
                 .queryParam("social", socialToken)
                 .build().toUriString();
 
