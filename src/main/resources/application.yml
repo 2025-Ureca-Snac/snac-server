@@ -55,7 +55,8 @@ spring:
 
   # RabbitMQ 설정
   rabbitmq:
-    addresses: ${RABBITMQ_ADDRESSES}
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
 
@@ -87,3 +88,12 @@ aws:
     access-key: ${AWS_ACCESS_KEY_ID}
     secret-key: ${AWS_SECRET_ACCESS_KEY}
     attachment-dir: trade/attachments/
+
+custom:
+  stomp:
+    host: ${STOMP_HOST}
+    port: ${STOMP_PORT}
+    client-login: ${STOMP_CLIENT_LOGIN}
+    client-passcode: ${STOMP_CLIENT_PASS}
+    system-login: ${STOMP_SYSTEM_LOGIN}
+    system-passcode: ${STOMP_SYSTEM_PASS}

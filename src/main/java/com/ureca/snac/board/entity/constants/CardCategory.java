@@ -1,5 +1,5 @@
 package com.ureca.snac.board.entity.constants;
 
 public enum CardCategory {
-    SELL, BUY
+    SELL, BUY, REALTIME_SELL
 }

@@ -1,5 +1,6 @@
 package com.ureca.snac.notification.service;
 
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
@@ -23,6 +24,8 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String EXCHANGE = RabbitMQConfig.NOTIFICATION_EXCHANGE;
     private static final String RK_FMT = "%s.%s";
 
+    private static final String MATCHING_EXCHANGE = RabbitMQConfig.MATCHING_NOTIFICATION_EXCHANGE;
+
     @Transactional
     public void notify(NotificationDTO notificationRequest) {
         Member from = getMember(notificationRequest.getSender());
@@ -41,6 +44,12 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationRequest.getTarget());
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.NOTIFICATION_EXCHANGE, rk, notificationRequest);
+    }
+
+    public void sendMatchingNotification(String username, CardDto cardDto) {
+        System.out.println("매칭알림 MQ 발행: " + username + " " + cardDto);
+        String routingKey = String.format("matching.notification.%s", username);
+        rabbitTemplate.convertAndSend(MATCHING_EXCHANGE, routingKey, cardDto);
     }
 
     private Member getMember(String email) {
