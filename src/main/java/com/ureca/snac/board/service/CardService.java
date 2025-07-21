@@ -1,12 +1,15 @@
 package com.ureca.snac.board.service;
 
 import com.ureca.snac.board.controller.request.CreateCardRequest;
+import com.ureca.snac.board.controller.request.CreateRealTimeCardRequest;
 import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
+import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,5 +57,9 @@ public interface CardService {
     void deleteCard(String username, Long cardId);
 
     void deleteCardByTrade(Long cardId);
+
+    CardDto createRealtimeCard(String username, CreateRealTimeCardRequest request);
+
+    List<CardDto> findRealtimeCardsByFilter(BuyerFilterRequest filter);
 }
 
