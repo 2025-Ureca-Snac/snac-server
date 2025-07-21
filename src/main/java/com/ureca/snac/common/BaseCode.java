@@ -105,8 +105,17 @@ public enum BaseCode {
     // 비밀번호 변경 – 성공
     PASSWORD_CHANGED("PASSWORD_CHANGED_200", HttpStatus.OK, "비밀번호가 변경되었습니다."),
 
+    // 전화번호 변경 – 성공
+    PHONE_CHANGED("PHONE_CHANGED_200", HttpStatus.OK, "전화번호가 변경되었습니다."),
+
+    // 전화번호 동일 확인 – 성공
+    PHONE_EXIST_SUCCESS("PHONE_EXIST_SUCCESS_200", HttpStatus.OK, "전화번호 변경이 가능합니다."),
+
     // 비밀번호 변경 – 예외
     INVALID_CURRENT_PASSWORD("INVALID_CURRENT_PASSWORD_400", HttpStatus.BAD_REQUEST, "현재 비밀번호가 올바르지 않습니다."),
+
+    // 전화번호 변경 – 예외
+    INVALID_CURRENT_PHONE("INVALID_CURRENT_PASSWORD_400", HttpStatus.BAD_REQUEST, "현재 전화번호가 올바르지 않습니다."),
 
     // 카드 - 성공
     CARD_CREATE_SUCCESS("CARD_CREATE_SUCCESS_201", HttpStatus.CREATED, "카드가 성공적으로 등록되었습니다."),

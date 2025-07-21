@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangePhoneRequest {
-    private String currentPhone;
+public class PhoneChangeRequest {
     private String newPhone;
-    private String code;
 }
