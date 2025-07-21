@@ -60,6 +60,7 @@ public class JoinServiceImpl implements JoinService {
                 .email(email)
                 .password(passwordEncoder.encode(joinRequest.getPassword()))
                 .name(joinRequest.getName())
+                .nickname(joinRequest.getNickname())
                 .phone(phone)
                 .birthDate(joinRequest.getBirthDate())
                 .role(USER)

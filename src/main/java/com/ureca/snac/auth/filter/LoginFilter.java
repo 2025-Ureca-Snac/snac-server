@@ -82,7 +82,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ access);
         response.addCookie(CookieUtil.createCookie("refresh", refresh));
 
-        response.setStatus(HttpStatus.OK.value());
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json; charset=UTF-8");
         ApiResponse<Void> apiResponse = ApiResponse.ok(BaseCode.LOGIN_SUCCESS);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
