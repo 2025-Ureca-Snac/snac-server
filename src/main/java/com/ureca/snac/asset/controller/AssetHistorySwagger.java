@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Tag(name = "자산 내역 API", description = "사용자의 자산 변동 내역을 관리")
+@Tag(name = "자산 내역 조회", description = "사용자의 자산 변동 내역을 관리")
 @RequestMapping("/api/asset-histories")
 public interface AssetHistorySwagger {
 

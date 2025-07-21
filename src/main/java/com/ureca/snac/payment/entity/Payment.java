@@ -67,6 +67,18 @@ public class Payment extends BaseTimeEntity {
                 .build();
     }
 
+    public static Payment createFake(Member member, Long amount) {
+        return Payment.builder()
+                .member(member)
+                .orderId("dev_order_" + UUID.randomUUID())
+                .amount(amount)
+                .method("계좌이체")
+                .status(PaymentStatus.SUCCESS)
+                .paymentKey("dev_payment_key_" + System.currentTimeMillis())
+                .paidAt(OffsetDateTime.now())
+                .build();
+    }
+
     // 상태 완료
     public void complete(String paymentKey, String method, OffsetDateTime paidAt) {
         this.paymentKey = paymentKey;

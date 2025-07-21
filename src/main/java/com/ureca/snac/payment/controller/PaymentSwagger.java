@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Tag(name = "결제 API", description = "결제 취소 등 결제 관련")
+@Tag(name = "스낵 머니 충전 취소", description = "토스 페이먼츠 결제 취소 API")
 @RequestMapping("/api/payments")
 public interface PaymentSwagger {
 
