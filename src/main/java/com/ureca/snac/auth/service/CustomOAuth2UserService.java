@@ -57,7 +57,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         };
         if (existingMember != null) {
             log.info("기존 회원: {}", existingMember.getEmail());
-            return new CustomOAuth2User(existingMember);
+            return new CustomOAuth2User(existingMember, registrationId, providerId, oAuth2User.getAttributes());
         }else {
             // 예외처리
         }
@@ -78,6 +78,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         log.info("소셜 ID를 업데이트 및 저장");
 
         log.info("loadUser 메소드 종료");
-        return new CustomOAuth2User(member);
+        return new CustomOAuth2User(member, registrationId, providerId, oAuth2User.getAttributes());
     }
 }
