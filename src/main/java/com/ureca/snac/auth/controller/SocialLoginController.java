@@ -1,7 +1,7 @@
 package com.ureca.snac.auth.controller;
 
 import com.ureca.snac.auth.dto.TokenDto;
-import com.ureca.snac.auth.exception.SocialTokenException;
+import com.ureca.snac.auth.exception.SocialLoginException;
 import com.ureca.snac.auth.service.SocialLoginService;
 import com.ureca.snac.auth.util.CookieUtil;
 import com.ureca.snac.common.ApiResponse;
@@ -40,6 +40,6 @@ public class SocialLoginController implements SocialLoginControllerSwagger {
         if (header != null && header.startsWith("Bearer ")) {
             return header.substring(7);
         }
-        throw new SocialTokenException(BaseCode.SOCIAL_TOKEN_INVALID);
+        throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
     }
 }

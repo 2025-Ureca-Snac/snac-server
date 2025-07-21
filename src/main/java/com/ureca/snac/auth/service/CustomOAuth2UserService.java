@@ -5,15 +5,19 @@ import com.ureca.snac.auth.dto.response.GoogleResponse;
 import com.ureca.snac.auth.dto.response.KakaoResponse;
 import com.ureca.snac.auth.dto.response.NaverResponse;
 import com.ureca.snac.auth.dto.response.OAuth2Response;
+import com.ureca.snac.auth.exception.SocialLoginException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.util.JWTUtil;
+import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,8 +62,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (existingMember != null) {
             log.info("기존 회원: {}", existingMember.getEmail());
             return new CustomOAuth2User(existingMember, registrationId, providerId, oAuth2User.getAttributes());
-        }else {
-            // 예외처리
         }
 
         // 사용자 정보 state 에서 꺼내서 확인
@@ -67,7 +69,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String state = request.getParameter("state");
         log.info("state: {}", state);
 
-        String email = jwtUtil.getUsername(state);
+        String email;
+        try {
+            email = jwtUtil.getUsername(state);
+        } catch (MalformedJwtException e) {
+            log.error("state JWT 디코딩 실패", e);
+
+            OAuth2Error error = new OAuth2Error(
+                    BaseCode.OAUTH_LOGIN_FAILED.getCode(),
+                    BaseCode.OAUTH_LOGIN_FAILED.getMessage(),
+                    null
+            );
+            throw new OAuth2AuthenticationException(error, e);
+        }
         log.info("email from state: {}", email);
         Member member = authRepository.findByEmail(email)
                 .orElseThrow(() -> new OAuth2AuthenticationException("존재하지 않는 회원입니다."));

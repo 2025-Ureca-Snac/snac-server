@@ -1,7 +1,7 @@
 package com.ureca.snac.auth.service;
 
 import com.ureca.snac.auth.dto.TokenDto;
-import com.ureca.snac.auth.exception.SocialTokenException;
+import com.ureca.snac.auth.exception.SocialLoginException;
 import com.ureca.snac.auth.refresh.Refresh;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.repository.RefreshRepository;
@@ -26,21 +26,21 @@ public class SocialLoginServiceImpl implements SocialLoginService {
     public TokenDto socialLogin(String socialToken) {
         if (socialToken == null) {
             // 소셜 토큰이 없는 경우
-            throw new SocialTokenException(BaseCode.SOCIAL_TOKEN_INVALID);
+            throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
         }
 
         try {
             jwtUtil.isExpired(socialToken);
         } catch (ExpiredJwtException e) {
             // 토큰이 만료된 경우
-            throw new SocialTokenException(BaseCode.TOKEN_EXPIRED);
+            throw new SocialLoginException(BaseCode.TOKEN_EXPIRED);
         }
 
         // 토큰 카테고리가 social 인지
         String category = jwtUtil.getCategory(socialToken);
         if (!"social".equals(category)) {
             // 유효하지 않은 토큰인 경우
-            throw new SocialTokenException(BaseCode.SOCIAL_TOKEN_INVALID);
+            throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
         }
 
         String provider = jwtUtil.getProvider(socialToken);
@@ -49,7 +49,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         Member validateMember = validateMember(provider, providerId);
 
         if(!validateMember.getEmail().equals(jwtUtil.getUsername(socialToken))){
-            throw new SocialTokenException(BaseCode.SOCIAL_TOKEN_INVALID);
+            throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
         }
 
         String username = jwtUtil.getUsername(socialToken);
@@ -71,7 +71,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
             member = authRepository.findByNaverId(providerId);
         } else if (Objects.equals(provider, "kakao")) {
             member = authRepository.findByKakaoId(providerId);
-        } else throw new SocialTokenException(BaseCode.SOCIAL_TOKEN_INVALID);
+        } else throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
 
         return member;
     }

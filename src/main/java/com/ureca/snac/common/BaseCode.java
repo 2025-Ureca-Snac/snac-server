@@ -29,7 +29,7 @@ public enum BaseCode {
     OAUTH_LOGIN_SUCCESS("OAUTH_LOGIN_SUCCESS_200", HttpStatus.OK, "소셜 로그인에 성공했습니다."),
 
     // 소셜 로그인 시도 - 실패
-    OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
+    OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
 
     // 로그아웃 시도 - 성공
     LOGOUT_SUCCESS("LOGOUT_SUCCESS_200", HttpStatus.OK, "로그아웃에 성공했습니다."),
