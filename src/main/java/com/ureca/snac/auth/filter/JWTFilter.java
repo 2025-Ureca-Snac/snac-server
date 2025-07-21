@@ -2,6 +2,7 @@ package com.ureca.snac.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.snac.auth.dto.CustomUserDetails;
+import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
@@ -26,6 +27,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper;
     private final JWTUtil jwtUtil;
+    private final AuthRepository authRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -47,20 +49,53 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 토큰이 access 맞는지 확인
         String category = jwtUtil.getCategory(accessToken);
-        if (!category.equals("access")) {
-            sendErrorResponse(response, BaseCode.TOKEN_INVALID);
-            return;
+        Member member;
+        switch (category) {
+            case "access":
+                // 일반 로그인 토큰 처리
+                String username = jwtUtil.getUsername(accessToken);
+                String role     = jwtUtil.getRole(accessToken);
+                member = Member.builder()
+                        .email(username)
+                        .role(Role.valueOf(role))
+                        .build();
+                break;
+
+            case "social":
+                // 소셜 로그인 토큰 처리
+                String usernameBySocial = jwtUtil.getUsername(accessToken);
+                String provider   = jwtUtil.getProvider(accessToken);
+                String providerId = jwtUtil.getProviderId(accessToken);
+
+                Member socialMember;
+                switch (provider) {
+                    case "naver":
+                        socialMember = authRepository.findByNaverId(providerId);
+                        break;
+                    case "google":
+                        socialMember = authRepository.findByGoogleId(providerId);
+                        break;
+                    case "kakao":
+                        socialMember = authRepository.findByKakaoId(providerId);
+                        break;
+                    default:
+                        sendErrorResponse(response, BaseCode.TOKEN_INVALID);
+                        return;
+                }
+
+                if (!socialMember.getEmail().equals(usernameBySocial)) {
+                    sendErrorResponse(response, BaseCode.TOKEN_INVALID);
+                    return;
+                }
+
+                member = socialMember;
+                break;
+
+            default:
+                sendErrorResponse(response, BaseCode.TOKEN_INVALID);
+                return;
         }
-
-        String username = jwtUtil.getUsername(accessToken);
-        String role = jwtUtil.getRole(accessToken);
-
-        Member member = Member.builder()
-                .email(username)
-                .role(Role.valueOf(role))
-                .build();
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());

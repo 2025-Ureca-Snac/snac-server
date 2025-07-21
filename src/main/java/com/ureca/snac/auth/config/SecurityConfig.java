@@ -7,6 +7,7 @@ import com.ureca.snac.auth.filter.LoginFilter;
 import com.ureca.snac.auth.oauth2.CustomAuthorizationRequestResolver;
 import com.ureca.snac.auth.oauth2.CustomOAuth2FailHandler;
 import com.ureca.snac.auth.oauth2.CustomOAuth2SuccessHandler;
+import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.service.CustomOAuth2UserService;
 import com.ureca.snac.auth.util.JWTUtil;
@@ -38,6 +39,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
+    private final AuthRepository authRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customSuccessHandler;
     private final CustomOAuth2FailHandler customFailHandler;
@@ -102,7 +104,7 @@ public class SecurityConfig {
 
 
         http
-                .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), OAuth2AuthorizationRequestRedirectFilter.class);
+                .addFilterBefore(new JWTFilter(objectMapper, jwtUtil, authRepository), OAuth2AuthorizationRequestRedirectFilter.class);
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper, refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
