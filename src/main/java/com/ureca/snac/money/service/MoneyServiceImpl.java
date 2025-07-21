@@ -1,9 +1,7 @@
 package com.ureca.snac.money.service;
 
-import com.ureca.snac.asset.entity.AssetType;
-import com.ureca.snac.asset.entity.TransactionCategory;
-import com.ureca.snac.asset.entity.TransactionType;
 import com.ureca.snac.asset.event.AssetChangedEvent;
+import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.infra.TossPaymentsClient;
 import com.ureca.snac.infra.dto.response.TossConfirmResponse;
@@ -44,6 +42,7 @@ public class MoneyServiceImpl implements MoneyService {
 
     // 이벤트 발행
     private final AssetHistoryEventPublisher assetHistoryEventPublisher;
+    private final AssetChangedEventFactory assetChangedEventFactory;
 
     @Override
     @Transactional
@@ -119,17 +118,13 @@ public class MoneyServiceImpl implements MoneyService {
         log.info("[머니 충전 처리] 최종 완료 회원 ID : {}, 최종잔액 : {}", payment.getMember().getId(), balanceAfter);
 
         // 6단계 이벤트 발행
-        AssetChangedEvent event = AssetChangedEvent.builder()
-                .memberId(member.getId())
-                .assetType(AssetType.MONEY)
-                .transactionType(TransactionType.DEPOSIT)
-                .category(TransactionCategory.RECHARGE)
-                .amount(payment.getAmount())
-                .balanceAfter(balanceAfter)
-                .title("스낵 머니 충전")
-                .sourceDomain("MONEY_RECHARGE")
-                .sourceId(recharge.getId())
-                .build();
+        // 생성 책임을 팩토리 클래스에 위임
+        AssetChangedEvent event = assetChangedEventFactory.createForRecharge(
+                recharge.getMember().getId(),
+                recharge.getId(),
+                recharge.getPaidAmountWon(),
+                balanceAfter
+        );
 
         assetHistoryEventPublisher.publish(event);
         log.info("[이벤트 발행] 자산 내역 기록을 위한 이벤트 발행 성공. 회원 ID : {}", member.getId());
