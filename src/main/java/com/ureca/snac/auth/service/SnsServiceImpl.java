@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 
 @Service

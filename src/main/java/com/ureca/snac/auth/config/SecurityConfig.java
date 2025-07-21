@@ -68,8 +68,10 @@ public class SecurityConfig {
                             "http://127.0.0.1:3000",
                             "https://docs.tosspayments.com",
                             "https://snac-app.com",
+
                             "https://develop.df83wi2m9axuw.amplifyapp.com",
                             "https://seungwoo.i234.me"
+
                     ));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     cfg.setAllowedHeaders(List.of("*"));

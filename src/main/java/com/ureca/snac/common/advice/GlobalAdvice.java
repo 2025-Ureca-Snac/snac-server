@@ -2,7 +2,8 @@ package com.ureca.snac.common.advice;
 
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.common.exception.BusinessException;
+import com.ureca.snac.common.exception.BaseCustomException;
+import com.ureca.snac.common.exception.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,13 +16,19 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalAdvice {
 
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<?>> handleBusinessException(BusinessException e) {
-        log.warn("Exception: ", e);
+    @ExceptionHandler(BaseCustomException.class)
+    public ResponseEntity<ApiResponse<?>> handleBusinessException(BaseCustomException e) {
+        BaseCode baseCode = e.getBaseCode();
+
+        if (e instanceof ExternalApiException) {
+            log.error("외부 API 호출 예외 발생 : {}", e.getMessage(), e);
+        } else {
+            log.warn("내부 비즈니스 예외 발생 : ", e);
+        }
 
         return ResponseEntity
-                .status(e.getBaseCode().getStatus())
-                .body(ApiResponse.error(e.getBaseCode()));
+                .status(baseCode.getStatus())
+                .body(ApiResponse.error(baseCode));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

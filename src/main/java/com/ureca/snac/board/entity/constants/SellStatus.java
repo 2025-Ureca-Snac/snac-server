@@ -1,5 +1,5 @@
 package com.ureca.snac.board.entity.constants;
 
 public enum SellStatus {
-    SELLING, TRADING, SOLD_OUT
+    PENDING, SELLING, TRADING, SOLD_OUT
 }

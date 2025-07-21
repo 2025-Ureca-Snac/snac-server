@@ -16,7 +16,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Entity
 @Table(name = "card",
         indexes = {
-            @Index(name = "idx_card_updated_at_id", columnList = "updated_at, card_id")
+                @Index(name = "idx_card_updated_at_id", columnList = "updated_at, card_id")
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -59,10 +59,26 @@ public class Card extends BaseTimeEntity {
         this.price = price;
     }
 
+    public static Card createFake(Member owner, Carrier carrier, Integer dataAmount,
+                                  Long price, CardCategory category) {
+        return Card.builder()
+                .member(owner)
+                .sellStatus(SellStatus.SOLD_OUT)
+                .cardCategory(category)
+                .carrier(carrier)
+                .dataAmount(dataAmount)
+                .price(price.intValue())
+                .build();
+    }
+
     public void update(CardCategory cardCategory, Carrier carrier, Integer dataAmount, Integer price) {
         this.cardCategory = cardCategory;
         this.carrier = carrier;
         this.dataAmount = dataAmount;
         this.price = price;
+    }
+
+    public void changeSellStatus(SellStatus sellStatus) {
+        this.sellStatus = sellStatus;
     }
 }

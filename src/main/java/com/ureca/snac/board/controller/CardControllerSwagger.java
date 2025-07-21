@@ -3,6 +3,7 @@ package com.ureca.snac.board.controller;
 
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.board.controller.request.CreateCardRequest;
+import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
@@ -55,24 +56,29 @@ public interface CardControllerSwagger {
     @Operation(
             summary = "판매글 또는 구매글 목록 조회 (스크롤)",
             description = """
-        조건에 맞는 판매글(SELL) 또는 구매글(BUY)을 스크롤 방식으로 조회합니다.
-        - `cardCategory`, `priceRanges`는 필수이며, SELL 또는 BUY 중 하나  
-        - `carrier`는 선택적 필터  
-        - 커서 페이징 방식 사용  
-        - 초기 조회 시에는 `lastCardId`, `lastUpdatedAt` 없이 호출 가능  
-        - 이후 추가 조회(더보기) 시에는 두 값 모두 전달해야 합니다.
-        """
+                    조건에 맞는 판매글(SELL) 또는 구매글(BUY)을 스크롤 방식으로 조회합니다.
+                    - `cardCategory`, `priceRanges`는 필수이며, SELL 또는 BUY 중 하나  
+                    - `carrier`는 선택적 필터  
+                    - `highRatingFirst`는 평점 높은 회원 우선 조회 옵션입니다.  
+                      - `true`로 설정 시 평점 높은 순으로 정렬하여 반환  
+                      - `false`(기본)일 경우 최근 수정 순으로 정렬  
+                    - 커서 페이징 방식 사용  
+                    - 초기 조회 시에는 `lastCardId`, `lastUpdatedAt` 없이 호출 가능  
+                    - 이후 추가 조회(더보기) 시에는 두 값 모두 전달해야 합니다.
+                    """
     )
     @ApiSuccessResponse(description = "목록 조회 성공")
     @ErrorCode400(description = "조회 실패 - 잘못된 요청 파라미터")
     @ErrorCode404(description = "조회 실패 - 존재하지 않는 판매글 또는 구매글")
     @GetMapping("/scroll")
     ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@RequestParam CardCategory cardCategory,
-                                                                       @RequestParam(required = false) Carrier carrier,
-                                                                       @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
-                                                                       @RequestParam(defaultValue = "54") int size,
-                                                                       @RequestParam(required = false) Long lastCardId,
-                                                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt);
+                                                                @RequestParam(required = false) Carrier carrier,
+                                                                @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
+                                                                @RequestParam SellStatusFilter sellStatusFilter,
+                                                                @RequestParam(defaultValue = "true") Boolean highRatingFirst,
+                                                                @RequestParam(defaultValue = "54") Integer size,
+                                                                @RequestParam(required = false) Long lastCardId,
+                                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt);
 
     @Operation(
             summary = "판매글 또는 구매글 삭제",

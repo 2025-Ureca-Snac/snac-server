@@ -1,6 +1,7 @@
 package com.ureca.snac.notification.entity;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.entity.Trade;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,18 +27,21 @@ public class Notification {
     @JoinColumn(name = "member_to_id")
     private Member memberTo;
 
+    @ManyToOne
+    @JoinColumn(name = "trade_id")
+    private Trade trade;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private NotificationType type;
 
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead;
+//    @Column(name = "is_read", nullable = false)
+//    private boolean isRead;
 
     @Builder
-    public Notification(Member memberFrom, Member memberTo, NotificationType type, boolean isRead) {
+    public Notification(Member memberFrom, Member memberTo, NotificationType type) {
         this.memberFrom = memberFrom;
         this.memberTo = memberTo;
         this.type = type;
-        this.isRead = isRead;
     }
 }
