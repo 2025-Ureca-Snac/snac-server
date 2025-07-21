@@ -70,13 +70,27 @@ public class Trade extends BaseTimeEntity {
                   Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, String phone, Integer point) {
         this.cardId = cardId;
         this.seller = seller;
-        this.buyer  = buyer;
+        this.buyer = buyer;
         this.carrier = carrier;
         this.priceGb = priceGb;
         this.dataAmount = dataAmount;
         this.status = status;
         this.phone = phone;
         this.point = point;
+    }
+
+    public static Trade createFake(Card card, Member seller, Member buyer) {
+        return Trade.builder()
+                .cardId(card.getId())
+                .seller(seller)
+                .buyer(buyer)
+                .carrier(card.getCarrier())
+                .priceGb(card.getPrice())
+                .dataAmount(card.getDataAmount())
+                .status(COMPLETED)
+                .phone("01011111111")
+                .point(0)
+                .build();
     }
 
     // 거래 상태 변경

@@ -83,4 +83,9 @@ public class AssetHistoryServiceImpl implements AssetHistoryService {
                 assetHistoryRepository.findWithFilters(member.getId(), request);
         return AssetHistoryListResponse.of(histories, request.size());
     }
+
+//    private Member findMemberByEmail(String email) {
+//        return memberRepository.findByEmail(email)
+//                .orElseThrow(MemberNotFoundException::new);
+//    }
 }

@@ -12,10 +12,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TransactionCategory {
     RECHARGE("충전"),
-    BUY("구매"),
+    BUY("머니 구매"),
     SELL("판매"),
     CANCEL("취소"),
-    EVENT("적립");
+    EVENT("적립"),
+    POINT_USAGE("포인트 사용");
 
     private final String displayName;
 
@@ -27,7 +28,7 @@ public enum TransactionCategory {
     public boolean isValidFor(AssetType assetType) {
         return switch (assetType) {
             case MONEY -> this == RECHARGE || this == CANCEL || this == BUY || this == SELL;
-            case POINT -> this == EVENT || this == BUY;
+            case POINT -> this == EVENT || this == POINT_USAGE;
         };
     }
 
@@ -38,7 +39,7 @@ public enum TransactionCategory {
     public boolean isConsistentWith(TransactionType transactionType) {
         return switch (transactionType) {
             case DEPOSIT -> this == RECHARGE || this == SELL || this == EVENT;
-            case WITHDRAWAL -> this == BUY || this == CANCEL;
+            case WITHDRAWAL -> this == BUY || this == CANCEL || this == POINT_USAGE;
         };
     }
 }

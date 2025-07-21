@@ -94,4 +94,29 @@ public class WalletServiceImpl implements WalletService {
         // 지갑은 반드시 존재 해야되고 잔액반환
         return wallet.getPoint();
     }
+
+    @Override
+    @Transactional
+    public void withdrawComposite(Long memberId, long moneyAmount, long pointAmount) {
+        if (moneyAmount <= 0 && pointAmount <= 0) {
+            return;
+        }
+        log.info("[복합 출금] 시작 . 회원 ID : {}, 머니 : {}, 포인트 : {}",
+                memberId, moneyAmount, pointAmount);
+        Wallet wallet = walletRepository.findByMemberIdWithLock(memberId)
+                .orElseThrow(WalletNotFoundException::new);
+
+        // 트랜잭션 내에서 실행
+        if (moneyAmount > 0) {
+            wallet.withdrawMoney(moneyAmount);
+        }
+        if (pointAmount > 0) {
+            wallet.withdrawPoint(pointAmount);
+        }
+        log.info("[복합 출금] 완료 . 최종 머니 : {}, 최종 포인트 : {}",
+                wallet.getMoney(), wallet.getPoint());
+    }
 }
+
+
+// 지갑 엔드포인트 만들고 private로 리팩토링 빼고
