@@ -39,3 +39,6 @@ public interface AssetHistoryService {
      */
     AssetHistoryListResponse getAssetHistories(String username, AssetHistoryListRequest request);
 }
+
+// LastestBalance랑 Wallet이랑 고려
+// 그리고 새로운 내부

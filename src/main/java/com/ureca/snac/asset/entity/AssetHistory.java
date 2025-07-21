@@ -63,7 +63,7 @@ public class AssetHistory extends BaseTimeEntity {
     private String title; // 거래대상 제목
 
     @Column(name = "source_domain", nullable = false, length = 20)
-    private String sourceDomain; // CHARGE, TRADE, EVENT
+    private SourceDomain sourceDomain; // CHARGE, TRADE, EVENT
 
     @Column(name = "source_id", nullable = false)
     private Long sourceId;
@@ -79,7 +79,7 @@ public class AssetHistory extends BaseTimeEntity {
             Long amount,
             Long balanceAfter,
             String title,
-            String sourceDomain,
+            SourceDomain sourceDomain,
             Long sourceId) {
 
         validateCreateRequest(member, assetType, transactionType, category,
@@ -102,7 +102,7 @@ public class AssetHistory extends BaseTimeEntity {
     private static void validateCreateRequest(
             Member member, AssetType assetType, TransactionType transactionType,
             TransactionCategory category, Long amount, Long balanceAfter,
-            String title, String sourceDomain, Long sourceId) {
+            String title, SourceDomain sourceDomain, Long sourceId) {
 
         if (member == null) {
             throw new InvalidAssetSourceException();
@@ -116,7 +116,7 @@ public class AssetHistory extends BaseTimeEntity {
         if (title == null || title.isBlank() || title.length() > 50) {
             throw new InvalidAssetTitleException();
         }
-        if (sourceDomain == null || sourceDomain.isBlank() || sourceId == null || sourceId <= 0) {
+        if (sourceDomain == null || sourceId == null || sourceId <= 0) {
             throw new InvalidAssetSourceException();
         }
 

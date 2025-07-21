@@ -1,5 +1,8 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.asset.event.AssetChangedEvent;
+import com.ureca.snac.asset.service.AssetChangedEventFactory;
+import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.CardAlreadyTradingException;
@@ -30,6 +33,10 @@ import static com.ureca.snac.board.entity.constants.SellStatus.*;
 public class TradeInitiationServiceImpl implements TradeInitiationService {
     private final TradeRepository tradeRepository;
     private final TradeSupport tradeSupport;
+
+    // 이벤트 기록 저장
+    private final AssetHistoryEventPublisher assetHistoryEventPublisher;
+    private final AssetChangedEventFactory assetChangedEventFactory;
 
     /**
      * 판매 거래를 생성합니다.
@@ -89,6 +96,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     private Long buildTrade(CreateTradeRequest createTradeRequest, String username, SellStatus requiredStatus) {
         Member member = tradeSupport.findMember(username);
         Wallet wallet = tradeSupport.findLockedWallet(member.getId());
+        //-------- Wallet 엔티티 직접 가져오지말고 WalletService DI 하는게 안나은가?-------
+
         Card card = tradeSupport.findLockedCard(createTradeRequest.getCardId());
 
         // 카드 상태가 판매 중이 아닌데 판매 거래 요청이 들어오면 예외
@@ -104,6 +113,7 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
 
         // 결제 금액 검증 (금액 + 포인트 == 카드 가격)
         int totalPay = createTradeRequest.getMoney() + createTradeRequest.getPoint();
+//        long totalPay = createTradeRequest.getMoney() + createTradeRequest.getPoint();
 
         if (card.getPrice() != totalPay)
             throw new TradePaymentMismatchException();
@@ -111,6 +121,7 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         // 금액 및 포인트 차감
         if (createTradeRequest.getMoney() != 0) {
             wallet.withdrawMoney(createTradeRequest.getMoney());
+            // 예를 들면 walletService.withdrawMoney(createTradeRequest.getMoney());
         }
         if (createTradeRequest.getPoint() != 0) {
             wallet.withdrawPoint(createTradeRequest.getPoint());
@@ -119,6 +130,28 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         // 거래 엔티티 생성 및 저장
         Trade trade = Trade.buildTrade(createTradeRequest.getPoint(), member, member.getPhone(), card, requiredStatus);
         tradeRepository.save(trade);
+        
+        if (createTradeRequest.getMoney() > 0) {
+            long moneyBalanceAfter = wallet.getMoney();
+//            long moneyBalanceAfter = walletService.getMoneyBalance(member.getId());
+            String title = String.format("%s %dGB 머니 사용", card.getCarrier().name(), card.getDataAmount());
+
+            AssetChangedEvent event = assetChangedEventFactory.createForBuyWithMoney(
+                    member.getId(), trade.getId(), title, Long.valueOf(createTradeRequest.getMoney()), moneyBalanceAfter);
+
+            assetHistoryEventPublisher.publish(event);
+        }
+
+        if (createTradeRequest.getPoint() > 0) {
+            long pointBalanceAfter = wallet.getPoint();
+//            long pointBalanceAfter = walletService.getPointBalance(member.getId());
+            String title = String.format("%s %dGB 포인트 사용", card.getCarrier().name(), card.getDataAmount());
+
+            AssetChangedEvent event = assetChangedEventFactory.createForBuyWithPoint(
+                    member.getId(), trade.getId(), title, Long.valueOf(createTradeRequest.getPoint()), pointBalanceAfter);
+
+            assetHistoryEventPublisher.publish(event);
+        }
 
         // 카드 상태 변경 (판매글이면 TRADING, 구매글이면 SELLING)
         card.changeSellStatus(requiredStatus == SELLING ? TRADING : SELLING);

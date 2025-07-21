@@ -1,6 +1,7 @@
 package com.ureca.snac.asset.event;
 
 import com.ureca.snac.asset.entity.AssetType;
+import com.ureca.snac.asset.entity.SourceDomain;
 import com.ureca.snac.asset.entity.TransactionCategory;
 import com.ureca.snac.asset.entity.TransactionType;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public record AssetChangedEvent(
         @NonNull Long amount,
         @NonNull Long balanceAfter,
         @NonNull String title,
-        @NonNull String sourceDomain,
+        @NonNull SourceDomain sourceDomain,
         Long sourceId
 ) {
 }

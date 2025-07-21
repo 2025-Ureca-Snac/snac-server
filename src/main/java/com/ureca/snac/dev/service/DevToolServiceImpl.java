@@ -1,6 +1,7 @@
 package com.ureca.snac.dev.service;
 
 import com.ureca.snac.asset.entity.AssetType;
+import com.ureca.snac.asset.entity.SourceDomain;
 import com.ureca.snac.asset.entity.TransactionCategory;
 import com.ureca.snac.asset.entity.TransactionType;
 import com.ureca.snac.asset.event.AssetChangedEvent;
@@ -42,8 +43,17 @@ public class DevToolServiceImpl implements DevToolService {
 
         Long balanceAfter = walletService.depositMoney(ctx.member().getId(), request.amount());
 
-        publishEvent(ctx.member().getId(), AssetType.MONEY, TransactionType.DEPOSIT, TransactionCategory.RECHARGE,
-                request.amount(), balanceAfter, "개발용 강제 충전", "DEV_RECHARGE", ctx.recharge().getId());
+        publishEvent(
+                ctx.member().getId(),
+                AssetType.MONEY,
+                TransactionType.DEPOSIT,
+                TransactionCategory.RECHARGE,
+                request.amount(),
+                balanceAfter,
+                "개발용 강제 충전",
+                SourceDomain.MONEY_RECHARGE,
+                ctx.recharge().getId()
+        );
 
         log.info("[개발용 머니 충전] 완료. 생성된 Payment Id : {}", ctx.payment().getId());
         return ctx.payment().getId();
@@ -60,8 +70,18 @@ public class DevToolServiceImpl implements DevToolService {
         walletService.depositPoint(member.getId(), request.amount());
         long balanceAfter = walletService.getPointBalance(member.getId());
 
-        publishEvent(member.getId(), AssetType.POINT, TransactionType.DEPOSIT, TransactionCategory.EVENT,
-                request.amount(), balanceAfter, request.reason(), "DEV_POINT_GRNAT", member.getId());
+        publishEvent(
+                member.getId(),
+                AssetType.POINT,
+                TransactionType.DEPOSIT,
+                TransactionCategory.EVENT,
+                request.amount(),
+                balanceAfter,
+                request.reason(),
+                SourceDomain.EVENT,
+                member.getId()
+        );
+
         log.info("[개발용 포인트 지급] 완료.");
     }
 
@@ -87,9 +107,9 @@ public class DevToolServiceImpl implements DevToolService {
                 payment.getAmount()
                 , balanceAfter
                 , "개발용 강제 충전 취소",
-                "DEV_RECHARGE_CANCEL",
-                payment.getId())
-        ;
+                SourceDomain.PAYMENT,
+                payment.getId()
+        );
 
         log.info("[개발용 충전 취소] 완료.");
     }
@@ -115,6 +135,7 @@ public class DevToolServiceImpl implements DevToolService {
         publishTradeEvents(ctx, request.moneyAmountToUse(), request.pointAmountToUse(), sellerMoneyBalanceAfter);
 
         log.info("[개발용 거래 완료] 완료. 생성된 Trade ID : {}", ctx.trade().getId());
+
         return ctx.trade().getId();
     }
 
@@ -128,19 +149,19 @@ public class DevToolServiceImpl implements DevToolService {
 
         if (moneyUsed > 0) {
             publishEvent(ctx.buyer().getId(), AssetType.MONEY, TransactionType.WITHDRAWAL, TransactionCategory.BUY, moneyUsed,
-                    buyerMoneyBalance, generateTitle + " 머니 사용 ", "DEV_TRADE", ctx.trade().getId());
+                    buyerMoneyBalance, generateTitle + " 머니 사용 ", SourceDomain.TRADE, ctx.trade().getId());
             publishEvent(ctx.seller().getId(), AssetType.MONEY, TransactionType.DEPOSIT, TransactionCategory.SELL, moneyUsed,
-                    sellerMoneyBalance, generateTitle + " 판매 대금 ", "DEV_TRADE", ctx.trade().getId());
+                    sellerMoneyBalance, generateTitle + " 판매 대금 ", SourceDomain.TRADE, ctx.trade().getId());
         }
         if (pointUsed > 0) {
             publishEvent(ctx.buyer().getId(), AssetType.POINT, TransactionType.WITHDRAWAL, TransactionCategory.POINT_USAGE, pointUsed,
-                    buyerPointBalance, generateTitle + " 포인트 사용 ", "DEV_TRADE", ctx.trade().getId());
+                    buyerPointBalance, generateTitle + " 포인트 사용 ", SourceDomain.TRADE, ctx.trade().getId());
         }
     }
 
     private void publishEvent(Long memberId, AssetType assetType, TransactionType transactionType,
                               TransactionCategory category, Long amount, Long balanceAfter,
-                              String title, String domain, Long sourceId) {
+                              String title, SourceDomain domain, Long sourceId) {
         eventPublisher.publish(AssetChangedEvent.builder()
                 .memberId(memberId)
                 .assetType(assetType)
