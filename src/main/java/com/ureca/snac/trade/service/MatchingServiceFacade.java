@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 
+import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
+import static com.ureca.snac.common.RedisKeyConstants.CONNECTED_USERS;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -29,6 +32,11 @@ public class MatchingServiceFacade {
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
+
+    public long getConnectedUserCount() {
+        Long count = redisTemplate.opsForSet().size(CONNECTED_USERS);
+        return count == null ? 0L : count;
+    }
 
     public void registerBuyerFilterAndNotify(String username, BuyerFilterRequest buyerFilterRequest) {
         buyFilterService.saveBuyerFilter(username, buyerFilterRequest);
@@ -45,7 +53,7 @@ public class MatchingServiceFacade {
         CardDto realtimeCard = cardService.createRealtimeCard(username, request);
 
         //  Redis에서 전체 구매자 필터 key 조회 (예: buyer_filter:{username})
-        Set<String> keys = redisTemplate.keys("buyer_filter:*");
+        Set<String> keys = redisTemplate.keys(BUYER_FILTER_PREFIX + "*");
         if (keys.isEmpty()) return;
 
         for (String key : keys) {
@@ -58,7 +66,7 @@ public class MatchingServiceFacade {
                 // 조건 매칭 (carrier, dataAmount, priceRange 등)
                 if (isMatching(realtimeCard, filter)) {
                     // username 추출 (key: buyer_filter:{username})
-                    String buyerUsername = key.substring("buyer_filter:".length());
+                    String buyerUsername = key.substring(BUYER_FILTER_PREFIX.length());
                     notificationService.sendMatchingNotification(buyerUsername, realtimeCard);
                 }
             } catch (Exception e) {
