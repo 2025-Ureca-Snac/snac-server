@@ -1,4 +1,4 @@
-package com.ureca.snac.notification.config;
+package com.ureca.snac.config;
 
 import com.ureca.snac.auth.util.JWTUtil;
 import lombok.RequiredArgsConstructor;

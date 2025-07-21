@@ -1,9 +1,10 @@
 package com.ureca.snac.trade.service;
 
-import com.ureca.snac.auth.service.SnsService;
 import com.ureca.snac.board.service.CardService;
+import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.dto.TradeMessageDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.interfaces.AttachmentService;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
@@ -14,6 +15,7 @@ import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import com.ureca.snac.trade.support.TradeMessageBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,18 +31,18 @@ public class TradeFacade {
     private final TradeQueryService tradeQueryService;
 
     private final AttachmentService attachmentService;
-    private final SnsService snsService;
     private final CardService cardService;
 
     private final TradeMessageBuilder tradeMessageBuilder;
+    private final RabbitTemplate rabbitTemplate;
 
     // === TradeInitiationService === //
     @Transactional
     public Long createSellTrade(CreateTradeRequest createTradeRequest, String username) {
         Long savedTradeId = tradeInitiationService.createSellTrade(createTradeRequest, username);
 
-//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(savedTradeId);
-//        snsService.sendSms(tradeMessageDto.getPhoneList(), tradeMessageDto.getMessage());
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(savedTradeId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
 
         return savedTradeId;
     }
@@ -49,9 +51,6 @@ public class TradeFacade {
     public Long createBuyTrade(CreateTradeRequest createTradeRequest, String username) {
         Long tradeId = tradeInitiationService.createBuyTrade(createTradeRequest, username);
 
-//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
-//        snsService.sendSms(tradeMessageDto.getPhoneList(), tradeMessageDto.getMessage());
-
         return tradeId;
     }
 
@@ -59,8 +58,8 @@ public class TradeFacade {
     public void acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
         Long tradeId = tradeInitiationService.acceptBuyRequest(claimBuyRequest, username);
 
-//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
-//        snsService.sendSms(tradeMessageDto.getPhoneList(), tradeMessageDto.getMessage());
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
     }
 
     // === TradeProgressService === //
@@ -71,23 +70,23 @@ public class TradeFacade {
         // 파일 업로드
         attachmentService.upload(tradeId, username, picture);
 
-//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(sendTradeId);
-//        snsService.sendSms(tradeMessageDto.getPhoneList(), tradeMessageDto.getMessage());
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(sendTradeId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
     }
 
     @Transactional
     public void confirmTrade(Long tradeId, String username) {
         Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username);
 
-//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confirmTradeId);
-//        snsService.sendSms(tradeMessageDto.getPhoneList(), tradeMessageDto.getMessage());
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confirmTradeId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
     }
 
     @Transactional
     public void cancelTrade(Long tradeId, String username) {
         Long cancelCardId = tradeProgressService.cancelTrade(tradeId, username);
-//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
-//        snsService.sendSms(tradeMessageDto.getPhoneList(), tradeMessageDto.getMessage());
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
 
         cardService.deleteCardByTrade(cancelCardId);
     }

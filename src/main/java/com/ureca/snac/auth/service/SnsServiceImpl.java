@@ -73,27 +73,6 @@ public class SnsServiceImpl implements SnsService {
     }
 
     @Override
-    public void sendSms(List<String> phoneNumberList, String message) {
-        for (String phoneNumber : phoneNumberList) {
-            String formatPhoneNumber = formatToE164(phoneNumber);
-
-            try {
-                PublishResponse response = snsClient.publish(PublishRequest.builder()
-                        .message(message)
-                        .phoneNumber(formatPhoneNumber)
-                        .build());
-                log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
-
-                Thread.sleep(3000);
-
-            } catch (Exception e) {
-                log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
-                throw new SmsSendFailedException();
-            }
-        }
-    }
-
-    @Override
     public boolean isPhoneVerified(String phoneNumber) {
         String flag = redisTemplate.opsForValue().get(VERIFIED_FLAG_PREFIX + phoneNumber);
         return "true".equals(flag);

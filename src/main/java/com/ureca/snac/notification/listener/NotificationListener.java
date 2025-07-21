@@ -1,6 +1,6 @@
 package com.ureca.snac.notification.listener;
 
-import com.ureca.snac.notification.config.RabbitMQConfig;
+import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.notification.dto.NotificationDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
