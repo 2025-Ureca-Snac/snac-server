@@ -3,7 +3,7 @@ package com.ureca.snac.notification.service;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
-import com.ureca.snac.notification.config.RabbitMQConfig;
+import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.notification.dto.NotificationDTO;
 import com.ureca.snac.notification.entity.Notification;
 import com.ureca.snac.notification.repository.NotificationRepository;
