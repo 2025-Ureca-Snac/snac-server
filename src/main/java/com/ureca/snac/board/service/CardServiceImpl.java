@@ -147,6 +147,16 @@ public class CardServiceImpl implements CardService {
         cardRepository.delete(card);
     }
 
+    @Transactional
+    public List<CardDto> findByMemberUsernameAndSellStatusAndCardCategory(String username, SellStatus sellStatus, CardCategory cardCategory) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+
+        return cardRepository.findLockedByMemberAndSellStatusAndCardCategory(member, sellStatus, cardCategory)
+                .stream()
+                .map(CardDto::from)
+                .toList();
+    }
+
     @Override
     @Transactional
     public void deleteCardByTrade(Long cardId) {

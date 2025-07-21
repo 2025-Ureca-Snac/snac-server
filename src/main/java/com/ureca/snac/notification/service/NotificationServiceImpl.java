@@ -13,6 +13,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.ureca.snac.config.RabbitMQConfig.MATCHING_NOTIFICATION_EXCHANGE;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -24,7 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
     private static final String EXCHANGE = RabbitMQConfig.NOTIFICATION_EXCHANGE;
     private static final String RK_FMT = "%s.%s";
 
-    private static final String MATCHING_EXCHANGE = RabbitMQConfig.MATCHING_NOTIFICATION_EXCHANGE;
+    private static final String MATCHING_EXCHANGE = MATCHING_NOTIFICATION_EXCHANGE;
 
     @Transactional
     public void notify(NotificationDTO notificationRequest) {
@@ -49,7 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendMatchingNotification(String username, CardDto cardDto) {
         System.out.println("매칭알림 MQ 발행: " + username + " " + cardDto);
         String routingKey = String.format("matching.notification.%s", username);
-        rabbitTemplate.convertAndSend(MATCHING_EXCHANGE, routingKey, cardDto);
+        rabbitTemplate.convertAndSend(MATCHING_NOTIFICATION_EXCHANGE, routingKey, cardDto);
     }
 
     private Member getMember(String email) {

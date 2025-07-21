@@ -7,16 +7,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
+
 @Service
 @RequiredArgsConstructor
 public class BuyFilterServiceImpl implements BuyFilterService {
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
-    private static final String PREFIX = "buyer_filter:";
 
     @Override
     public void saveBuyerFilter(String username, BuyerFilterRequest filter) {
-        String key = PREFIX + username;
+        String key = BUYER_FILTER_PREFIX + username;
 
         try {
             redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(filter));

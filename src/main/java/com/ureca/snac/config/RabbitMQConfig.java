@@ -1,6 +1,7 @@
 package com.ureca.snac.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -8,6 +9,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@EnableRabbit
 @Configuration
 public class RabbitMQConfig {
     /* ------------------- Topic : 실시간 서비스 전용 ------------------- */
@@ -58,7 +60,7 @@ public class RabbitMQConfig {
     }
 
 
-        /* ------------------- Direct : SMS 전용 ------------------- */
+    /* ------------------- Direct : SMS 전용 ------------------- */
     public static final String SMS_EXCHANGE     = "sms_exchange";
 
     // 거래·알림 문자
