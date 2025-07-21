@@ -94,7 +94,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setContentType("application/json; charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        ApiResponse<Void> apiResponse = ApiResponse.error(BaseCode.OAUTH_LOGIN_FAILED);
+        ApiResponse<Void> apiResponse = ApiResponse.error(BaseCode.LOGIN_FAILED);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
         response.getWriter().print(responseBody);
         response.getWriter().flush();

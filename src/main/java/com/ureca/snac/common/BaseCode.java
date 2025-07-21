@@ -26,7 +26,7 @@ public enum BaseCode {
 
 
     // 소셜 로그인 시도 - 성공
-    OAUTH_LOGIN_SUCCESS("OAUTH_LOGIN_SUCCESS_200", HttpStatus.OK, "로그인에 성공했습니다."),
+    OAUTH_LOGIN_SUCCESS("OAUTH_LOGIN_SUCCESS_200", HttpStatus.OK, "소셜 로그인에 성공했습니다."),
 
     // 소셜 로그인 시도 - 실패
     OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
@@ -37,7 +37,9 @@ public enum BaseCode {
 
     // 인증,인가
     TOKEN_EXPIRED("TOKEN_EXPIRED_401", HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
+    SOCIAL_TOKEN_EXPIRED("SOCIAL_TOKEN_EXPIRED_401", HttpStatus.UNAUTHORIZED, "소셜 토큰이 만료되었습니다."),
     TOKEN_INVALID("TOKEN_INVALID_401", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    SOCIAL_TOKEN_INVALID("SOCIAL_TOKEN_INVALID_401", HttpStatus.UNAUTHORIZED, "유효하지 않은 소셜 토큰입니다."),
     TOKEN_SUCCESS("TOKEN_SUCCESS_200", HttpStatus.OK, "토큰이 성공적으로 발급되었습니다."),
     REISSUE_SUCCESS("REISSUE_SUCCESS_200", HttpStatus.OK, "액세스 토큰이 재발급되었습니다."),
     REFRESH_TOKEN_NULL("REFRESH_TOKEN_NULL_400", HttpStatus.BAD_REQUEST, "refresh 토큰이 없습니다."),

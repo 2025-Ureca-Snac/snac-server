@@ -104,7 +104,7 @@ public class SecurityConfig {
 
 
         http
-                .addFilterBefore(new JWTFilter(objectMapper, jwtUtil, authRepository), OAuth2AuthorizationRequestRedirectFilter.class);
+                .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), OAuth2AuthorizationRequestRedirectFilter.class);
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper, refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
