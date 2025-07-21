@@ -106,6 +106,16 @@ public enum BaseCode {
     INVALID_AMOUNT("INVALID_AMOUNT_400", HttpStatus.BAD_REQUEST, "금액은 0보다 커야합니다"),
     INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE_400", HttpStatus.BAD_REQUEST, "잔액이 부족합니다."),
 
+    // 단골 - 성공
+    FAVORITE_CREATE_SUCCESS("FAVORITE_CREATE_SUCCESS_201", HttpStatus.CREATED, "단골 등록에 성공했습니다."),
+    FAVORITE_LIST_SUCCESS("FAVORITE_LIST_SUCCESS_200", HttpStatus.OK, "단골 목록 조회에 성공했습니다."),
+    FAVORITE_DELETE_SUCCESS("FAVORITE_DELETE_SUCCESS_200", HttpStatus.OK, "단골 삭제에 성공했습니다."),
+
+    // 단골 - 예외
+    CANNOT_FAVORITE_SELF("CANNOT_FAVORITE_SELF_400", HttpStatus.BAD_REQUEST, "자기 자신을 단골로 등록할 수 없습니다."),
+    ALREADY_FAVORITE_MEMBER("ALREADY_FAVORITE_MEMBER_409", HttpStatus.CONFLICT, "이미 단골로 등록된 사용자 입니다."),
+    FAVORITE_RELATION_NOT_FOUND("FAVORITE_RELATION_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 단골 관계를 찾을 수 없슨니다"),
+
     // 거래 내역 - 성공
     ASSET_HISTORY_SUCCESS("ASSET_HISTORY_SUCCESS_200", HttpStatus.OK, "자산 내역 조회 성공했습니다"),
     // 거래 내역 - 예외
