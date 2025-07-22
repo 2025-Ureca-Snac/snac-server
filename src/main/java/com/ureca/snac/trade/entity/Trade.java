@@ -102,6 +102,10 @@ public class Trade extends BaseTimeEntity {
         this.seller = member;
     }
 
+    public void changePoint(int point) {
+        this.point = point;
+    }
+
     // === 팩토리 메서드 ===
     public static Trade buildTrade(int point, Member member, String phone, Card card, SellStatus requiredStatus) {
         return Trade.builder().cardId(card.getId())
@@ -113,6 +117,19 @@ public class Trade extends BaseTimeEntity {
                 .status(PAYMENT_CONFIRMED)
                 .phone(phone)
                 .point(point)
+                .build();
+    }
+
+    public static Trade buildTrade(Member member, String phone, Card card) {
+        return Trade.builder().cardId(card.getId())
+                .seller(card.getMember())
+                .buyer(member)
+                .carrier(card.getCarrier())
+                .priceGb(card.getPrice())
+                .dataAmount(card.getDataAmount())
+                .status(BUY_REQUESTED)
+                .phone(phone)
+                .point(0)
                 .build();
     }
 
@@ -144,7 +161,8 @@ public class Trade extends BaseTimeEntity {
             throw new TradeCancelPermissionDeniedException();
 
         // 취소 요청자에 따라 취소 사유 지정
-        this.cancelReason = isBuyer ? CancelReason.BUYER_REQUEST : CancelReason.SELLER_REQUEST;
+//        this.cancelReason = isBuyer ? (CancelReason.BUYER_CHANGE_MIND) : (CancelReason.SELLER_CHANGE_MIND);
+        // 이 부분 TradeCancel 에서 저장
 
         // 거래 상태를 '취소됨'으로 변경
         this.status = CANCELED;

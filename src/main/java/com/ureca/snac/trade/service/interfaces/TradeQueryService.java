@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.service.interfaces;
 
+import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
@@ -31,4 +32,6 @@ public interface TradeQueryService {
      * @return 진행 중 거래 건수
      */
     ProgressTradeCountResponse countBuyingProgress(String username);
+
+    TradeDto findByTradeId(Long tradeId);
 }

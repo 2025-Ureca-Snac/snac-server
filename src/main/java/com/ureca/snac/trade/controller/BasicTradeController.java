@@ -3,10 +3,12 @@ package com.ureca.snac.trade.controller;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.dto.CancelTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.TradeFacade;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -96,5 +98,27 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
                                                                          @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ApiResponse.of(TRADE_SCROLL_SUCCESS,
                 tradeFacade.scrollTrades(userDetails.getUsername(), side, size, cursorId)));
+    }
+
+    @PatchMapping("/{tradeId}/cancel/request")
+    public ResponseEntity<ApiResponse<?>> requestCancel(@PathVariable Long tradeId,
+                                                        @RequestBody @Valid CancelTradeRequest dto,
+                                                        @AuthenticationPrincipal UserDetails userDetails) {
+        tradeFacade.requestCancel(tradeId, userDetails.getUsername(), dto.getReason());
+        return ResponseEntity.ok(ApiResponse.ok(TRADE_CANCEL_REQUESTED));
+    }
+
+    @PatchMapping("/{tradeId}/cancel/accept")
+    public ResponseEntity<ApiResponse<?>> acceptCancel(@PathVariable Long tradeId,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        tradeFacade.acceptCancel(tradeId, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.ok(TRADE_CANCEL_ACCEPTED));
+    }
+
+    @PatchMapping("/{tradeId}/cancel/reject")
+    public ResponseEntity<ApiResponse<?>> rejectCancel(@PathVariable Long tradeId,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        tradeFacade.rejectCancel(tradeId, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.ok(TRADE_CANCEL_REJECTED));
     }
 }

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -32,6 +33,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
 
+    @Column(name = "nicknameUpdatedAt")
+    private LocalDateTime nicknameUpdatedAt;
+
     @Column(name = "phone", nullable = false, length = 11)
     private String phone;
 
@@ -49,19 +53,26 @@ public class Member extends BaseTimeEntity {
     @Column(name = "activated", nullable = false)
     private Activated activated;
 
+
+    @Column(name = "suspend_until")
+    private LocalDateTime suspendUntil; // 임시 정지 만료일
+  
     private String naverId;
 
     private String googleId;
 
     private String kakaoId;
 
+
     @Builder
-    private Member(String email, String password, String name, String nickname, String phone, LocalDate birthDate,
-                   Integer ratingScore, Role role, Activated activated,String naverId, String googleId, String kakaoId) {
+    private Member(String email, String password, String name, String nickname, LocalDateTime nicknameUpdatedAt, String phone, LocalDate birthDate,
+                   Integer ratingScore, Role role, Activated activated, String naverId, String googleId, String kakaoId) {
+
         this.email = email;
         this.password = password;
         this.name = name;
         this.nickname = nickname;
+        this.nicknameUpdatedAt = nicknameUpdatedAt;
         this.phone = phone;
         this.birthDate = birthDate;
         this.ratingScore = ratingScore;
@@ -85,5 +96,36 @@ public class Member extends BaseTimeEntity {
                 this.kakaoId = providerId;
                 break;
         }
+    }
+
+    public void changePasswordTo(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
+    public void changePhoneTo(String newPhone) {
+        this.phone = newPhone;
+    }
+
+    public void changeNicknameTo(String newNickname) {
+        this.nickname = newNickname;
+        this.nicknameUpdatedAt = LocalDateTime.now();
+    }
+
+    // 임시 정지
+    public void suspendUntil(LocalDateTime until) {
+        this.activated = Activated.TEMP_SUSPEND;
+        this.suspendUntil = until;
+    }
+
+    // 영구 정지
+    public void permanentBan() {
+        this.activated = Activated.PERMANENT_BAN;
+        this.suspendUntil = null;
+    }
+
+    // 정지 해제
+    public void activate() {
+        this.activated = Activated.NORMAL;
+        this.suspendUntil = null;
     }
 }

@@ -55,8 +55,12 @@ public enum BaseCode {
     EMAIL_VERIFICATION_SENT("EMAIL_VERIFICATION_SENT_200", HttpStatus.OK, "Email 인증번호가 발송되었습니다."),
     // 이메일 인증코드 발송- 예외
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Email 인증번호 전송에 실패했습니다."),
-    EMAIL_NOT_VERIFIED("EMAIL_NOT_VERIFIED_401", HttpStatus.UNAUTHORIZED, "Email 검증에 실패했습니다."),
+    // 이메일 휴대폰번호로 조회 - 성공
+    EMAIL_FOUND_BY_PHONE("EMAIL_FOUND_BY_PHONE_200", HttpStatus.OK, "휴대폰 번호로 EMAIL 을 찾았습니다"),
+    // 이메일
+    EMAIL_IS_EXIST("EMAIL_IS_EXIST_200", HttpStatus.OK, "이메일이 있는지 확인하였습니다."),
 
+    EMAIL_NOT_VERIFIED("EMAIL_NOT_VERIFIED_401", HttpStatus.UNAUTHORIZED, "Email 검증에 실패했습니다."),
 
     // 문자 인증코드 인증- 성공
     SMS_CODE_VERIFICATION_SUCCESS("SMS_CODE_VERIFICATION_SUCCESS_200", HttpStatus.OK, "문자 인증에 성공했습니다."),
@@ -74,6 +78,12 @@ public enum BaseCode {
 
     // 휴대폰번호 검증 - 실패
     PHONE_NOT_VERIFIED("PHONE_NOT_VERIFIED_422", HttpStatus.UNPROCESSABLE_ENTITY, "휴대폰 인증이 완료되지 않았습니다."),
+
+    // 닉네임 변경 - 성공
+    NICKNAME_CHANGED("NICKNAME_CHANGED_200", HttpStatus.OK, "닉네임 변경이 성공하였습니다."),
+
+    // 닉네임 변경 시간 검증 - 실패
+    NICKNAME_CHANGE_TOO_EARLY("NICKNAME_CHANGE_TOO_EARLY_400", HttpStatus.BAD_REQUEST, "닉네임은 최근 변경 시점 24시간이 지난 후 수정할 수 있습니다."),
 
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
@@ -136,6 +146,21 @@ public enum BaseCode {
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 
+    // 비밀번호 변경 – 성공
+    PASSWORD_CHANGED("PASSWORD_CHANGED_200", HttpStatus.OK, "비밀번호가 변경되었습니다."),
+
+    // 전화번호 변경 – 성공
+    PHONE_CHANGED("PHONE_CHANGED_200", HttpStatus.OK, "전화번호가 변경되었습니다."),
+
+    // 전화번호 동일 확인 – 성공
+    PHONE_EXIST_SUCCESS("PHONE_EXIST_SUCCESS_200", HttpStatus.OK, "전화번호 변경이 가능합니다."),
+
+    // 비밀번호 변경 – 예외
+    INVALID_CURRENT_PASSWORD("INVALID_CURRENT_PASSWORD_400", HttpStatus.BAD_REQUEST, "현재 비밀번호가 올바르지 않습니다."),
+
+    // 전화번호 변경 – 예외
+    INVALID_CURRENT_PHONE("INVALID_CURRENT_PASSWORD_400", HttpStatus.BAD_REQUEST, "현재 전화번호가 올바르지 않습니다."),
+
     // 카드 - 성공
     CARD_CREATE_SUCCESS("CARD_CREATE_SUCCESS_201", HttpStatus.CREATED, "카드가 성공적으로 등록되었습니다."),
     CARD_READ_SUCCESS("CARD_READ_SUCCESS_200", HttpStatus.OK, "카드 정보를 성공적으로 조회했습니다."),
@@ -175,6 +200,17 @@ public enum BaseCode {
     TRADE_SEND_PERMISSION_DENIED("TRADE_SEND_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "판매자만 거래 데이터를 전송할 수 있습니다."),
     TRADE_CONFIRM_PERMISSION_DENIED("TRADE_CONFIRM_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "구매자만 거래를 완료할 수 있습니다."),
     TRADE_STATISTICS_NOT_FOUND("STATISTICS_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 통신사의 통계 데이터가 존재하지 않습니다."),
+
+    // 취소 플로우
+    TRADE_CANCEL_REQUESTED("TRADE_CANCEL_REQUESTED_200", HttpStatus.OK, "거래 취소 요청이 등록되었습니다."),
+    TRADE_CANCEL_ACCEPTED("TRADE_CANCEL_ACCEPTED_200", HttpStatus.OK, "거래 취소가 승인되었습니다."),
+    TRADE_CANCEL_REJECTED("TRADE_CANCEL_REJECTED_200", HttpStatus.OK, "거래 취소 요청이 거절되었습니다."),
+    TRADE_ALREADY_CANCEL_REQUESTED("TRADE_ALREADY_CANCEL_REQUESTED_409", HttpStatus.CONFLICT, "이미 취소 요청이 있습니다."),
+    TRADE_CANCEL_NOT_FOUND("TRADE_CANCEL_NOT_FOUND_404", HttpStatus.NOT_FOUND, "취소 요청 정보를 찾을 수 없습니다."),
+
+    // 스케줄러 자동 처리
+    AUTO_REFUND_SUCCESS("AUTO_REFUND_SUCCESS_200", HttpStatus.OK, "판매자 지연으로 자동 환불되었습니다."),
+    AUTO_PAYOUT_SUCCESS("AUTO_PAYOUT_SUCCESS_200", HttpStatus.OK, "구매자 미확정으로 자동 정산되었습니다."),
 
 
     // 계좌 - 성공
