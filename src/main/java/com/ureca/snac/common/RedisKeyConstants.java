@@ -8,4 +8,6 @@ public final class RedisKeyConstants {
 
     // 구매자 필터 저장용 키 prefix (“buyer_filter:{username}”)
     public static final String BUYER_FILTER_PREFIX = "buyer_filter:";
+    public static final String WS_DISCONNECT_LOCK_PREFIX  = "lock:ws:disconnect:";
+    public static final String REDISSON_HOST_PREFIX = "redis://";
 }
