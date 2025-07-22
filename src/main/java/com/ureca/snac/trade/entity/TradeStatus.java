@@ -7,5 +7,10 @@ public enum TradeStatus {
     PAYMENT_CONFIRMED, // 입금 확인됨
     DATA_SENT, // 데이터 전송 완료
     COMPLETED, // 거래 완료
-    CANCELED // 거래 취소
+    CANCELED, // 거래 취소
+
+    AUTO_REFUND, // 자동 환불
+    AUTO_PAYOUT // 자동 정산
+
+
 }

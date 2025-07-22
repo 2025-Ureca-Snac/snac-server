@@ -53,12 +53,16 @@ public class Member extends BaseTimeEntity {
     @Column(name = "activated", nullable = false)
     private Activated activated;
 
+
+    @Column(name = "suspend_until")
+    private LocalDateTime suspendUntil; // 임시 정지 만료일
+  
     private String naverId;
 
     private String googleId;
 
-
     private String kakaoId;
+
 
     @Builder
     private Member(String email, String password, String name, String nickname, LocalDateTime nicknameUpdatedAt, String phone, LocalDate birthDate,
@@ -105,5 +109,23 @@ public class Member extends BaseTimeEntity {
     public void changeNicknameTo(String newNickname) {
         this.nickname = newNickname;
         this.nicknameUpdatedAt = LocalDateTime.now();
+    }
+
+    // 임시 정지
+    public void suspendUntil(LocalDateTime until) {
+        this.activated = Activated.TEMP_SUSPEND;
+        this.suspendUntil = until;
+    }
+
+    // 영구 정지
+    public void permanentBan() {
+        this.activated = Activated.PERMANENT_BAN;
+        this.suspendUntil = null;
+    }
+
+    // 정지 해제
+    public void activate() {
+        this.activated = Activated.NORMAL;
+        this.suspendUntil = null;
     }
 }

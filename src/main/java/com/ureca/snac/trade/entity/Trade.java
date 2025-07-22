@@ -161,7 +161,8 @@ public class Trade extends BaseTimeEntity {
             throw new TradeCancelPermissionDeniedException();
 
         // 취소 요청자에 따라 취소 사유 지정
-        this.cancelReason = isBuyer ? CancelReason.BUYER_REQUEST : CancelReason.SELLER_REQUEST;
+//        this.cancelReason = isBuyer ? (CancelReason.BUYER_CHANGE_MIND) : (CancelReason.SELLER_CHANGE_MIND);
+        // 이 부분 TradeCancel 에서 저장
 
         // 거래 상태를 '취소됨'으로 변경
         this.status = CANCELED;

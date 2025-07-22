@@ -61,6 +61,17 @@ public class TradeMessageBuilder {
                     phoneList.add(trade.getBuyer().getPhone());
                     break;
 
+                case AUTO_REFUND:
+                    statusText = "판매자 지연으로 자동 환불되었습니다";
+                    phoneList.add(trade.getSeller().getPhone());
+                    phoneList.add(trade.getBuyer().getPhone());
+                    break;
+                case AUTO_PAYOUT:
+                    statusText = "구매자 미확정으로 자동 정산되었습니다";
+                    phoneList.add(trade.getSeller().getPhone());
+                    phoneList.add(trade.getBuyer().getPhone());
+                    break;
+
                 default:
                     statusText = "상태가 변경되었습니다";
             }
