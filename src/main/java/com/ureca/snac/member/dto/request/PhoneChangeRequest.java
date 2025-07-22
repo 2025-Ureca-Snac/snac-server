@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PhoneChangeRequest {
+    private String pwd;
     private String newPhone;
 }

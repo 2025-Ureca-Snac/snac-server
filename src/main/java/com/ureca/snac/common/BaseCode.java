@@ -67,6 +67,12 @@ public enum BaseCode {
     // 휴대폰번호 검증 - 실패
     PHONE_NOT_VERIFIED("PHONE_NOT_VERIFIED_422", HttpStatus.UNPROCESSABLE_ENTITY, "휴대폰 인증이 완료되지 않았습니다."),
 
+    // 닉네임 변경 - 성공
+    NICKNAME_CHANGED("NICKNAME_CHANGED_200", HttpStatus.OK, "닉네임 변경이 성공하였습니다."),
+
+    // 닉네임 변경 시간 검증 - 실패
+    NICKNAME_CHANGE_TOO_EARLY("NICKNAME_CHANGE_TOO_EARLY_400", HttpStatus.BAD_REQUEST, "닉네임은 최근 변경 시점 24시간이 지난 후 수정할 수 있습니다."),
+
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
     BANK_READ_SUCCESS("BANK_READ_SUCCESS_200", HttpStatus.OK, "은행 정보를 성공적으로 조회했습니다."),

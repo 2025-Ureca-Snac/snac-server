@@ -1,10 +1,6 @@
 package com.ureca.snac.member.service;
 
-import com.ureca.snac.auth.dto.request.VerificationPhoneRequest;
-import com.ureca.snac.member.dto.request.EmailRequest;
-import com.ureca.snac.member.dto.request.PasswordChangeRequest;
-import com.ureca.snac.member.dto.request.PhoneChangeRequest;
-import com.ureca.snac.member.dto.request.PhoneRequest;
+import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.member.dto.response.EmailResponse;
 
 public interface MemberService {
@@ -15,7 +11,9 @@ public interface MemberService {
 
     void changePassword(String email, PasswordChangeRequest request);
 
-    void checkPhone(String email, String currentPhone);
+    void checkPassword(String email, PhoneChangeRequest request);
 
     void changePhone(String email, String changePhone);
+
+    String changeNickname(String email, NicknameChangeRequest changeNickname);
 }

@@ -1,21 +1,22 @@
 package com.ureca.snac.member.service;
 
-import com.ureca.snac.auth.dto.request.VerificationPhoneRequest;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
-import com.ureca.snac.member.dto.request.EmailRequest;
-import com.ureca.snac.member.dto.request.PasswordChangeRequest;
-import com.ureca.snac.member.dto.request.PhoneChangeRequest;
-import com.ureca.snac.member.dto.request.PhoneRequest;
+import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.member.dto.response.EmailResponse;
 import com.ureca.snac.member.exception.InvalidCurrentMemberInfoException;
 import com.ureca.snac.member.exception.MemberNotFoundException;
+import com.ureca.snac.member.exception.NicknameChangeTooEarlyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -46,20 +47,19 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
 
-        if (!passwordEncoder.matches(req.getCurrentPassword(), member.getPassword())) {
+        if (!passwordEncoder.matches(req.getCurrentPwd(), member.getPassword())) {
             throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PASSWORD);
         }
-        member.changePasswordTo(passwordEncoder.encode(req.getNewPassword()));
+        member.changePasswordTo(passwordEncoder.encode(req.getNewPwd()));
     }
-
     @Override
     @Transactional
-    public void checkPhone(String email, String currentPhone) {
+    public void checkPassword(String email, PhoneChangeRequest request) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
-
-        if (!member.getPhone().equals(currentPhone)) {
-            throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PHONE);
+        log.info("member.getPhone() : {}", member.getPhone());
+        if (!passwordEncoder.matches(request.getPwd(), member.getPassword())) {
+            throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PASSWORD);
         }
     }
 
@@ -69,4 +69,29 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(MemberNotFoundException::new);
         member.changePhoneTo(changePhone);
     }
+
+    @Override
+    public String changeNickname(String email, NicknameChangeRequest nicknameChangeRequest) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
+        if (ChronoUnit.HOURS.between(member.getNicknameUpdatedAt(), LocalDateTime.now()) < 24) {
+            throw new NicknameChangeTooEarlyException();
+        }
+        member.changeNicknameTo(nicknameChangeRequest.getNickname());
+        LocalDateTime nicknameUpdatedAt = member.getNicknameUpdatedAt();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return nicknameUpdatedAt.format(formatter);
+    }
+
+
+    /*    @Override
+    @Transactional
+    public void checkPhone(String email, String pwd) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
+
+        if (!member.getPhone().equals(pwd)) {
+            throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PHONE);
+        }
+    }*/
 }
