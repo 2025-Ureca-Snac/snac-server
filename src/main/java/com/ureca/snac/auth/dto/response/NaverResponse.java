@@ -1,7 +1,5 @@
 package com.ureca.snac.auth.dto.response;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Map;
 
 public class NaverResponse implements OAuth2Response{
