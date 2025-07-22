@@ -116,6 +116,19 @@ public class Trade extends BaseTimeEntity {
                 .build();
     }
 
+    public static Trade buildTrade(Member member, String phone, Card card) {
+        return Trade.builder().cardId(card.getId())
+                .seller(card.getMember())
+                .buyer(member)
+                .carrier(card.getCarrier())
+                .priceGb(card.getPrice())
+                .dataAmount(card.getDataAmount())
+                .status(BUY_REQUESTED)
+                .phone(phone)
+                .point(0)
+                .build();
+    }
+
     public void confirm(Member buyer) {
         // 거래 상태가 데이터 전송 완료 상태가 아니면 확정할 수 없음
         if (this.status != DATA_SENT)

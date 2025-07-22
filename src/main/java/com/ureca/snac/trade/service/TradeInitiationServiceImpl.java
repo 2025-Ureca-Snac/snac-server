@@ -9,6 +9,7 @@ import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
+import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
@@ -37,6 +38,32 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     // 이벤트 기록 저장
     private final AssetHistoryEventPublisher assetHistoryEventPublisher;
     private final AssetChangedEventFactory assetChangedEventFactory;
+
+    @Override
+    @Transactional
+    public Long createRealTimeTrade(CreateRealTimeTradeRequest request, String username) {
+        Member member = tradeSupport.findMember(username);
+        Card card = tradeSupport.findLockedCard(request.getCardId());
+
+        // 카드 상태가 판매 중이 아닌데 판매 거래 요청이 들어오면 예외
+        if (card.getSellStatus() != SELLING) {
+            throw new CardAlreadyTradingException();
+        }
+
+        boolean isOwner = card.getMember().equals(member);
+        if (isOwner) {
+            throw new TradeSelfRequestException();
+        }
+
+        // 거래 엔티티 생성 및 저장
+        Trade trade = Trade.buildTrade(member, member.getPhone(), card);
+        tradeRepository.save(trade);
+
+        // 카드 상태 변경 (Trading)
+        card.changeSellStatus(TRADING);
+
+        return trade.getId();
+    }
 
     /**
      * 판매 거래를 생성합니다.

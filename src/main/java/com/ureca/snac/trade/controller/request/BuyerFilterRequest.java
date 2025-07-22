@@ -10,4 +10,5 @@ public class BuyerFilterRequest {
     private Carrier carrier;
     private Integer dataAmount;
     private PriceRange priceRange;
+    private Boolean active = true;
 }
