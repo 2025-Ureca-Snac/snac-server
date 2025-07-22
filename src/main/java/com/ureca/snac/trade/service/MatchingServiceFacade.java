@@ -11,15 +11,13 @@ import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeApproveRequest;
 import com.ureca.snac.trade.dto.TradeDto;
-import com.ureca.snac.trade.service.interfaces.BuyFilterService;
-import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
-import com.ureca.snac.trade.service.interfaces.TradeProgressService;
-import com.ureca.snac.trade.service.interfaces.TradeQueryService;
+import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -39,6 +37,7 @@ public class MatchingServiceFacade {
     private final TradeQueryService tradeQueryService;
     private final TradeProgressService tradeProgressService;
     private final BuyFilterService buyFilterService;
+    private final AttachmentService attachmentService;
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
@@ -110,8 +109,19 @@ public class MatchingServiceFacade {
         Long tradeId = tradeInitiationService.payTrade(request, username);
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
 
-        // 구매자에게 입금 완료 알림 전송
+        // 판매자에게 입금 완료 알림 전송
         notificationService.notify(tradeDto.getSeller(), tradeDto);
+    }
+
+    @Transactional
+    public void sendTradeData(Long tradeId, MultipartFile file, String username) {
+        tradeProgressService.sendTradeData(tradeId, username);
+        attachmentService.upload(tradeId, username, file);
+
+        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+
+        // 구매자에게 확정 요청
+        notificationService.notify(tradeDto.getBuyer(), tradeDto);
     }
 
     // 조건 비교 함수
