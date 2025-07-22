@@ -69,7 +69,7 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PHONE_CHANGED));
     }
 
-    //TODO
+    //TODO (완료, 검증완료료)
     // 닉네임 변경
     @PostMapping("/change-nickname")
     public ResponseEntity<ApiResponse<String>> changeNickname(
