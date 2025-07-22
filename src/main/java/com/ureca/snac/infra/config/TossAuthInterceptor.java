@@ -1,6 +1,5 @@
 package com.ureca.snac.infra.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -11,10 +10,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@RequiredArgsConstructor
 public class TossAuthInterceptor implements ClientHttpRequestInterceptor {
 
-    private final String secretKey;
+    /**
+     * Authorization 헤더값
+     */
+    private final String preCalculatedAuthHeader;
+
+    /**
+     * 생성자로 부터 시크릿 키 받아서 Base64 인코딩하고
+     * 인증 헤더값 한번만 계산 걍 빈 생성 처럼
+     *
+     * @param secretKey 시크릿 키
+     */
+    public TossAuthInterceptor(String secretKey) {
+        byte[] encodedKey = Base64.getEncoder().encode((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+
+        this.preCalculatedAuthHeader = "Basic " + new String(encodedKey);
+    }
 
     @Override
     @NonNull
@@ -23,11 +36,9 @@ public class TossAuthInterceptor implements ClientHttpRequestInterceptor {
             @NonNull byte[] body,
             @NonNull ClientHttpRequestExecution execution)
             throws IOException {
-        byte[] encodedKey = Base64.getEncoder().encode((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
-        String authHeaderValue = "Basic " + new String(encodedKey);
-        request.getHeaders().set("Authorization", authHeaderValue);
-
+        // 미리 계산된 헤더 값
+        request.getHeaders().set("Authorization", this.preCalculatedAuthHeader);
         return execution.execute(request, body);
     }
 }
