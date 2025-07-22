@@ -44,6 +44,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                 .selectFrom(c)
                 .join(c.member, m).fetchJoin()
                 .where(
+                        c.cardCategory.ne(CardCategory.REALTIME_SELL),
                         c.cardCategory.eq(cardCategory),
                         ltCursor(lastCardId, lastUpdatedAt, c),
                         carrierEq(carrier, c),
