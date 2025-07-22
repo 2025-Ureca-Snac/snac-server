@@ -53,11 +53,11 @@ spring:
   jwt:
     secret: ${JWT_SECRET_KEY}
 
-    # RabbitMQ 설정
-    rabbitmq:
-      addresses: ${RABBITMQ_ADDRESSES}
-      username: ${RABBITMQ_USERNAME}
-      password: ${RABBITMQ_PASSWORD}
+  # RabbitMQ 설정
+  rabbitmq:
+    addresses: ${RABBITMQ_ADDRESSES}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
 
 # Swagger UI (springdoc) 설정
 springdoc:
