@@ -1,6 +1,7 @@
 package com.ureca.snac.wallet.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.wallet.dto.WalletSummaryResponse;
 
 public interface WalletService {
 
@@ -17,10 +18,10 @@ public interface WalletService {
     long getMoneyBalance(Long memberId);
 
     // 포인트 입금
-    void depositPoint(Long memberId, long amount);
+    Long depositPoint(Long memberId, long amount);
 
     // 포인트 출금
-    void withdrawPoint(Long memberId, long amount);
+    Long withdrawPoint(Long memberId, long amount);
 
     // 포인트 잔액
     long getPointBalance(Long memberId);
@@ -28,4 +29,7 @@ public interface WalletService {
     // 머니와 포인트를 함께 사용하는 출금
     // 복합 출금을 원자성 고려해서 처리
     void withdrawComposite(Long memberId, long moneyAmount, long pointAmount);
+
+    // 특정 회원의 지갑 요약 정보(머니, 포인트 잔액) 조회
+    WalletSummaryResponse getWalletSummary(String email);
 }
