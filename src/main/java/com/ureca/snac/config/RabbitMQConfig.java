@@ -16,8 +16,8 @@ public class RabbitMQConfig {
 
     /* ------------------- Topic : 실시간 서비스 전용 ------------------- */
     public static final String NOTIFICATION_EXCHANGE = "notification_exchange";
-    public static final String NOTIFICATION_QUEUE    = "notification_queue";
-    public static final String ROUTING_KEY_PATTERN   = "notification.#";
+    public static final String NOTIFICATION_QUEUE = "notification_queue";
+    public static final String ROUTING_KEY_PATTERN = "notification.#";
 
     @Bean
     public TopicExchange notificationExchange() {
@@ -39,8 +39,8 @@ public class RabbitMQConfig {
 
     /* ------------------- Topic : 매칭 전용 ------------------- */
     public static final String MATCHING_NOTIFICATION_EXCHANGE = "matching_notification_exchange";
-    public static final String MATCHING_NOTIFICATION_QUEUE    = "matching_notification_queue";
-    public static final String MATCHING_ROUTING_KEY_PATTERN   = "matching.notification.#";
+    public static final String MATCHING_NOTIFICATION_QUEUE = "matching_notification_queue";
+    public static final String MATCHING_ROUTING_KEY_PATTERN = "matching.notification.#";
 
     @Bean
     public TopicExchange matchingNotificationExchange() {
@@ -64,7 +64,7 @@ public class RabbitMQConfig {
 
     /* ------------------- Fanout : 전체 브로드캐스트용(공지, 이벤트 등) ------------------- */
     public static final String BROADCAST_EXCHANGE = "broadcast_exchange";
-    public static final String BROADCAST_QUEUE    = "broadcast_queue";
+    public static final String BROADCAST_QUEUE = "broadcast_queue";
 
     @Bean
     public FanoutExchange broadcastExchange() {
@@ -86,7 +86,7 @@ public class RabbitMQConfig {
 
     /* ------------------- Fanout : 접속자 수 전용 브로드캐스트 ------------------- */
     public static final String CONNECTED_USERS_EXCHANGE = "connected_users_exchange";
-    public static final String CONNECTED_USERS_QUEUE    = "connected_users_queue";
+    public static final String CONNECTED_USERS_QUEUE = "connected_users_queue";
 
     @Bean
     public FanoutExchange connectedUsersExchange() {
@@ -107,15 +107,15 @@ public class RabbitMQConfig {
 
 
     /* ------------------- Direct : SMS 전용 ------------------- */
-    public static final String SMS_EXCHANGE     = "sms_exchange";
+    public static final String SMS_EXCHANGE = "sms_exchange";
 
     // 거래·알림 문자
-    public static final String SMS_TRADE_QUEUE       = "sms_trade_queue";
+    public static final String SMS_TRADE_QUEUE = "sms_trade_queue";
     public static final String SMS_TRADE_ROUTING_KEY = "sms.trade";
 
     // 인증 문자
-    public static final String SMS_AUTH_QUEUE        = "sms_auth_queue";
-    public static final String SMS_AUTH_ROUTING_KEY  = "sms.auth";
+    public static final String SMS_AUTH_QUEUE = "sms_auth_queue";
+    public static final String SMS_AUTH_ROUTING_KEY = "sms.auth";
 
     @Bean
     public DirectExchange smsExchange() {
@@ -146,6 +146,49 @@ public class RabbitMQConfig {
                 .with(SMS_AUTH_ROUTING_KEY);
     }
 
+    /* ------------------- Direct : 카드 목록 조회용 ------------------- */
+    public static final String CARD_LIST_EXCHANGE = "card_list_exchange";
+    public static final String CARD_LIST_QUEUE = "card_list_queue";
+    public static final String CARD_LIST_ROUTING_KEY = "card.list";
+
+    @Bean
+    public DirectExchange cardListExchange() {
+        return new DirectExchange(CARD_LIST_EXCHANGE);
+    }
+
+    @Bean
+    public Queue cardListQueue() {
+        return new Queue(CARD_LIST_QUEUE, false);
+    }
+
+    @Bean
+    public Binding cardListBinding(DirectExchange cardListExchange, Queue cardListQueue) {
+        return BindingBuilder.bind(cardListQueue)
+                .to(cardListExchange)
+                .with(CARD_LIST_ROUTING_KEY);
+    }
+
+    /* ------------------- Direct : 필터 조회용 ------------------- */
+    public static final String FILTER_EXCHANGE = "filter_exchange";
+    public static final String FILTER_QUEUE = "filter_queue";
+    public static final String FILTER_ROUTING_KEY = "filter.retrieve";
+
+    @Bean
+    public DirectExchange filterExchange() {
+        return new DirectExchange(FILTER_EXCHANGE);
+    }
+
+    @Bean
+    public Queue filterQueue() {
+        return new Queue(FILTER_QUEUE, false);
+    }
+
+    @Bean
+    public Binding filterBinding(DirectExchange filterExchange, Queue filterQueue) {
+        return BindingBuilder.bind(filterQueue)
+                .to(filterExchange)
+                .with(FILTER_ROUTING_KEY);
+    }
 
     /* ------------------- 공통 설정 ------------------- */
     @Bean

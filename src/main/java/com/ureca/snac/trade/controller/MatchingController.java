@@ -66,6 +66,12 @@ public class MatchingController {
         matchingServiceFacade.confirmTrade(request, principal.getName());
     }
 
+    @MessageMapping("/filters")
+    public void sendAllBuyerFilters(Principal principal) {
+        log.info("[매칭] /filters 호출, 사용자: {}", principal.getName());
+        matchingServiceFacade.getBuyerFilters(principal.getName());
+    }
+
     @MessageExceptionHandler(CardAlreadyTradingException.class)
     @SendToUser("/queue/errors")
     public String handleCardAlreadyTradingException(CardAlreadyTradingException ex) {

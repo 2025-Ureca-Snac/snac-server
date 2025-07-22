@@ -7,6 +7,7 @@ import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.notification.service.NotificationService;
 import com.ureca.snac.trade.controller.request.*;
+import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
@@ -52,6 +54,16 @@ public class MatchingServiceFacade {
         for (CardDto cardDto : cardDtoList) {
             notificationService.sendMatchingNotification(username, cardDto);
         }
+    }
+
+
+    public void getBuyerFilters(String username) {
+        Map<String, BuyerFilterRequest> allFilters = buyFilterService.findAllBuyerFilters();
+        RetrieveFilterDto dto = new RetrieveFilterDto(username, allFilters);
+
+        notificationService.sendBuyFilterNotification(dto);
+
+        log.info("[필터 발행] username={} filterCount={}", username, allFilters.size());
     }
 
     @Transactional

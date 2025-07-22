@@ -2,6 +2,7 @@ package com.ureca.snac.notification.listener;
 
 import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.config.RabbitMQConfig;
+import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,15 @@ public class NotificationListener {
     @RabbitListener(queues = RabbitMQConfig.BROADCAST_QUEUE)
     public void onBroadcast(String message) {
         messaging.convertAndSend("/topic/broadcast", message);
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.FILTER_QUEUE)
+    public void onFilter(RetrieveFilterDto dto) {
+        messaging.convertAndSendToUser(
+                dto.getUsername(),
+                "/queue/filters",
+                dto.getBuyerFilter()
+        );
     }
 
     public record WebSocketNotification(
