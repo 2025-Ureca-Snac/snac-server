@@ -1,6 +1,8 @@
 package com.ureca.snac.trade.service.interfaces;
 
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
+import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
+import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 
 public interface TradeInitiationService {
@@ -29,4 +31,10 @@ public interface TradeInitiationService {
      * @param username        거래 신청을 수행하는 판매자 이메일
      */
     Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username);
+
+    Long createRealTimeTrade(CreateRealTimeTradeRequest request, String username);
+
+    Long acceptTrade(Long tradeId, String username);
+
+    Long payTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username);
 }

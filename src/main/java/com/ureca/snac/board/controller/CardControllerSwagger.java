@@ -16,6 +16,8 @@ import com.ureca.snac.swagger.annotation.error.ErrorCode404;
 import com.ureca.snac.swagger.annotation.response.ApiCreatedResponse;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -71,7 +73,9 @@ public interface CardControllerSwagger {
     @ErrorCode400(description = "조회 실패 - 잘못된 요청 파라미터")
     @ErrorCode404(description = "조회 실패 - 존재하지 않는 판매글 또는 구매글")
     @GetMapping("/scroll")
-    ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@RequestParam CardCategory cardCategory,
+    ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@Parameter(
+                                                                        description = "카드 카테고리",
+                                                                        schema = @Schema(type = "string", allowableValues = {"BUY", "SELL"}))@RequestParam CardCategory cardCategory,
                                                                 @RequestParam(required = false) Carrier carrier,
                                                                 @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
                                                                 @RequestParam SellStatusFilter sellStatusFilter,

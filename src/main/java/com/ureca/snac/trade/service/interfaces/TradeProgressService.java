@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.service.interfaces;
 
+
 public interface TradeProgressService {
 
     /**

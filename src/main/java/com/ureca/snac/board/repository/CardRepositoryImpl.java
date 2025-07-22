@@ -1,5 +1,6 @@
 package com.ureca.snac.board.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -12,11 +13,14 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.member.QMember;
+import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.ureca.snac.board.entity.constants.CardCategory.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -40,6 +44,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                 .selectFrom(c)
                 .join(c.member, m).fetchJoin()
                 .where(
+                        c.cardCategory.ne(CardCategory.REALTIME_SELL),
                         c.cardCategory.eq(cardCategory),
                         ltCursor(lastCardId, lastUpdatedAt, c),
                         carrierEq(carrier, c),
@@ -54,6 +59,26 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
         }
 
         return q.limit(size).fetch();
+    }
+
+    @Override
+    public List<Card> findRealtimeCardsByFilter(BuyerFilterRequest filter) {
+        QCard card = QCard.card;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(card.cardCategory.eq(REALTIME_SELL));
+        builder.and(card.carrier.eq(filter.getCarrier()));
+        builder.and(card.dataAmount.eq(filter.getDataAmount()));
+
+        Integer min = filter.getPriceRange().getMin();
+        Integer max = filter.getPriceRange().getMax();
+
+        if (min != null) builder.and(card.price.goe(min));
+        if (max != null) builder.and(card.price.loe(max));
+
+        return query.selectFrom(card)
+                .where(builder)
+                .fetch();
     }
 
     private BooleanExpression sellStatusCond(SellStatusFilter sellStatusFilter, QCard c) {

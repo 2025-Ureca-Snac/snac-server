@@ -1,8 +1,10 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeQueryService;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -59,5 +61,12 @@ public class TradeQueryServiceImpl implements TradeQueryService {
 
         return new ProgressTradeCountResponse(tradeRepository.countByBuyerAndStatusIn(buyer,
                 List.of(DATA_SENT, PAYMENT_CONFIRMED)));
+    }
+
+    @Override
+    public TradeDto findByTradeId(Long tradeId) {
+        return tradeRepository.findById(tradeId)
+                .map(TradeDto::from)
+                .orElseThrow(TradeNotFoundException::new);
     }
 }

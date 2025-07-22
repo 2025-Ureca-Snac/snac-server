@@ -1,6 +1,7 @@
 package com.ureca.snac.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -8,9 +9,10 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@EnableRabbit
 @Configuration
 public class RabbitMQConfig {
-    /* ------------------- Topic : 실시간 매칭 ------------------- */
+    /* ------------------- Topic : 실시간 서비스 전용 ------------------- */
     public static final String NOTIFICATION_EXCHANGE = "notification_exchange";
     public static final String NOTIFICATION_QUEUE    = "notification_queue";
     public static final String ROUTING_KEY_PATTERN   = "notification.#";
@@ -32,6 +34,31 @@ public class RabbitMQConfig {
                 .to(notificationExchange)
                 .with(ROUTING_KEY_PATTERN);
     }
+
+    /* ------------------- Topic : 매칭 전용 ------------------- */
+    public static final String MATCHING_NOTIFICATION_EXCHANGE = "matching_notification_exchange";
+    public static final String MATCHING_NOTIFICATION_QUEUE    = "matching_notification_queue";
+    public static final String MATCHING_ROUTING_KEY_PATTERN   = "matching.notification.#";
+
+    @Bean
+    public TopicExchange matchingNotificationExchange() {
+        return new TopicExchange(MATCHING_NOTIFICATION_EXCHANGE);
+    }
+
+    @Bean
+    public Queue matchingNotificationQueue() {
+        return new Queue(MATCHING_NOTIFICATION_QUEUE, false);
+    }
+
+    @Bean
+    public Binding matchingNotificationBinding(TopicExchange matchingNotificationExchange,
+                                               Queue matchingNotificationQueue) {
+        return BindingBuilder
+                .bind(matchingNotificationQueue)
+                .to(matchingNotificationExchange)
+                .with(MATCHING_ROUTING_KEY_PATTERN);
+    }
+
 
     /* ------------------- Direct : SMS 전용 ------------------- */
     public static final String SMS_EXCHANGE     = "sms_exchange";

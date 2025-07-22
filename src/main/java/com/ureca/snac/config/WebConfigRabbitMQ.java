@@ -26,10 +26,20 @@ import java.util.List;
 public class WebConfigRabbitMQ implements WebSocketMessageBrokerConfigurer {
 
     private final JWTUtil jwtUtil;
+    private final StompRelayProperties stompProps;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/queue", "/topic");
+//        registry.enableSimpleBroker("/queue", "/topic");
+
+        registry.enableStompBrokerRelay("/queue", "/topic")
+                .setRelayHost(stompProps.getHost())
+                .setRelayPort(stompProps.getPort())
+                .setClientLogin(stompProps.getClientLogin())
+                .setClientPasscode(stompProps.getClientPasscode())
+                .setSystemLogin(stompProps.getSystemLogin())
+                .setSystemPasscode(stompProps.getSystemPasscode());
+
         registry.setApplicationDestinationPrefixes("/app");
         registry.setUserDestinationPrefix("/user");
     }
