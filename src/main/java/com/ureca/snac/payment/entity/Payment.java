@@ -107,11 +107,12 @@ public class Payment extends BaseTimeEntity {
     }
 
     // 소유주 검증
-    public boolean validateOwner(Member member) {
-        if (this.member == null || member == null) {
-            return true;
+    public boolean isOwner(Member member) {
+        if (this.member == null || member == null ||
+                this.member.getId() == null || member.getId() == null) {
+            return false;
         }
-        return !this.member.getId().equals(member.getId());
+        return this.member.getId().equals(member.getId());
     }
 
     // 기록 금액 검증
