@@ -2,9 +2,7 @@ package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.board.controller.request.CreateRealTimeCardRequest;
 import com.ureca.snac.board.exception.CardAlreadyTradingException;
-import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
-import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
-import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.controller.request.*;
 import com.ureca.snac.trade.service.MatchingServiceFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -45,6 +43,18 @@ public class MatchingController {
         String username = principal.getName();
 
         matchingServiceFacade.createTradeFromBuyer(request, username);
+    }
+
+    @MessageMapping("/trade/approve")
+    public void approveTrade(@Payload TradeApproveRequest request, Principal principal) {
+        String username = principal.getName();
+        matchingServiceFacade.acceptTrade(request, username);
+    }
+
+    @MessageMapping("/trade/payment")
+    public void payTrade(@Payload CreateRealTimeTradePaymentRequest request, Principal principal) {
+        String username = principal.getName();
+        matchingServiceFacade.payTrade(request, username);
     }
 
     @MessageExceptionHandler(CardAlreadyTradingException.class)

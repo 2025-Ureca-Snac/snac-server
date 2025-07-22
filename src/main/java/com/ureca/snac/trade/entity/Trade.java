@@ -102,6 +102,10 @@ public class Trade extends BaseTimeEntity {
         this.seller = member;
     }
 
+    public void changePoint(int point) {
+        this.point = point;
+    }
+
     // === 팩토리 메서드 ===
     public static Trade buildTrade(int point, Member member, String phone, Card card, SellStatus requiredStatus) {
         return Trade.builder().cardId(card.getId())

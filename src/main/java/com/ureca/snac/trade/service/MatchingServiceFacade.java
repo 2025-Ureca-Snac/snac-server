@@ -7,7 +7,9 @@ import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.notification.service.NotificationService;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
+import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
+import com.ureca.snac.trade.controller.request.TradeApproveRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.service.interfaces.BuyFilterService;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
@@ -87,6 +89,26 @@ public class MatchingServiceFacade {
         TradeDto tradeDto = tradeQueryService.findByTradeId(savedId);
 
         // 판매자에게 알림 전송
+        notificationService.notify(tradeDto.getSeller(), tradeDto);
+    }
+
+    @Transactional
+    public void acceptTrade(TradeApproveRequest tradeApproveRequest, String buyerUsername) {
+        // 1. 거래 승인 로직 (거래 상태 변경)
+        Long tradeId = tradeInitiationService.acceptTrade(tradeApproveRequest.getTradeId(), buyerUsername);
+        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+
+        // 2. 판매자에게 입금 요청 알림 전송
+        notificationService.notify(tradeDto.getBuyer(), tradeDto);
+    }
+
+    @Transactional
+    public void payTrade(CreateRealTimeTradePaymentRequest request, String username) {
+        // 결제 완료 로직
+        Long tradeId = tradeInitiationService.payTrade(request, username);
+        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+
+        // 구매자에게 입금 완료 알림 전송
         notificationService.notify(tradeDto.getSeller(), tradeDto);
     }
 

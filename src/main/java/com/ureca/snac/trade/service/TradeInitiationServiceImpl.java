@@ -9,9 +9,11 @@ import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
+import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradePaymentMismatchException;
 import com.ureca.snac.trade.exception.TradePermissionDeniedException;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.ureca.snac.board.entity.constants.SellStatus.*;
+import static com.ureca.snac.trade.entity.TradeStatus.*;
 
 @Slf4j
 @Service
@@ -41,19 +44,48 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
 
     @Override
     @Transactional
+    public Long acceptTrade(Long tradeId, String username) {
+        Member member = tradeSupport.findMember(username);
+        Trade trade = tradeSupport.findLockedTrade(tradeId);
+
+        trade.changeStatus(ACCEPTED);
+
+        return trade.getId();
+    }
+
+    @Override
+    @Transactional
+    public Long payTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username) {
+        // 1. 거래 조회 (락 걸어서)
+        Trade trade = tradeSupport.findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
+        Member member = tradeSupport.findMember(username);
+
+        Wallet wallet = tradeSupport.findLockedWallet(member.getId());
+
+        int totalPay = createRealTimeTradePaymentRequest.getMoney() + createRealTimeTradePaymentRequest.getPoint();
+
+        if (trade.getPriceGb() != totalPay)
+            throw new TradePaymentMismatchException();
+
+        // 결제
+        if (createRealTimeTradePaymentRequest.getMoney() != 0) {
+            wallet.withdrawMoney(createRealTimeTradePaymentRequest.getMoney());
+        }
+        if (createRealTimeTradePaymentRequest.getPoint() != 0) {
+            wallet.withdrawPoint(createRealTimeTradePaymentRequest.getPoint());
+        }
+
+        trade.changePoint(createRealTimeTradePaymentRequest.getPoint());
+        trade.changeStatus(PAYMENT_CONFIRMED);
+
+        return trade.getId();
+    }
+
+    @Override
+    @Transactional
     public Long createRealTimeTrade(CreateRealTimeTradeRequest request, String username) {
         Member member = tradeSupport.findMember(username);
         Card card = tradeSupport.findLockedCard(request.getCardId());
-
-        // 카드 상태가 판매 중이 아닌데 판매 거래 요청이 들어오면 예외
-        if (card.getSellStatus() != SELLING) {
-            throw new CardAlreadyTradingException();
-        }
-
-        boolean isOwner = card.getMember().equals(member);
-        if (isOwner) {
-            throw new TradeSelfRequestException();
-        }
 
         // 거래 엔티티 생성 및 저장
         Trade trade = Trade.buildTrade(member, member.getPhone(), card);
