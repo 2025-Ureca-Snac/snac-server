@@ -9,11 +9,11 @@ import com.ureca.snac.favorite.service.FavoriteService;
 import com.ureca.snac.swagger.annotation.UserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 import static com.ureca.snac.common.BaseCode.*;
 
@@ -27,20 +27,27 @@ public class FavoriteController implements FavoriteSwagger {
     public ResponseEntity<ApiResponse<Void>> createFavorite(
             @Valid @RequestBody FavoriteCreateRequest request,
             @UserInfo CustomUserDetails userDetails) {
-        Long currentMemberId = userDetails.getMember().getId();
-        favoriteService.createFavorite(currentMemberId, request.toMemberId());
+        String currentUserEmail = userDetails.getUsername();
+        favoriteService.createFavorite(currentUserEmail, request.toMemberId());
 
-        return ResponseEntity.ok(ApiResponse.ok(FAVORITE_CREATE_SUCCESS));
+        return ResponseEntity.status(FAVORITE_CREATE_SUCCESS.getStatus())
+                .body(ApiResponse.ok(FAVORITE_CREATE_SUCCESS));
     }
 
     @Override
     public ResponseEntity<ApiResponse<CursorResult<FavoriteMemberDto>>> getMyFavorites(
-            @RequestParam Long cursorId,
-            @RequestParam int size,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime cursorCreatedAt,
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false, defaultValue = "10")
+            Integer size,
             @UserInfo CustomUserDetails userDetails) {
-        Long currentMemberId = userDetails.getMember().getId();
+
+        String currentUserEmail = userDetails.getUsername();
         CursorResult<FavoriteMemberDto> result =
-                favoriteService.getMyFavorites(currentMemberId, cursorId, size);
+                favoriteService.getMyFavorites(
+                        currentUserEmail, cursorCreatedAt, cursorId, size);
 
         return ResponseEntity.ok(ApiResponse.of(FAVORITE_LIST_SUCCESS, result));
     }
@@ -49,8 +56,8 @@ public class FavoriteController implements FavoriteSwagger {
     public ResponseEntity<ApiResponse<Void>> deleteFavorite(
             @PathVariable Long toMemberId,
             @UserInfo CustomUserDetails userDetails) {
-        Long currentMemberId = userDetails.getMember().getId();
-        favoriteService.deleteFavorite(currentMemberId, toMemberId);
+        String currentUserEmail = userDetails.getUsername();
+        favoriteService.deleteFavorite(currentUserEmail, toMemberId);
 
         return ResponseEntity.ok(ApiResponse.ok(FAVORITE_DELETE_SUCCESS));
     }
