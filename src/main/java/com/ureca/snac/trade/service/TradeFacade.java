@@ -6,10 +6,8 @@ import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.dto.TradeMessageDto;
 import com.ureca.snac.trade.dto.TradeSide;
-import com.ureca.snac.trade.service.interfaces.AttachmentService;
-import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
-import com.ureca.snac.trade.service.interfaces.TradeProgressService;
-import com.ureca.snac.trade.service.interfaces.TradeQueryService;
+import com.ureca.snac.trade.entity.CancelReason;
+import com.ureca.snac.trade.service.interfaces.*;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import com.ureca.snac.trade.support.TradeMessageBuilder;
@@ -35,6 +33,8 @@ public class TradeFacade {
 
     private final TradeMessageBuilder tradeMessageBuilder;
     private final RabbitTemplate rabbitTemplate;
+
+    private final TradeCancelService tradeCancelService;
 
     // === TradeInitiationService === //
     @Transactional
@@ -101,5 +101,23 @@ public class TradeFacade {
 
     public ProgressTradeCountResponse countBuyingProgress(String username) {
         return tradeQueryService.countBuyingProgress(username);
+    }
+
+    // 거래 취소 요청
+    @Transactional
+    public void requestCancel(Long tradeId, String username, CancelReason reason) {
+        tradeCancelService.requestCancel(tradeId, username, reason);
+    }
+
+    // 거래 취소 수락
+    @Transactional
+    public void acceptCancel(Long tradeId, String username) {
+        tradeCancelService.acceptCancel(tradeId, username);
+    }
+
+    // 거래 취소 거절
+    @Transactional
+    public void rejectCancel(Long tradeId, String username) {
+        tradeCancelService.rejectCancel(tradeId, username);
     }
 }
