@@ -57,11 +57,13 @@ public class Member extends BaseTimeEntity {
 
     private String googleId;
 
+
     private String kakaoId;
 
     @Builder
     private Member(String email, String password, String name, String nickname, LocalDateTime nicknameUpdatedAt, String phone, LocalDate birthDate,
                    Integer ratingScore, Role role, Activated activated, String naverId, String googleId, String kakaoId) {
+
         this.email = email;
         this.password = password;
         this.name = name;
@@ -103,6 +105,5 @@ public class Member extends BaseTimeEntity {
     public void changeNicknameTo(String newNickname) {
         this.nickname = newNickname;
         this.nicknameUpdatedAt = LocalDateTime.now();
-
     }
 }

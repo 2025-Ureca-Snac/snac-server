@@ -3,21 +3,18 @@ package com.ureca.snac.trade.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ureca.snac.trade.entity.Trade;
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.ureca.snac.trade.entity.QTrade.*;
+import static com.ureca.snac.trade.entity.QTrade.trade;
 
 @Repository
+@RequiredArgsConstructor
 public class TradeRepositoryImpl implements CustomTradeRepository {
 
     private final JPAQueryFactory query;
-
-    public TradeRepositoryImpl(EntityManager entityManager) {
-        this.query = new JPAQueryFactory(entityManager);
-    }
 
     @Override
     public List<Trade> findTradesByBuyerInfinite(Long buyerId, Long lastTradeId, int limit) {

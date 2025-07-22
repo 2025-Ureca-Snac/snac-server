@@ -70,13 +70,27 @@ public class Trade extends BaseTimeEntity {
                   Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, String phone, Integer point) {
         this.cardId = cardId;
         this.seller = seller;
-        this.buyer  = buyer;
+        this.buyer = buyer;
         this.carrier = carrier;
         this.priceGb = priceGb;
         this.dataAmount = dataAmount;
         this.status = status;
         this.phone = phone;
         this.point = point;
+    }
+
+    public static Trade createFake(Card card, Member seller, Member buyer) {
+        return Trade.builder()
+                .cardId(card.getId())
+                .seller(seller)
+                .buyer(buyer)
+                .carrier(card.getCarrier())
+                .priceGb(card.getPrice())
+                .dataAmount(card.getDataAmount())
+                .status(COMPLETED)
+                .phone("01011111111")
+                .point(0)
+                .build();
     }
 
     // 거래 상태 변경
@@ -86,6 +100,10 @@ public class Trade extends BaseTimeEntity {
 
     public void changeSeller(Member member) {
         this.seller = member;
+    }
+
+    public void changePoint(int point) {
+        this.point = point;
     }
 
     // === 팩토리 메서드 ===
@@ -102,28 +120,50 @@ public class Trade extends BaseTimeEntity {
                 .build();
     }
 
+    public static Trade buildTrade(Member member, String phone, Card card) {
+        return Trade.builder().cardId(card.getId())
+                .seller(card.getMember())
+                .buyer(member)
+                .carrier(card.getCarrier())
+                .priceGb(card.getPrice())
+                .dataAmount(card.getDataAmount())
+                .status(BUY_REQUESTED)
+                .phone(phone)
+                .point(0)
+                .build();
+    }
+
     public void confirm(Member buyer) {
+        // 거래 상태가 데이터 전송 완료 상태가 아니면 확정할 수 없음
         if (this.status != DATA_SENT)
             throw new TradeInvalidStatusException();
 
+        // 요청자가 실제 구매자가 아니면 확정 권한이 없음
         if (this.buyer != buyer) {
             throw new TradeConfirmPermissionDeniedException();
         }
 
+        // 거래 상태를 완료로 변경
         this.status = COMPLETED;
     }
 
     public void cancel(Member requester) {
+        // 데이터 전송 이후, 완료되었거나 이미 취소된 거래는 취소 불가
         if (this.status == DATA_SENT || this.status == COMPLETED || this.status == CANCELED)
             throw new TradeCancelNotAllowedException();
 
+        // 취소 요청자가 구매자 또는 판매자인지 확인
         boolean isBuyer = requester.equals(this.buyer);
         boolean isSeller = requester.equals(this.seller);
 
+        // 거래 당사자가 아니라면 취소 권한 없음
         if (!isBuyer && !isSeller)
             throw new TradeCancelPermissionDeniedException();
 
+        // 취소 요청자에 따라 취소 사유 지정
         this.cancelReason = isBuyer ? CancelReason.BUYER_REQUEST : CancelReason.SELLER_REQUEST;
+
+        // 거래 상태를 '취소됨'으로 변경
         this.status = CANCELED;
     }
 }

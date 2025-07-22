@@ -30,6 +30,14 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
     }
 
+    public String getProvider(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("provider", String.class);
+    }
+
+    public String getProviderId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("providerId", String.class);
+    }
+
     public Boolean isExpired(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
@@ -39,6 +47,19 @@ public class JWTUtil {
                 .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
+                .issuedAt(new Date(System.currentTimeMillis()))//언제 발행 ?
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .signWith(secretKey) // 시그니처를 만들어서 암호화 진행
+                .compact();
+    }
+
+    public String createJwtForSocial(String category, String username, String role, String provider, String providerId, Long expiredMs) {
+        return Jwts.builder()
+                .claim("category", category)
+                .claim("username", username)
+                .claim("role", role)
+                .claim("provider", provider)
+                .claim("providerId", providerId)
                 .issuedAt(new Date(System.currentTimeMillis()))//언제 발행 ?
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey) // 시그니처를 만들어서 암호화 진행

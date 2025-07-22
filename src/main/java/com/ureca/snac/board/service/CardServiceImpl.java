@@ -1,12 +1,17 @@
 package com.ureca.snac.board.service;
 
 import com.ureca.snac.board.controller.request.CreateCardRequest;
+import com.ureca.snac.board.controller.request.CreateRealTimeCardRequest;
+import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardAlreadySoldOutException;
+import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.board.service.response.CardResponse;
@@ -14,6 +19,7 @@ import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
+import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.ureca.snac.board.entity.constants.CardCategory.*;
 
 @Slf4j
 @Service
@@ -43,8 +51,33 @@ public class CardServiceImpl implements CardService {
         return savedCard.getId();
     }
 
+    @Transactional
+    public CardDto createRealtimeCard(String username, CreateRealTimeCardRequest request) {
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(MemberNotFoundException::new);
+
+        Card card = Card.builder()
+                .member(member)
+                .sellStatus(SellStatus.SELLING)
+                .cardCategory(REALTIME_SELL)
+                .carrier(request.getCarrier())
+                .dataAmount(request.getDataAmount())
+                .price(request.getPrice())
+                .build();
+
+        Card savedCard = cardRepository.save(card);
+
+        return CardDto.from(card);
+    }
+
+    public List<CardDto> findRealtimeCardsByFilter(BuyerFilterRequest filter) {
+        return cardRepository.findRealtimeCardsByFilter(filter).stream()
+                .map(CardDto::from)
+                .toList();
+    }
+
     private static Card getBuildCard(CreateCardRequest request, Member member) {
-        SellStatus sellStatus = (request.getCardCategory() == CardCategory.BUY) ? SellStatus.PENDING : SellStatus.SELLING;
+        SellStatus sellStatus = (request.getCardCategory() == BUY) ? SellStatus.PENDING : SellStatus.SELLING;
 
         return Card.builder().member(member)
                 .sellStatus(sellStatus)
@@ -59,7 +92,15 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public void updateCard(String username, Long cardId, UpdateCardRequest updateCardRequest) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Card card = cardRepository.findByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+
+        if (card.getSellStatus() == SellStatus.TRADING) {
+            throw new CardAlreadyTradingException();
+        }
+
+        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
 
         card.update(
                 updateCardRequest.getCardCategory(),
@@ -70,8 +111,11 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, int size, Long lastCardId, LocalDateTime lastUpdatedAt) {
-        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, size + 1, lastCardId, lastUpdatedAt);
+    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
+                                          Integer size, Long lastCardId, LocalDateTime lastUpdatedAt) {
+
+        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, sellStatusFilter, highRatingFirst,
+                size + 1, lastCardId, lastUpdatedAt);
 
         boolean hasNext = raw.size() > size;
 
@@ -90,8 +134,32 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public void deleteCard(String username, Long cardId) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Card card = cardRepository.findByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+
+        if (card.getSellStatus() == SellStatus.TRADING) {
+            throw new CardAlreadyTradingException();
+        }
+
+        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
 
         cardRepository.delete(card);
+    }
+
+    @Transactional
+    public List<CardDto> findByMemberUsernameAndSellStatusAndCardCategory(String username, SellStatus sellStatus, CardCategory cardCategory) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+
+        return cardRepository.findLockedByMemberAndSellStatusAndCardCategory(member, sellStatus, cardCategory)
+                .stream()
+                .map(CardDto::from)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteCardByTrade(Long cardId) {
+        cardRepository.deleteById(cardId);
     }
 }
