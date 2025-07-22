@@ -153,6 +153,17 @@ public enum BaseCode {
     TRADE_CONFIRM_PERMISSION_DENIED("TRADE_CONFIRM_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "구매자만 거래를 완료할 수 있습니다."),
     TRADE_STATISTICS_NOT_FOUND("STATISTICS_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 통신사의 통계 데이터가 존재하지 않습니다."),
 
+    // 취소 플로우
+    TRADE_CANCEL_REQUESTED("TRADE_CANCEL_REQUESTED_200", HttpStatus.OK, "거래 취소 요청이 등록되었습니다."),
+    TRADE_CANCEL_ACCEPTED("TRADE_CANCEL_ACCEPTED_200", HttpStatus.OK, "거래 취소가 승인되었습니다."),
+    TRADE_CANCEL_REJECTED("TRADE_CANCEL_REJECTED_200", HttpStatus.OK, "거래 취소 요청이 거절되었습니다."),
+    TRADE_ALREADY_CANCEL_REQUESTED("TRADE_ALREADY_CANCEL_REQUESTED_409", HttpStatus.CONFLICT, "이미 취소 요청이 있습니다."),
+    TRADE_CANCEL_NOT_FOUND("TRADE_CANCEL_NOT_FOUND_404", HttpStatus.NOT_FOUND, "취소 요청 정보를 찾을 수 없습니다."),
+
+    // 스케줄러 자동 처리
+    AUTO_REFUND_SUCCESS("AUTO_REFUND_SUCCESS_200", HttpStatus.OK, "판매자 지연으로 자동 환불되었습니다."),
+    AUTO_PAYOUT_SUCCESS("AUTO_PAYOUT_SUCCESS_200", HttpStatus.OK, "구매자 미확정으로 자동 정산되었습니다."),
+
 
     // 계좌 - 성공
     ACCOUNT_CREATE_SUCCESS("ACCOUNT_CREATE_SUCCESS_201", HttpStatus.CREATED, "계좌가 성공적으로 생성되었습니다."),

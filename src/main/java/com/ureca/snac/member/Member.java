@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -46,6 +47,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "activated", nullable = false)
     private Activated activated;
 
+    @Column(name = "suspend_until")
+    private LocalDateTime suspendUntil; // 임시 정지 만료일
+
     @Builder
     private Member(String email, String password, String name, String phone, LocalDate birthDate,
                    Integer ratingScore, Role role, Activated activated) {
@@ -58,5 +62,23 @@ public class Member extends BaseTimeEntity {
         this.ratingScore = ratingScore;
         this.role = role;
         this.activated = activated;
+    }
+
+    // 임시 정지
+    public void suspendUntil(LocalDateTime until) {
+        this.activated = Activated.TEMP_SUSPEND;
+        this.suspendUntil = until;
+    }
+
+    // 영구 정지
+    public void permanentBan() {
+        this.activated = Activated.PERMANENT_BAN;
+        this.suspendUntil = null;
+    }
+
+    // 정지 해제
+    public void activate() {
+        this.activated = Activated.NORMAL;
+        this.suspendUntil = null;
     }
 }
