@@ -1,6 +1,7 @@
 package com.ureca.snac.payment.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.payment.entity.Payment;
 
 /**
@@ -23,6 +24,7 @@ public interface PaymentService {
      * @param paymentKey 취소할 결제 ID
      * @param reason     취소 사유
      * @param email      취소요청한 사람
+     * @return 결제 취소의 상세 정보 PaymentCancelResponse DTO
      */
-    void cancelPayment(String paymentKey, String reason, String email);
+    PaymentCancelResponse cancelPayment(String paymentKey, String reason, String email);
 }
