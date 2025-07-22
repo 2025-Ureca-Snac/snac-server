@@ -9,13 +9,11 @@ import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/member")
 @RequiredArgsConstructor
-public class MemberController {
+public class MemberController implements MemberControllerSwagger {
 
     private final MemberService memberService;
     private final SnsService snsService;
@@ -25,10 +23,10 @@ public class MemberController {
     // 사용자 인증 추가 해야 할듯? -> 안하기로 함. 로그아웃 시켜버리는 방식으로
 
     // 1. 비밀번호 현재 비밀번호와 함께 입력하여 변경
-    @PostMapping("/change-pwd")
+    @Override
     public ResponseEntity<ApiResponse<Void>> changePwd(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody PasswordChangeRequest request
+            CustomUserDetails userDetails,
+            PasswordChangeRequest request
     ) {
         memberService.changePassword(userDetails.getUsername(), request);
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PASSWORD_CHANGED));
@@ -41,10 +39,10 @@ public class MemberController {
     //TODO 전화번호 변경(완료, 검증완료)
 
     // 1. 비밀번호 맞는지 확인 하고, 인증번호 요청
-    @PostMapping("/change-phone/check")
+    @Override
     public ResponseEntity<ApiResponse<Void>> checkPhone(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody PhoneChangeRequest phoneChangeRequest) {
+            CustomUserDetails userDetails,
+            PhoneChangeRequest phoneChangeRequest) {
 
         memberService.checkPassword(userDetails.getUsername(), phoneChangeRequest);
 
@@ -56,11 +54,11 @@ public class MemberController {
     // /api/sns/verify-code
 
     // 3. 맞으면 교체
-    @PostMapping("/change-phone")
+    @Override
     public ResponseEntity<ApiResponse<Void>> changePhone(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody PhoneRequest phoneRequest
-            ) {
+            CustomUserDetails userDetails,
+            PhoneRequest phoneRequest
+    ) {
         String changePhone = phoneRequest.getPhone();
         boolean phoneVerified = snsService.isPhoneVerified(changePhone);
         if (!phoneVerified) {
@@ -72,10 +70,10 @@ public class MemberController {
 
     //TODO 닉네임 변경(완료, 검증완료)
 
-    @PostMapping("/change-nickname")
+    @Override
     public ResponseEntity<ApiResponse<String>> changeNickname(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody NicknameChangeRequest nicknameChangeRequest) {
+            CustomUserDetails userDetails,
+            NicknameChangeRequest nicknameChangeRequest) {
         String lastUpdated = memberService.changeNickname(userDetails.getUsername(), nicknameChangeRequest);
         return ResponseEntity.ok(ApiResponse.of(BaseCode.NICKNAME_CHANGED, lastUpdated));
     }
@@ -89,8 +87,8 @@ public class MemberController {
     // /api/sns/verify-code
 
     // 3. 검증 되었는지 확인 후 이메일 찾아주기
-    @PostMapping("/find-email")
-    public ResponseEntity<ApiResponse<String>> findEmail(@RequestBody PhoneRequest phoneRequest) {
+    @Override
+    public ResponseEntity<ApiResponse<String>> findEmail(PhoneRequest phoneRequest) {
         String phone = phoneRequest.getPhone();
         boolean phoneVerified = snsService.isPhoneVerified(phone);
         if (!phoneVerified) {
@@ -114,9 +112,9 @@ public class MemberController {
     // /api/sns/verify-code
 
     // 3. 비밀번호 교체
-    @PostMapping("/find-pwd/phone")
+    @Override
     public ResponseEntity<ApiResponse<Void>> resetPwdByPhone(
-            @RequestBody PasswordResetByPhoneRequest req) {
+            PasswordResetByPhoneRequest req) {
 
         String phone = req.getPhone();
         if (!snsService.isPhoneVerified(phone)) {
@@ -135,9 +133,9 @@ public class MemberController {
     // /api/email/verify-code
 
     // 3. 비밀번호 교체
-    @PostMapping("/find-pwd/email")
+    @Override
     public ResponseEntity<ApiResponse<Void>> resetPwdByEmail(
-            @RequestBody PasswordResetByEmailRequest req) {
+            PasswordResetByEmailRequest req) {
 
         String email = req.getEmail();
         if (!emailService.isEmailVerified(email)) {
