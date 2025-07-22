@@ -1,7 +1,6 @@
 package com.ureca.snac.money.repository;
 
 import com.ureca.snac.money.entity.MoneyRecharge;
-import com.ureca.snac.payment.entity.Payment;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -11,15 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface MoneyRechargeRepository extends JpaRepository<MoneyRecharge, Long> {
-
-    /**
-     * Payment 객체 MoneyRecharge 조회
-     *
-     * @param payment Payment 객체
-     * @return MoneyRecharge 객체
-     */
-    Optional<MoneyRecharge> findByPayment(Payment payment);
-
+    
     /**
      * 비관적 락 사용 결제 취소랑 고려했을 때 데이터 정합성 보장
      *

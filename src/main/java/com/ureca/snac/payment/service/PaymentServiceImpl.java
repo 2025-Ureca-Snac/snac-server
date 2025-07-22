@@ -1,17 +1,14 @@
 package com.ureca.snac.payment.service;
 
-import com.ureca.snac.asset.event.AssetChangedEvent;
-import com.ureca.snac.asset.service.AssetChangedEventFactory;
-import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
-import com.ureca.snac.infra.TossPaymentsClient;
+import com.ureca.snac.infra.PaymentGatewayAdapter;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
+import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.exception.PaymentOwnershipMismatchException;
 import com.ureca.snac.payment.repository.PaymentRepository;
-import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,65 +17,54 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class PaymentServiceImpl implements PaymentService {
 
     private final MemberRepository memberRepository;
     private final PaymentRepository paymentRepository;
-    private final WalletService walletService;
-    private final TossPaymentsClient tossPaymentsClient;
 
-    private final AssetHistoryEventPublisher assetHistoryEventPublisher;
-    private final AssetChangedEventFactory assetChangedEventFactory;
+    // 외부 통신은 어댑터를 통해 수행
+    private final PaymentGatewayAdapter paymentGatewayAdapter;
+    // 내부 하위 서비스 레이어
+    private final PaymentInternalService paymentInternalService;
 
     @Override
     @Transactional
     public Payment preparePayment(Member member, Long amount) {
         // Payment 객체 생성하고
         Payment payment = Payment.prepare(member, amount);
-
         // 디비에 저장
         return paymentRepository.save(payment);
     }
 
     @Override
-    @Transactional
-    public void cancelPayment(String paymentKey, String reason, String email) {
+    public PaymentCancelResponse cancelPayment(String paymentKey, String reason, String email) {
         log.info("[결제 취소] 시작. 결제 ID : {}", paymentKey);
 
+        log.info("[결제 취소] 사전 검증 시작 email : {}", email);
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
 
-        Payment payment = paymentRepository.findByPaymentKey(paymentKey)
+        Payment payment = paymentRepository.findByPaymentKeyWithMember(paymentKey)
                 .orElseThrow(PaymentNotFoundException::new);
 
         // 결제 멤버랑 현재 요청자 검토
-        if (payment.validateOwner(member)) {
+        if (!payment.isOwner(member)) {
+            log.info("[결제 취소] 실패 : 결제 소유주 불일치. 소유주 : {}, 요청자 : {}",
+                    payment.getMember().getId(), member.getId());
             throw new PaymentOwnershipMismatchException();
         }
+        log.info("[결제 취소] 검증 통과");
 
-        tossPaymentsClient.cancelPayment(payment.getPaymentKey(), reason);
+        // 외부 API 호출 트랜잭션 외부니까
+        log.info("[결제 취소] 외부 TOSS API 호출 시작. paymentKey : {}", paymentKey);
+        PaymentCancelResponse cancelResponse =
+                paymentGatewayAdapter.cancelPayment(paymentKey, reason);
+        log.info("[결제 취소] 외부 TOSS API 호출 성공");
 
-        // 캡슐화 서비스는 취소만 여부는 엔티티가
-        payment.cancel(reason);
+        // 책임 위임 DB 상태 변경은 내부 서비스 계층에다가
+        paymentInternalService.processCancellationInDB(payment, member, cancelResponse);
+        log.info("[결제 취소] 내부 상태 변경 완료");
 
-        Long balanceAfter = walletService.withdrawMoney(member.getId(),
-                payment.getAmount());
-        log.info("[결제 취소] 지갑 출금 완료. 회원 ID : {}, 최종 잔액 : {}",
-                member.getId(), balanceAfter);
-
-        AssetChangedEvent event = assetChangedEventFactory.createForCancel(
-                member.getId(),
-                payment.getId(),
-                payment.getAmount(),
-                balanceAfter
-        );
-
-        assetHistoryEventPublisher.publish(event);
-        log.info("[이벤트 발행] 충전 취소를 위한 자산 내역 기록 이벤트 발행 . 회원 ID : {}",
-                member.getId());
-
-        log.info("[결제 취소] 최종 완료 결제 ID : {}", payment.getId());
-
+        return cancelResponse;
     }
 }

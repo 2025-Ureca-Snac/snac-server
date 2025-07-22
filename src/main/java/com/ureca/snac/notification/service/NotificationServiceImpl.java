@@ -4,19 +4,15 @@ import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
-import com.ureca.snac.config.RabbitMQConfig;
-import com.ureca.snac.notification.dto.NotificationDTO;
-import com.ureca.snac.notification.entity.Notification;
 import com.ureca.snac.notification.repository.NotificationRepository;
+import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static com.ureca.snac.config.RabbitMQConfig.*;
-import static com.ureca.snac.config.RabbitMQConfig.MATCHING_NOTIFICATION_EXCHANGE;
 
 @Slf4j
 @Service
@@ -44,6 +40,12 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("매칭알림 MQ 발행: {} {}", username, cardDto);
         String routingKey = String.format("matching.notification.%s", username);
         rabbitTemplate.convertAndSend(MATCHING_NOTIFICATION_EXCHANGE, routingKey, cardDto);
+    }
+
+    @Override
+    public void sendBuyFilterNotification(RetrieveFilterDto dto) {
+        log.info("[필터 발행] username={} filterCount={}", dto.getUsername(), dto.getBuyerFilter().size());
+        rabbitTemplate.convertAndSend(FILTER_EXCHANGE, FILTER_ROUTING_KEY, dto);
     }
 
     private Member getMember(String email) {

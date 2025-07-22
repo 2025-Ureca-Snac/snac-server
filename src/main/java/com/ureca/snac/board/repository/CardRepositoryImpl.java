@@ -66,6 +66,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
         QCard card = QCard.card;
 
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(card.sellStatus.eq(SellStatus.SELLING));
         builder.and(card.cardCategory.eq(REALTIME_SELL));
         builder.and(card.carrier.eq(filter.getCarrier()));
         builder.and(card.dataAmount.eq(filter.getDataAmount()));

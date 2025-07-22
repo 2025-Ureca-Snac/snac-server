@@ -6,21 +6,19 @@ import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.notification.service.NotificationService;
-import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
-import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
-import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
-import com.ureca.snac.trade.controller.request.TradeApproveRequest;
+import com.ureca.snac.trade.controller.request.*;
+import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
-import com.ureca.snac.trade.service.interfaces.BuyFilterService;
-import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
-import com.ureca.snac.trade.service.interfaces.TradeQueryService;
+import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
@@ -36,7 +34,9 @@ public class MatchingServiceFacade {
     private final NotificationService notificationService;
     private final TradeInitiationService tradeInitiationService;
     private final TradeQueryService tradeQueryService;
+    private final TradeProgressService tradeProgressService;
     private final BuyFilterService buyFilterService;
+    private final AttachmentService attachmentService;
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
@@ -54,6 +54,16 @@ public class MatchingServiceFacade {
         for (CardDto cardDto : cardDtoList) {
             notificationService.sendMatchingNotification(username, cardDto);
         }
+    }
+
+
+    public void getBuyerFilters(String username) {
+        Map<String, BuyerFilterRequest> allFilters = buyFilterService.findAllBuyerFilters();
+        RetrieveFilterDto dto = new RetrieveFilterDto(username, allFilters);
+
+        notificationService.sendBuyFilterNotification(dto);
+
+        log.info("[필터 발행] username={} filterCount={}", username, allFilters.size());
     }
 
     @Transactional
@@ -108,7 +118,28 @@ public class MatchingServiceFacade {
         Long tradeId = tradeInitiationService.payTrade(request, username);
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
 
-        // 구매자에게 입금 완료 알림 전송
+        // 판매자에게 입금 완료 알림 전송
+        notificationService.notify(tradeDto.getSeller(), tradeDto);
+    }
+
+    @Transactional
+    public void sendTradeData(Long tradeId, MultipartFile file, String username) {
+        tradeProgressService.sendTradeData(tradeId, username);
+        attachmentService.upload(tradeId, username, file);
+
+        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+
+        // 구매자에게 확정 요청
+        notificationService.notify(tradeDto.getBuyer(), tradeDto);
+    }
+
+    @Transactional
+    public void confirmTrade(ConfirmTradeRequest request, String username) {
+        Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username);
+
+        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+
+        // 판매자에게 확정 정보 제공
         notificationService.notify(tradeDto.getSeller(), tradeDto);
     }
 

@@ -1,14 +1,22 @@
 package com.ureca.snac.trade.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ureca.snac.common.RedisKeyConstants;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 import com.ureca.snac.trade.service.interfaces.BuyFilterService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BuyFilterServiceImpl implements BuyFilterService {
@@ -25,5 +33,25 @@ public class BuyFilterServiceImpl implements BuyFilterService {
         } catch (Exception e) {
             throw new RuntimeException("필터 저장 실패", e);
         }
+    }
+
+    @Override
+    public Map<String, BuyerFilterRequest> findAllBuyerFilters() {
+        Set<String> keys = redisTemplate.keys(RedisKeyConstants.BUYER_FILTER_PREFIX + "*");
+        Map<String, BuyerFilterRequest> result = new HashMap<>();
+
+        for (String key : keys) {
+            String username = key.substring(RedisKeyConstants.BUYER_FILTER_PREFIX.length());
+            String json = redisTemplate.opsForValue().get(key);
+            if (json == null) continue;
+            try {
+                BuyerFilterRequest filter = objectMapper.readValue(json, BuyerFilterRequest.class);
+                result.put(username, filter);
+            } catch (JsonProcessingException e) {
+                // 파싱 에러 로그만 남기고 계속
+                log.warn("BoughtFilterRequest JSON 파싱 실패 for key={} json={}", key, json, e);
+            }
+        }
+        return result;
     }
 }
