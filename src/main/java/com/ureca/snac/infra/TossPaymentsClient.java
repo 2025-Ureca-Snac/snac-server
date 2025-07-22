@@ -44,6 +44,13 @@ public class TossPaymentsClient {
                 .body(TossConfirmResponse.class);
     }
 
+    /**
+     * 결제 취소 API 호출, 응답 TOSS API 명세랑 1:1 매핑
+     *
+     * @param paymentKey 취소할 결제 키
+     * @param reason     취소 이유
+     * @return TOSS 로부터 받은 응답 객체
+     */
     public TossCancelResponse cancelPayment(String paymentKey, String reason) {
         log.info("[외부 API] 토스 페이먼츠 결제 취소 API 호출 시작. 결제 키 : {}", paymentKey);
 
@@ -51,7 +58,8 @@ public class TossPaymentsClient {
 
         return tossPaymentsRestClient.post()
                 .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
-                .headers(httpHeaders -> httpHeaders.set("Idempotency-Key", "snac-cancel-" + paymentKey))
+                .headers(httpHeaders ->
+                        httpHeaders.set("Idempotency-Key", "snac-cancel-" + paymentKey))
                 .body(request)
                 .retrieve()
                 .body(TossCancelResponse.class);
