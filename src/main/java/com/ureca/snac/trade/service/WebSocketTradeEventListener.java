@@ -4,10 +4,12 @@ import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.service.CardService;
+import com.ureca.snac.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -32,6 +34,7 @@ public class WebSocketTradeEventListener {
     private final SimpMessagingTemplate messaging;
     private final CardService cardService;
     private final RedissonClient redissonClient;
+    private final RabbitTemplate rabbitTemplate;
 
     // 소켓 연결시 호출
     @EventListener
@@ -98,7 +101,11 @@ public class WebSocketTradeEventListener {
 
     private void broadcastUserCount() {
         Long count = redisTemplate.opsForSet().size(CONNECTED_USERS);
-        messaging.convertAndSend("/topic/connected-users", count == null ? 0 : count);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.CONNECTED_USERS_EXCHANGE,
+                "",                                      // Fanout: 라우팅키 필요 없음
+                count == null ? 0 : count
+        );
     }
 
     // username 추출
