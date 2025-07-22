@@ -3,6 +3,7 @@ package com.ureca.snac.payment.controller;
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.payment.dto.PaymentCancelRequest;
+import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.swagger.annotation.UserInfo;
 import com.ureca.snac.swagger.annotation.error.ErrorCode401;
 import com.ureca.snac.swagger.annotation.error.ErrorCode403;
@@ -32,7 +33,7 @@ public interface PaymentSwagger {
     @ErrorCode409(description = "결제 취소할 수 없는 상태")
 
     @PostMapping("/{paymentKey}/cancel")
-    ResponseEntity<ApiResponse<Void>> cancelPayment(
+    ResponseEntity<ApiResponse<PaymentCancelResponse>> cancelPayment(
             @PathVariable String paymentKey,
             @Valid @RequestBody PaymentCancelRequest request,
             @UserInfo CustomUserDetails userDetails
