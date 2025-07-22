@@ -53,17 +53,16 @@ public class MemberServiceImpl implements MemberService {
         member.changePasswordTo(passwordEncoder.encode(req.getNewPwd()));
     }
     @Override
-    @Transactional
     public void checkPassword(String email, PhoneChangeRequest request) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
-        log.info("member.getPhone() : {}", member.getPhone());
         if (!passwordEncoder.matches(request.getPwd(), member.getPassword())) {
             throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PASSWORD);
         }
     }
 
     @Override
+    @Transactional
     public void changePhone(String email, String changePhone) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
@@ -71,16 +70,18 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public String changeNickname(String email, NicknameChangeRequest nicknameChangeRequest) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
-        if (ChronoUnit.HOURS.between(member.getNicknameUpdatedAt(), LocalDateTime.now()) < 24) {
+
+        LocalDateTime lastUpdated = member.getNicknameUpdatedAt();
+        if (lastUpdated!=null && ChronoUnit.HOURS.between(lastUpdated, LocalDateTime.now()) < 24) {
             throw new NicknameChangeTooEarlyException();
         }
         member.changeNicknameTo(nicknameChangeRequest.getNickname());
-        LocalDateTime nicknameUpdatedAt = member.getNicknameUpdatedAt();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return nicknameUpdatedAt.format(formatter);
+        return member.getNicknameUpdatedAt()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
 
