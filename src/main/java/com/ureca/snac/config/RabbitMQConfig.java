@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableRabbit
 @Configuration
 public class RabbitMQConfig {
+
+
     /* ------------------- Topic : 실시간 서비스 전용 ------------------- */
     public static final String NOTIFICATION_EXCHANGE = "notification_exchange";
     public static final String NOTIFICATION_QUEUE    = "notification_queue";
@@ -60,6 +62,50 @@ public class RabbitMQConfig {
     }
 
 
+    /* ------------------- Fanout : 전체 브로드캐스트용(공지, 이벤트 등) ------------------- */
+    public static final String BROADCAST_EXCHANGE = "broadcast_exchange";
+    public static final String BROADCAST_QUEUE    = "broadcast_queue";
+
+    @Bean
+    public FanoutExchange broadcastExchange() {
+        return new FanoutExchange(BROADCAST_EXCHANGE);
+    }
+
+    @Bean
+    public Queue broadcastQueue() {
+        return new Queue(BROADCAST_QUEUE, false);
+    }
+
+    @Bean
+    public Binding broadcastBinding(FanoutExchange broadcastExchange, Queue broadcastQueue) {
+        return BindingBuilder
+                .bind(broadcastQueue)
+                .to(broadcastExchange);
+    }
+
+
+    /* ------------------- Fanout : 접속자 수 전용 브로드캐스트 ------------------- */
+    public static final String CONNECTED_USERS_EXCHANGE = "connected_users_exchange";
+    public static final String CONNECTED_USERS_QUEUE    = "connected_users_queue";
+
+    @Bean
+    public FanoutExchange connectedUsersExchange() {
+        return new FanoutExchange(CONNECTED_USERS_EXCHANGE);
+    }
+
+    @Bean
+    public Queue connectedUsersQueue() {
+        return new Queue(CONNECTED_USERS_QUEUE, false);
+    }
+
+    @Bean
+    public Binding connectedUsersBinding(FanoutExchange connectedUsersExchange, Queue connectedUsersQueue) {
+        return BindingBuilder
+                .bind(connectedUsersQueue)
+                .to(connectedUsersExchange);
+    }
+
+
     /* ------------------- Direct : SMS 전용 ------------------- */
     public static final String SMS_EXCHANGE     = "sms_exchange";
 
@@ -99,6 +145,7 @@ public class RabbitMQConfig {
                 .to(smsExchange)
                 .with(SMS_AUTH_ROUTING_KEY);
     }
+
 
     /* ------------------- 공통 설정 ------------------- */
     @Bean

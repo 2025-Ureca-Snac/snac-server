@@ -13,6 +13,7 @@ import com.ureca.snac.trade.controller.request.TradeApproveRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.service.interfaces.BuyFilterService;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
+import com.ureca.snac.trade.service.interfaces.TradeProgressService;
 import com.ureca.snac.trade.service.interfaces.TradeQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class MatchingServiceFacade {
     private final NotificationService notificationService;
     private final TradeInitiationService tradeInitiationService;
     private final TradeQueryService tradeQueryService;
+    private final TradeProgressService tradeProgressService;
     private final BuyFilterService buyFilterService;
 
     private final StringRedisTemplate redisTemplate;

@@ -22,7 +22,7 @@ public class NotificationListener {
 
         messaging.convertAndSendToUser(
                 username,
-                "/queue/notifications",
+                "/queue/trade",
                 tradeDto
         );
     }
@@ -33,9 +33,19 @@ public class NotificationListener {
 
         messaging.convertAndSendToUser(
                 username,
-                "/queue/notifications",
+                "/queue/matching",
                 cardDto
         );
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.CONNECTED_USERS_QUEUE)
+    public void onConnectedUsersCount(Integer count) {
+        messaging.convertAndSend("/topic/connected-users", count);
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.BROADCAST_QUEUE)
+    public void onBroadcast(String message) {
+        messaging.convertAndSend("/topic/broadcast", message);
     }
 
     public record WebSocketNotification(

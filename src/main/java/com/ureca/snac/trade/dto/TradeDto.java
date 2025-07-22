@@ -12,6 +12,7 @@ import lombok.*;
 public class TradeDto {
     private Long id;
     private Long cardId;
+    private Integer sellerRatingScore;
     private String seller;
     private String buyer;
     private Carrier carrier;
@@ -26,6 +27,7 @@ public class TradeDto {
         return TradeDto.builder()
                 .id(trade.getId())
                 .cardId(trade.getCardId())
+                .sellerRatingScore(trade.getSeller().getRatingScore())
                 .seller(trade.getSeller().getEmail())
                 .buyer(trade.getBuyer().getEmail())
                 .carrier(trade.getCarrier())
