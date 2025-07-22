@@ -46,10 +46,11 @@ public class TradeCancel extends BaseTimeEntity {
     }
 
     @Builder
-    public TradeCancel(Trade trade, Member requester, CancelReason reason, CancelStatus status) {
+    public TradeCancel(Trade trade, Member requester, CancelReason reason, CancelStatus status, LocalDateTime resolvedAt) {
         this.trade = trade;
         this.requester = requester;
         this.reason = reason;
         this.status = status;
+        this.resolvedAt = resolvedAt;
     }
 }

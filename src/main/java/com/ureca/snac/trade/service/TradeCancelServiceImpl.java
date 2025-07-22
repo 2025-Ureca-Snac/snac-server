@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -39,6 +41,34 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         // 이미 요청이 있으면 중복 차단
         if (cancelRepo.findByTradeId(tradeId).isPresent())
             throw new TradeAlreadyCancelRequestedException();
+
+        boolean isSeller = requester.equals(trade.getSeller());
+
+        // 판매자 => 즉시 취소
+        if (isSeller) {
+            // 취소 엔티티 저장: ACCEPTED & resolvedAt
+            TradeCancel cancel = TradeCancel.builder()
+                    .trade(trade)
+                    .requester(requester)
+                    .reason(reason)
+                    .status(CancelStatus.ACCEPTED)
+                    .resolvedAt(LocalDateTime.now())
+                    .build();
+            cancelRepo.save(cancel);
+
+            // 거래 취소 및 환불
+            trade.cancel(requester);
+            Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
+            long refundMoney = (long) (trade.getPriceGb() - trade.getPoint()) * trade.getDataAmount();
+            if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
+            if (trade.getPoint() > 0) buyerWallet.depositPoint((long) trade.getPoint() * trade.getDataAmount());  // 구매자에게 사용한 포인트 환불
+
+            // 패널티: SELLER_FAULT
+            penaltyService.givePenalty(requester.getEmail(), PenaltyReason.SELLER_FAULT);
+
+            // 알림 추가
+            return;
+        }
 
         TradeCancel cancel = TradeCancel.builder()
                 .trade(trade)
