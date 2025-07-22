@@ -1,13 +1,10 @@
 package com.ureca.snac.member.service;
 
 import com.ureca.snac.member.dto.request.*;
-import com.ureca.snac.member.dto.response.EmailResponse;
 
 public interface MemberService {
 
-    EmailResponse findEmailByPhone(String phone);
-
-    Boolean emailExist(EmailRequest emailRequest);
+    String findEmailByPhone(String phone);
 
     void changePassword(String email, PasswordChangeRequest request);
 
@@ -16,4 +13,8 @@ public interface MemberService {
     void changePhone(String email, String changePhone);
 
     String changeNickname(String email, NicknameChangeRequest changeNickname);
+
+    void resetPasswordByPhone(String phone, String newPwd);
+
+    void resetPasswordByEmail(String email, String newPwd);
 }

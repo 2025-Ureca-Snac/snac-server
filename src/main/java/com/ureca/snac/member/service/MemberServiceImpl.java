@@ -4,7 +4,6 @@ import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.dto.request.*;
-import com.ureca.snac.member.dto.response.EmailResponse;
 import com.ureca.snac.member.exception.InvalidCurrentMemberInfoException;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.member.exception.NicknameChangeTooEarlyException;
@@ -29,16 +28,8 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public EmailResponse findEmailByPhone(String phone) {
-        Member member = memberRepository.findEmailByPhone(phone).orElseThrow(MemberNotFoundException::new);
-        return EmailResponse.of(member.getEmail());
-    }
-
-
-    @Override
-    public Boolean emailExist(EmailRequest emailRequest) {
-        // 존재하면 true, 없으면 false
-        return memberRepository.existsByEmail(emailRequest.getEmail());
+    public String findEmailByPhone(String phone) {
+        return memberRepository.findEmailByPhone(phone).orElseThrow(MemberNotFoundException::new);
     }
 
     @Override
@@ -85,14 +76,21 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
-    /*    @Override
+    @Override
     @Transactional
-    public void checkPhone(String email, String pwd) {
+    public void resetPasswordByPhone(String phone, String newPwd) {
+        Member member = memberRepository.findByPhone(phone)
+                .orElseThrow(MemberNotFoundException::new);
+
+        member.changePasswordTo(passwordEncoder.encode(newPwd));
+    }
+
+    @Override
+    @Transactional
+    public void resetPasswordByEmail(String email, String newPwd) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
 
-        if (!member.getPhone().equals(pwd)) {
-            throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PHONE);
-        }
-    }*/
+        member.changePasswordTo(passwordEncoder.encode(newPwd));
+    }
 }
