@@ -60,6 +60,12 @@ public class MatchingController {
         matchingServiceFacade.payTrade(request, principal.getName());
     }
 
+    @MessageMapping("/trade/confirm")
+    public void confirmTrade(@Payload ConfirmTradeRequest request, Principal principal) {
+        log.info("[거래] /trade/confirm 호출, 사용자: {}, 요청: {}", principal.getName(), request);
+        matchingServiceFacade.confirmTrade(request, principal.getName());
+    }
+
     @MessageExceptionHandler(CardAlreadyTradingException.class)
     @SendToUser("/queue/errors")
     public String handleCardAlreadyTradingException(CardAlreadyTradingException ex) {

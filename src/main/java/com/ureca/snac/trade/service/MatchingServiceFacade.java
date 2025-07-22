@@ -6,10 +6,7 @@ import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.notification.service.NotificationService;
-import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
-import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
-import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
-import com.ureca.snac.trade.controller.request.TradeApproveRequest;
+import com.ureca.snac.trade.controller.request.*;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -122,6 +119,16 @@ public class MatchingServiceFacade {
 
         // 구매자에게 확정 요청
         notificationService.notify(tradeDto.getBuyer(), tradeDto);
+    }
+
+    @Transactional
+    public void confirmTrade(ConfirmTradeRequest request, String username) {
+        Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username);
+
+        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+
+        // 판매자에게 확정 정보 제공
+        notificationService.notify(tradeDto.getSeller(), tradeDto);
     }
 
     // 조건 비교 함수
