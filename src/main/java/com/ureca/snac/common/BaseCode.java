@@ -55,6 +55,7 @@ public enum BaseCode {
     EMAIL_VERIFICATION_SENT("EMAIL_VERIFICATION_SENT_200", HttpStatus.OK, "Email 인증번호가 발송되었습니다."),
     // 이메일 인증코드 발송- 예외
     EMAIL_SEND_FAILED("EMAIL_SEND_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Email 인증번호 전송에 실패했습니다."),
+    EMAIL_NOT_VERIFIED("EMAIL_NOT_VERIFIED_401", HttpStatus.UNAUTHORIZED, "Email 검증에 실패했습니다."),
 
 
     // 문자 인증코드 인증- 성공
@@ -99,6 +100,9 @@ public enum BaseCode {
     // 토스 API
     TOSS_API_CALL_ERROR("TOSS_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "토스 결제 시스템 연동 중 오류 발생"),
     TOSS_API_CALL_ERROR_CUSTOM("TOSS_API_CALL_ERROR_CUSTOM_400", HttpStatus.BAD_REQUEST, "Toss API custom"),
+
+    // 지갑 - 성공
+    WALLET_SUMMARY_SUCCESS("WALLET_SUMMARY_SUCCESS_200", HttpStatus.OK, "내 지갑 요약 정보 조회 성공했습니다"),
 
     // 지갑 - 예외
     WALLET_NOT_FOUND("WALLET_NOT_FOUND_404", HttpStatus.NOT_FOUND, "지갑 정보를 찾을 수 없습니다"),
