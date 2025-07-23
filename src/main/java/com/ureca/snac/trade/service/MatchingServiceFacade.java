@@ -97,6 +97,7 @@ public class MatchingServiceFacade {
     public void createTradeFromBuyer(CreateRealTimeTradeRequest createTradeRequest, String username) {
         Long savedId = tradeInitiationService.createRealTimeTrade(createTradeRequest, username);
         TradeDto tradeDto = tradeQueryService.findByTradeId(savedId);
+        buyFilterService.deleteBuyerFilterByUsername(username);
 
         // 판매자에게 알림 전송
         notificationService.notify(tradeDto.getSeller(), tradeDto);
@@ -108,7 +109,6 @@ public class MatchingServiceFacade {
         // 1. 거래 승인 로직 (거래 상태 변경)
         Long tradeId = tradeInitiationService.acceptTrade(tradeApproveRequest.getTradeId(), buyerUsername);
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
-
         // 2. 판매자에게 입금 요청 알림 전송
         notificationService.notify(tradeDto.getBuyer(), tradeDto);
     }

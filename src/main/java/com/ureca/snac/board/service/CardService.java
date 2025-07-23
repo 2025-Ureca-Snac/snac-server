@@ -59,10 +59,12 @@ public interface CardService {
 
     void deleteCardByTrade(Long cardId);
 
+    void deleteCardByRealTime(String username, Long cardId);
+
     CardDto createRealtimeCard(String username, CreateRealTimeCardRequest request);
 
     List<CardDto> findRealtimeCardsByFilter(BuyerFilterRequest filter);
 
-    List<CardDto> findByMemberUsernameAndSellStatusAndCardCategory(String username, SellStatus sellStatus, CardCategory cardCategory);
+    List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory);
 }
 

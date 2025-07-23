@@ -1,10 +1,9 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.board.dto.CardDto;
-import com.ureca.snac.board.entity.constants.CardCategory;
-import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.config.RabbitMQConfig;
+import com.ureca.snac.trade.service.interfaces.BuyFilterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -23,6 +22,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.ureca.snac.board.entity.constants.CardCategory.*;
+import static com.ureca.snac.board.entity.constants.SellStatus.*;
 import static com.ureca.snac.common.RedisKeyConstants.*;
 
 @Slf4j
@@ -33,6 +34,7 @@ public class WebSocketTradeEventListener {
     private final StringRedisTemplate redisTemplate;
     private final SimpMessagingTemplate messaging;
     private final CardService cardService;
+    private final BuyFilterService buyFilterService;
     private final RedissonClient redissonClient;
     private final RabbitTemplate rabbitTemplate;
 
@@ -72,21 +74,16 @@ public class WebSocketTradeEventListener {
             redisTemplate.opsForSet().remove(CONNECTED_USERS, username);
 
             // 2) 필터 조건 삭제
-            String filterKey = BUYER_FILTER_PREFIX + username;
-            if (redisTemplate.hasKey(filterKey)) {
-                redisTemplate.delete(filterKey);
-                log.info("구매자 필터 삭제: {}", username);
-            }
+            buyFilterService.deleteBuyerFilterByUsername(username);
 
             // 3) DB 카드 삭제
-            List<CardDto> cards = cardService.findByMemberUsernameAndSellStatusAndCardCategory(
-                    username, SellStatus.SELLING, CardCategory.REALTIME_SELL);
+            List<CardDto> cards = cardService.findByMemberUsernameAndSellStatusesAndCardCategory(username, List.of(SELLING, TRADING), REALTIME_SELL);
             for (CardDto card : cards) {
-                cardService.deleteCard(username, card.getId());
+                cardService.deleteCardByRealTime(username, card.getId());
                 log.info("판매자 카드 삭제: {} (cardId={})", username, card.getId());
             }
 
-            // 4) 최종 접속자 수 브로드캐스트
+            // 5) 최종 접속자 수 브로드캐스트
             broadcastUserCount();
 
         } catch (InterruptedException e) {
