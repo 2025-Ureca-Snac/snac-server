@@ -5,10 +5,7 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.trade.exception.TradeCancelNotAllowedException;
-import com.ureca.snac.trade.exception.TradeCancelPermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeConfirmPermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeInvalidStatusException;
+import com.ureca.snac.trade.exception.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -136,7 +133,7 @@ public class Trade extends BaseTimeEntity {
     public void confirm(Member buyer) {
         // 거래 상태가 데이터 전송 완료 상태가 아니면 확정할 수 없음
         if (this.status != DATA_SENT)
-            throw new TradeInvalidStatusException();
+            throw new TradeStatusMismatchException();
 
         // 요청자가 실제 구매자가 아니면 확정 권한이 없음
         if (this.buyer != buyer) {

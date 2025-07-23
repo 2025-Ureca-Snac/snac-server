@@ -5,19 +5,16 @@ import com.ureca.snac.auth.dto.response.GoogleResponse;
 import com.ureca.snac.auth.dto.response.KakaoResponse;
 import com.ureca.snac.auth.dto.response.NaverResponse;
 import com.ureca.snac.auth.dto.response.OAuth2Response;
-import com.ureca.snac.auth.exception.SocialLoginException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.util.JWTUtil;
-import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,50 +45,63 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             case "kakao" -> new KakaoResponse(oAuth2User.getAttributes());
             default -> throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         };
-        log.info("OAuth2Response: {}", oAuth2Response);
 
-        String provider   = oAuth2Response.getProvider();
+        String provider = oAuth2Response.getProvider();
         String providerId = oAuth2Response.getProviderId();
         log.info("provider: {}, providerId: {}", provider, providerId);
 
+        // 1) state 파라미터가 JWT로 디코딩되는지 시도해서 플로우 구분
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String state = request.getParameter("state");
+        log.info("state : {}", state);
+
+        String emailFromState = null;
+        boolean isLinking = true;
+        try {
+            emailFromState = jwtUtil.getUsername(state);
+            log.info("state 디코딩 성공, 연동 플로우: email={}", emailFromState);
+        } catch (JwtException e) {
+            log.info("state 디코딩 실패, 로그인 플로우");
+            isLinking = false;
+        }
+
+        if (isLinking) {
+            // 소셜 연동
+            // 이미 다른 계정에 해당 providerId가 연결되어 있는지 체크
+            Member alreadyLinked = switch (provider) {
+                case "naver" -> authRepository.findByNaverId(providerId);
+                case "google" -> authRepository.findByGoogleId(providerId);
+                default -> authRepository.findByKakaoId(providerId);
+            };
+            if (alreadyLinked != null) {
+                // 이미 다른 계정에 연동된 소셜 계정
+                log.info("이미 다른 계정에 연동된 소셜 계정");
+                throw new OAuth2AuthenticationException("이미 다른 계정에 연동된 소셜 계정입니다.");
+            }
+
+            // 연동 대상 회원 조회 및 ID 업데이트
+            Member member = authRepository.findByEmail(emailFromState)
+                    .orElseThrow(() -> new OAuth2AuthenticationException("존재하지 않는 회원입니다."));
+            member.updateSocialId(provider, providerId);
+            authRepository.save(member);
+            log.info("social 연동 완료: {} -> {}", member.getEmail(), provider);
+
+            return new CustomOAuth2User(member, registrationId, providerId, oAuth2User.getAttributes());
+        }
+
+        // -----------------------------------소셜 로그인 ---------------------------------------
         Member existingMember = switch (provider) {
             case "naver" -> authRepository.findByNaverId(providerId);
             case "google" -> authRepository.findByGoogleId(providerId);
             default -> authRepository.findByKakaoId(providerId);
         };
         if (existingMember != null) {
-            log.info("기존 회원: {}", existingMember.getEmail());
+            log.info("기존 회원 로그인: {}", existingMember.getEmail());
             return new CustomOAuth2User(existingMember, registrationId, providerId, oAuth2User.getAttributes());
         }
 
-        // 사용자 정보 state 에서 꺼내서 확인
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String state = request.getParameter("state");
-        log.info("state: {}", state);
-
-        String email;
-        try {
-            email = jwtUtil.getUsername(state);
-        } catch (MalformedJwtException e) {
-            log.error("state JWT 디코딩 실패", e);
-
-            OAuth2Error error = new OAuth2Error(
-                    BaseCode.OAUTH_LOGIN_FAILED.getCode(),
-                    BaseCode.OAUTH_LOGIN_FAILED.getMessage(),
-                    null
-            );
-            throw new OAuth2AuthenticationException(error, e);
-        }
-        log.info("email from state: {}", email);
-        Member member = authRepository.findByEmail(email)
-                .orElseThrow(() -> new OAuth2AuthenticationException("존재하지 않는 회원입니다."));
-        log.info("회원 발견: {}", member);
-
-        member.updateSocialId(provider, providerId);
-        authRepository.save(member);
-        log.info("소셜 ID를 업데이트 및 저장");
-
-        log.info("loadUser 메소드 종료");
-        return new CustomOAuth2User(member, registrationId, providerId, oAuth2User.getAttributes());
+        // (필요시!!!!!!!!!!) 신규 회원 가입 로직 추가
+        log.info("일치하는 계정이 없음.");
+        throw new OAuth2AuthenticationException("일치하는 계정이 없습니다.");
     }
 }

@@ -37,6 +37,7 @@ public class RabbitMQConfig {
                 .with(ROUTING_KEY_PATTERN);
     }
 
+
     /* ------------------- Topic : 매칭 전용 ------------------- */
     public static final String MATCHING_NOTIFICATION_EXCHANGE = "matching_notification_exchange";
     public static final String MATCHING_NOTIFICATION_QUEUE = "matching_notification_queue";
@@ -189,6 +190,30 @@ public class RabbitMQConfig {
                 .to(filterExchange)
                 .with(FILTER_ROUTING_KEY);
     }
+
+
+    /* ------------------- Direct : 에러 조회용 ------------------- */
+    public static final String ERROR_EXCHANGE = "error_exchange";
+    public static final String ERROR_QUEUE = "error_queue";
+    public static final String ERROR_ROUTING_KEY = "error.socket";
+
+    @Bean
+    public DirectExchange errorExchange() {
+        return new DirectExchange(ERROR_EXCHANGE);
+    }
+
+    @Bean
+    public Queue errorQueue() {
+        return new Queue(ERROR_QUEUE, false);
+    }
+
+    @Bean
+    public Binding errorBinding(DirectExchange errorExchange, Queue errorQueue) {
+        return BindingBuilder.bind(errorQueue)
+                .to(errorExchange)
+                .with(ERROR_ROUTING_KEY);
+    }
+
 
     /* ------------------- 공통 설정 ------------------- */
     @Bean

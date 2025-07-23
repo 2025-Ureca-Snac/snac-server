@@ -54,4 +54,36 @@ public class BuyFilterServiceImpl implements BuyFilterService {
         }
         return result;
     }
+
+//    @Override
+//    public void deactivateBuyerFilterByUsername(String username) {
+//        String key = RedisKeyConstants.BUYER_FILTER_PREFIX + username;
+//        String json = redisTemplate.opsForValue().get(key);
+//
+//        if (json == null) {
+//            log.warn("해당 사용자의 BuyerFilterRequest가 없습니다. username={}", username);
+//            return;
+//        }
+//
+//        try {
+//            BuyerFilterRequest filter = objectMapper.readValue(json, BuyerFilterRequest.class);
+//            filter.setActive(false); // active 필드를 false로 변경
+//            String updatedJson = objectMapper.writeValueAsString(filter);
+//            redisTemplate.opsForValue().set(key, updatedJson);
+//
+//        } catch (JsonProcessingException e) {
+//            log.warn("BuyerFilterRequest JSON 파싱/저장 실패 for username={} json={}", username, json, e);
+//        }
+//    }
+
+    @Override
+    public void deleteBuyerFilterByUsername(String username) {
+        String key = RedisKeyConstants.BUYER_FILTER_PREFIX + username;
+
+        if (redisTemplate.hasKey(key)) {
+            redisTemplate.delete(key);
+            log.info("구매자 필터 삭제: {}", username);
+        }
+
+    }
 }
