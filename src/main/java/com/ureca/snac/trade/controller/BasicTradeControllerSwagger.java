@@ -54,16 +54,6 @@ public interface BasicTradeControllerSwagger {
     ResponseEntity<ApiResponse<?>> createBuyTrade(@Validated @RequestBody CreateTradeRequest createTradeRequest,
                                                   @AuthenticationPrincipal UserDetails userDetails);
 
-    @Operation(summary = "거래 취소", description = "로그인한 사용자가 진행 중인 거래를 취소합니다.")
-    @ApiSuccessResponse(description = "거래 취소 성공")
-    @ErrorCode400(description = "잘못된 거래 상태로 인해 취소할 수 없습니다.")
-    @ErrorCode401(description = "인증되지 않은 사용자 접근")
-    @ErrorCode403(description = "거래 취소 권한이 없습니다.")
-    @ErrorCode404(description = "거래를 찾을 수 없습니다.")
-    @PatchMapping("/{tradeId}/cancel")
-    ResponseEntity<ApiResponse<?>> cancelTrade(@PathVariable Long tradeId,
-                                               @AuthenticationPrincipal UserDetails userDetails);
-
     @Operation(summary = "거래 데이터 전송", description = "판매자가 파일을 업로드하여 거래 데이터를 전송합니다.")
     @ApiSuccessResponse(description = "거래 데이터 전송 성공")
     @ErrorCode400(description = "잘못된 거래 상태로 인해 전송할 수 없습니다.")

@@ -48,7 +48,7 @@ public class MoneyDepositor {
         log.info("[머니 입금 처리] 지갑 머니 입금 완료. member Id : {} , 최종 잔액 : {}",
                 member.getId(), balanceAfter);
 
-        AssetChangedEvent event = assetChangedEventFactory.createForRecharge(
+        AssetChangedEvent event = assetChangedEventFactory.createForRechargeEvent(
                 member.getId(), recharge.getId(), recharge.getPaidAmountWon(), balanceAfter
         );
         assetHistoryEventPublisher.publish(event);
