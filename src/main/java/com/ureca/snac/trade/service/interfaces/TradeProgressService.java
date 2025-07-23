@@ -1,6 +1,7 @@
 package com.ureca.snac.trade.service.interfaces;
 
 
+import com.ureca.snac.trade.controller.request.CancelBuyRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 
 import java.util.List;
@@ -32,4 +33,8 @@ public interface TradeProgressService {
     Long cancelTrade(Long tradeId, String username);
 
     List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId);
+
+    TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username);
+
+    List<TradeDto> cancelBuyRequestBySellerOfCard(CancelBuyRequest request, String username);
 }

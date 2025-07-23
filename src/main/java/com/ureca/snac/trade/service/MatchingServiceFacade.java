@@ -10,7 +10,6 @@ import com.ureca.snac.trade.controller.request.*;
 import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
-import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
 import static com.ureca.snac.common.RedisKeyConstants.CONNECTED_USERS;
-import static com.ureca.snac.trade.entity.CancelReason.*;
 
 @Slf4j
 @Service
@@ -130,7 +128,7 @@ public class MatchingServiceFacade {
         List<TradeDto> trades = tradeProgressService.cancelOtherTradesOfCard(tradeDto.getCardId(), tradeId);
 
         for (TradeDto dto : trades) {
-            CancelTradeDto cancelTradeDto = new CancelTradeDto(dto.getBuyer(), dto, NOT_SELECTED);
+            CancelTradeDto cancelTradeDto = new CancelTradeDto(dto.getBuyer(), dto);
             notificationService.sendCancelNotification(cancelTradeDto);
         }
     }
@@ -167,6 +165,26 @@ public class MatchingServiceFacade {
 
         // 판매자에게 확정 정보 제공
         notificationService.notify(tradeDto.getSeller(), tradeDto);
+    }
+
+    /*-------------------------------------------- 실시간 거래 프로세스 -------------------------------------------- */
+
+    // BUY_REQUEST 구매자 기준 취소
+    @Transactional
+    public void cancelBuyRequestByBuyer(CancelBuyRequest request, String username) {
+        TradeDto tradeDto = tradeProgressService.cancelBuyRequestByBuyerOfCard(request, username);
+
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getSeller(), tradeDto));
+    }
+
+    // BUY_REQUEST 판매자 기준 취소
+    @Transactional
+    public void cancelBuyRequestBySeller(CancelBuyRequest request, String username) {
+        List<TradeDto> trades = tradeProgressService.cancelBuyRequestBySellerOfCard(request, username);
+
+        for (TradeDto tradeDto : trades) {
+            notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
+        }
     }
 
     // 조건 비교 함수

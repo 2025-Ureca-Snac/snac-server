@@ -1,6 +1,5 @@
 package com.ureca.snac.trade.dto;
 
-import com.ureca.snac.trade.entity.CancelReason;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,5 +9,4 @@ import lombok.Setter;
 public class CancelTradeDto {
     private String username;
     private TradeDto tradeDto;
-    private CancelReason cancelReason;
 }

@@ -164,4 +164,8 @@ public class Trade extends BaseTimeEntity {
         // 거래 상태를 '취소됨'으로 변경
         this.status = CANCELED;
     }
+
+    public void changeCancelReason(CancelReason cancelReason) {
+        this.cancelReason = cancelReason;
+    }
 }

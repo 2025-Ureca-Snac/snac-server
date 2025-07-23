@@ -44,7 +44,7 @@ public class NotificationListener {
     // 취소 관련 리스너
     @RabbitListener(queues = RabbitMQConfig.CANCEL_QUEUE)
     public void onTradeCancel(CancelTradeDto cancelDto) {
-        log.info("[거래 취소] 사용자: {}, tradeId: {}, reason: {}", cancelDto.getUsername(), cancelDto.getTradeDto().getId(), cancelDto.getCancelReason());
+        log.info("[거래 취소] 사용자: {}, tradeId: {}", cancelDto.getUsername(), cancelDto.getTradeDto().getId());
 
         // WebSocket으로 /user/queue/cancel로 전송
         messaging.convertAndSendToUser(
