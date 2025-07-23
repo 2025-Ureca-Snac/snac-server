@@ -20,6 +20,9 @@ public interface CardRepository extends JpaRepository<Card, Long>, CardRepositor
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Card> findLockedByIdAndMember(Long cardId, Member member);
 
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    List<Card> findLockedByMemberAndSellStatusAndCardCategory(Member member, SellStatus sellStatus, CardCategory cardCategory);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<Card> findLockedByMemberAndSellStatusAndCardCategory(Member member, SellStatus sellStatus, CardCategory cardCategory);
+    List<Card> findLockedByMemberAndSellStatusInAndCardCategory(Member member, List<SellStatus> sellStatuses, CardCategory cardCategory);
 }
