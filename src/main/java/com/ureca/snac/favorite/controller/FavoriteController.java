@@ -2,7 +2,7 @@ package com.ureca.snac.favorite.controller;
 
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
-import com.ureca.snac.favorite.dto.CursorResult;
+import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.favorite.dto.FavoriteCreateRequest;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.favorite.service.FavoriteService;

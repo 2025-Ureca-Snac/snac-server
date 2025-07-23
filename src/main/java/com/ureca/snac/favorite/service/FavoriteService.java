@@ -1,7 +1,7 @@
 package com.ureca.snac.favorite.service;
 
 
-import com.ureca.snac.favorite.dto.CursorResult;
+import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 
 import java.time.LocalDateTime;
