@@ -39,7 +39,6 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
-    private final AuthRepository authRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customSuccessHandler;
     private final CustomOAuth2FailHandler customFailHandler;
@@ -70,7 +69,8 @@ public class SecurityConfig {
                             "https://snac-app.com",
                             "https://www.snac-app.com",
                             "https://develop.df83wi2m9axuw.amplifyapp.com",
-                            "https://seungwoo.i234.me"
+                            "https://seungwoo.i234.me",
+                            "https://kapi.kakao.com"
 
                     ));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

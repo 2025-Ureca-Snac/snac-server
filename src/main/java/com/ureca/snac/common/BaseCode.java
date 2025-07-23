@@ -31,6 +31,12 @@ public enum BaseCode {
     // 소셜 로그인 시도 - 실패
     OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
 
+    // 카카오 API
+    KAKAO_UNLINK_SUCCESS("KAKAO_UNLINK_SUCCESS_200", HttpStatus.OK, "카카오 연결 끊기에 성공했습니다."),
+    KAKAO_API_ERROR("KAKAO_API_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "카카오 API 연동 중 오류가 발생했습니다."),
+    KAKAO_UNLINK_FAILED("KAKAO_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "카카오 연결 끊기에 실패했습니다."),
+    KAKAO_NO_LINKED("KAKAO_NO_LINKED_400", HttpStatus.BAD_REQUEST, "카카오 연동이 되어있지 않습니다."),
+
     // 로그아웃 시도 - 성공
     LOGOUT_SUCCESS("LOGOUT_SUCCESS_200", HttpStatus.OK, "로그아웃에 성공했습니다."),
 
