@@ -3,6 +3,7 @@ package com.ureca.snac.trade.service;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.TradeInvalidStatusException;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
@@ -16,9 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.ureca.snac.board.entity.constants.SellStatus.SOLD_OUT;
-import static com.ureca.snac.trade.entity.TradeStatus.DATA_SENT;
-import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
+import static com.ureca.snac.trade.entity.TradeStatus.*;
 
 @Slf4j
 @Service
@@ -81,5 +84,20 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         if (trade.getPoint() > 0) wallet.depositPoint(trade.getPoint());  // 구매자에게 사용한 포인트 환불
 
         return card.getId();
+    }
+
+    @Override
+    @Transactional
+    public List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId) {
+        List<Trade> waitingTrades = tradeRepository.findLockedByCardIdAndStatus(cardId, BUY_REQUESTED)
+                .stream()
+                .filter(t -> !t.getId().equals(acceptedTradeId))
+                .toList();
+
+        waitingTrades.forEach(t -> t.changeStatus(CANCELED));
+
+        return waitingTrades.stream()
+                .map(TradeDto::from)
+                .toList();
     }
 }

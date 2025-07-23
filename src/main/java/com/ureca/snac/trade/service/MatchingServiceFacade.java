@@ -7,8 +7,10 @@ import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.notification.service.NotificationService;
 import com.ureca.snac.trade.controller.request.*;
+import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
+import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import java.util.Set;
 
 import static com.ureca.snac.common.RedisKeyConstants.BUYER_FILTER_PREFIX;
 import static com.ureca.snac.common.RedisKeyConstants.CONNECTED_USERS;
+import static com.ureca.snac.trade.entity.CancelReason.*;
 
 @Slf4j
 @Service
@@ -122,6 +125,14 @@ public class MatchingServiceFacade {
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
         // 2. 판매자에게 입금 요청 알림 전송
         notificationService.notify(tradeDto.getBuyer(), tradeDto);
+
+        // 3. 연결되지 않는 다른 거래는 자동 취소
+        List<TradeDto> trades = tradeProgressService.cancelOtherTradesOfCard(tradeDto.getCardId(), tradeId);
+
+        for (TradeDto dto : trades) {
+            CancelTradeDto cancelTradeDto = new CancelTradeDto(dto.getBuyer(), dto, NOT_SELECTED);
+            notificationService.sendCancelNotification(cancelTradeDto);
+        }
     }
 
     // 실시간 매칭 - 구매자가 금앱을 입금 -> ( Status == PAYMENT_CONFIRM, Card == TRADING )

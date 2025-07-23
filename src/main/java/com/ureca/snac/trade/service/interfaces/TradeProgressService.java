@@ -1,6 +1,10 @@
 package com.ureca.snac.trade.service.interfaces;
 
 
+import com.ureca.snac.trade.dto.TradeDto;
+
+import java.util.List;
+
 public interface TradeProgressService {
 
     /**
@@ -26,4 +30,6 @@ public interface TradeProgressService {
      * @param username 요청 구매자 이메일
      */
     Long cancelTrade(Long tradeId, String username);
+
+    List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId);
 }
