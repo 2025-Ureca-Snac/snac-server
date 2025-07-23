@@ -9,32 +9,29 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/unlink")
 @RequiredArgsConstructor
-public class SocialUnlinkController {
+public class SocialUnlinkController implements SocialUnlinkControllerSwagger {
 
     private final KakaoService kakaoService;
     private final AuthRepository authRepository;
 
 
-    @PostMapping("/kakao")
-    public ResponseEntity<ApiResponse<Map<String, Long>>> unlinkUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    @Override
+    public ResponseEntity<ApiResponse<Map<String, Long>>> unlinkKakaoUser(CustomUserDetails customUserDetails) {
 
         String username = customUserDetails.getUsername();
         Member member = authRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         String kakaoId = member.getKakaoId();
 
         if (kakaoId == null) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(BaseCode.KAKAO_NO_LINKED));
+            return ResponseEntity.ok(ApiResponse.error(BaseCode.KAKAO_NO_LINKED));
         }
 
         try {
