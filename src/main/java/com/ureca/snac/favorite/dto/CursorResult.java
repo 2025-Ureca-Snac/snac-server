@@ -10,12 +10,13 @@ public record CursorResult<T>(
         List<T> contents,
 
         @Schema(description = "다음 페이지 조회를 위한 커서 ID (다음페이지 없으면 null")
-        Long nextCursorId,
+        FavoriteCursor nextCursor,
 
         @Schema(description = "다음 페이지 존재 여부")
         boolean hasNext
 ) {
-    public static <T> CursorResult<T> of(List<T> contents, Long nextCursorId, boolean hasNext) {
-        return new CursorResult<>(contents, nextCursorId, hasNext);
+    public static <T> CursorResult<T> of(
+            List<T> contents, FavoriteCursor nextCursor, boolean hasNext) {
+        return new CursorResult<>(contents, nextCursor, hasNext);
     }
 }
