@@ -16,11 +16,7 @@ import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.exception.TradeNotFoundException;
-import com.ureca.snac.trade.exception.TradePaymentMismatchException;
-import com.ureca.snac.trade.exception.TradePermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeSelfRequestException;
-
+import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
 import com.ureca.snac.trade.support.TradeSupport;
@@ -32,8 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.ureca.snac.board.entity.constants.SellStatus.*;
-import static com.ureca.snac.trade.entity.TradeStatus.ACCEPTED;
-import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
+import static com.ureca.snac.trade.entity.TradeStatus.*;
 
 @Slf4j
 @Service
