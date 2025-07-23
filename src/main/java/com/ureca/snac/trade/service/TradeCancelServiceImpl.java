@@ -1,5 +1,8 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.entity.constants.CardCategory;
+import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.TradeAlreadyCancelRequestedException;
@@ -33,6 +36,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
 
         Trade trade = tradeSupport.findLockedTrade(tradeId);
         Member requester = tradeSupport.findMember(userEmail);
+        Card card = tradeSupport.findLockedCard(trade.getCardId());
 
         // DATA_SENT 전만 가능
         if (trade.getStatus() == TradeStatus.DATA_SENT || trade.getStatus() == TradeStatus.COMPLETED || trade.getStatus() == TradeStatus.CANCELED)
@@ -56,8 +60,17 @@ public class TradeCancelServiceImpl implements TradeCancelService {
                     .build();
             cancelRepo.save(cancel);
 
+            // 카드 상태 처리
+            // 지금 판매자가 취소 요청 상태인데 판매글이면 삭제 처리 / 구매글이면 다시 구매중으로
+            if(card.getCardCategory() == CardCategory.SELL){
+                card.changeSellStatus(SellStatus.CANCEL);
+            } else if (card.getCardCategory() == CardCategory.BUY){
+                card.changeSellStatus(SellStatus.SELLING);
+            }
+
             // 거래 취소 및 환불
             trade.cancel(requester);
+
             Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
             long refundMoney = (long) (trade.getPriceGb() - trade.getPoint()) * trade.getDataAmount();
             if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
@@ -82,6 +95,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         // 알림 등 호출
     }
 
+    // 허락하는건 판매자, 즉 취소 요청이 구매자
     @Override
     public void acceptCancel(Long tradeId, String username) {
         TradeCancel cancel = cancelRepo.findByTradeId(tradeId)
@@ -90,6 +104,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         Trade trade = cancel.getTrade();
         Member seller = tradeSupport.findMember(username);
         Wallet wallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
+        Card card = tradeSupport.findLockedCard(trade.getCardId());
 
         // 판매자 본인만 승인
         if (!trade.getSeller().equals(seller))
@@ -97,6 +112,14 @@ public class TradeCancelServiceImpl implements TradeCancelService {
 
         if (cancel.getStatus() != CancelStatus.REQUESTED)
             throw new TradeInvalidStatusException();
+
+        // 카드 상태 처리
+        // 지금 구매자가 취소 요청 상태인데 구매글이면 삭제 처리 / 판매글이면 다시 판매중으로
+        if(card.getCardCategory() == CardCategory.BUY){
+            card.changeSellStatus(SellStatus.CANCEL);
+        } else if (card.getCardCategory() == CardCategory.SELL){
+            card.changeSellStatus(SellStatus.SELLING);
+        }
 
         // 취소 처리
         cancel.accept();
