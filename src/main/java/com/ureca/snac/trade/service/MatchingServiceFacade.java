@@ -56,7 +56,6 @@ public class MatchingServiceFacade {
         }
     }
 
-
     public void getBuyerFilters(String username) {
         Map<String, BuyerFilterRequest> allFilters = buyFilterService.findAllBuyerFilters();
         RetrieveFilterDto dto = new RetrieveFilterDto(username, allFilters);
@@ -93,6 +92,7 @@ public class MatchingServiceFacade {
         }
     }
 
+    // 판매자에게 거래 수락 요청 -> 이 시점에 Trade 생성 ( Status == BUY_REQUEST )
     @Transactional
     public void createTradeFromBuyer(CreateRealTimeTradeRequest createTradeRequest, String username) {
         Long savedId = tradeInitiationService.createRealTimeTrade(createTradeRequest, username);

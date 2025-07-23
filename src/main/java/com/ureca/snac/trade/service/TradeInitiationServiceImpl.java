@@ -4,16 +4,18 @@ import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardAlreadySoldOutException;
 import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
+import com.ureca.snac.board.exception.NotRealTimeSellCardException;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradePaymentMismatchException;
 import com.ureca.snac.trade.exception.TradePermissionDeniedException;
@@ -86,6 +88,24 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     public Long createRealTimeTrade(CreateRealTimeTradeRequest request, String username) {
         Member member = tradeSupport.findMember(username);
         Card card = tradeSupport.findLockedCard(request.getCardId());
+
+        // 실시간 판매 카드가 아닌 경우
+        if (card.getCardCategory() != CardCategory.REALTIME_SELL) {
+            throw new NotRealTimeSellCardException();
+        }
+
+        // 카드는 판매 상태이여야 함
+        if (card.getSellStatus() == TRADING) {
+            throw new CardAlreadyTradingException();
+        }
+        if (card.getSellStatus() == SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
+
+        // 카드 등록자와 달라야 함
+        if (card.getMember() == member) {
+            throw new TradeSelfRequestException();
+        }
 
         // 거래 엔티티 생성 및 저장
         Trade trade = Trade.buildTrade(member, member.getPhone(), card);

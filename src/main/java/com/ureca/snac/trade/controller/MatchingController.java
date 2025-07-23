@@ -1,13 +1,11 @@
 package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.board.controller.request.CreateRealTimeCardRequest;
-import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.trade.controller.request.*;
 import com.ureca.snac.trade.service.MatchingServiceFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -18,7 +16,7 @@ import java.security.Principal;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-public class MatchingController {
+public class MatchingController implements MatchingControllerSwagger {
 
     private final MatchingServiceFacade matchingServiceFacade;
     private final StringRedisTemplate redisTemplate;
@@ -70,11 +68,5 @@ public class MatchingController {
     public void sendAllBuyerFilters(Principal principal) {
         log.info("[매칭] /filters 호출, 사용자: {}", principal.getName());
         matchingServiceFacade.getBuyerFilters(principal.getName());
-    }
-
-    @MessageExceptionHandler(CardAlreadyTradingException.class)
-    @SendToUser("/queue/errors")
-    public String handleCardAlreadyTradingException(CardAlreadyTradingException ex) {
-        return ex.getMessage();
     }
 }
