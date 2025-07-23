@@ -43,13 +43,13 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
 
     @Override
     @Transactional
-    public Long acceptTrade(Long tradeId, String username) {
+    public Long acceptRealTimeTrade(Long tradeId, String username) {
         Member member = tradeSupport.findMember(username);
         Trade trade = tradeSupport.findLockedTrade(tradeId);
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
-        // 카드는 거래 상태이여야 함
-        if (card.getSellStatus() != TRADING) {
+        // 카드는 판매 상태이여야 함
+        if (card.getSellStatus() == TRADING) {
             throw new CardInvalidStatusException();
         }
 
@@ -64,13 +64,14 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         }
 
         trade.changeStatus(ACCEPTED);
+        card.changeSellStatus(TRADING);
 
         return trade.getId();
     }
 
     @Override
     @Transactional
-    public Long payTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username) {
+    public Long payRealTimeTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username) {
         // 1. 거래 조회 (락 걸어서)
         Trade trade = tradeSupport.findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
         Member member = tradeSupport.findMember(username);
@@ -140,7 +141,7 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         tradeRepository.save(trade);
 
         // 카드 상태 변경 (Trading)
-        card.changeSellStatus(TRADING);
+//        card.changeSellStatus(TRADING);
 
         return trade.getId();
     }

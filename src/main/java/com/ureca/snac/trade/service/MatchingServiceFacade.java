@@ -41,11 +41,16 @@ public class MatchingServiceFacade {
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
+    /*-------------------------------------------- 조회 -------------------------------------------- */
+
+
+    // 실시간 매칭 - 현재 사용자 수 조회
     public long getConnectedUserCount() {
         Long count = redisTemplate.opsForSet().size(CONNECTED_USERS);
         return count == null ? 0L : count;
     }
 
+    // 실시간 매칭 - 구매자 필터 등록 후 필터 조건에 맞는 판매글 알림 수신
     public void registerBuyerFilterAndNotify(String username, BuyerFilterRequest buyerFilterRequest) {
         buyFilterService.saveBuyerFilter(username, buyerFilterRequest);
 
@@ -56,6 +61,7 @@ public class MatchingServiceFacade {
         }
     }
 
+    // 실시간 매칭 - 구매자 필터 조회
     public void getBuyerFilters(String username) {
         Map<String, BuyerFilterRequest> allFilters = buyFilterService.findAllBuyerFilters();
         RetrieveFilterDto dto = new RetrieveFilterDto(username, allFilters);
@@ -65,6 +71,11 @@ public class MatchingServiceFacade {
         log.info("[필터 발행] username={} filterCount={}", username, allFilters.size());
     }
 
+
+    /*-------------------------------------------- 실시간 거래 프로세스 -------------------------------------------- */
+
+
+    // 실시간 매칭 - 판매자 판매글 생성 후 필터 조건에 맞는 구매자에게 해당 정보 전송
     @Transactional
     public void createRealtimeCardAndNotifyBuyers(String username, CreateRealTimeCardRequest request) {
         CardDto realtimeCard = cardService.createRealtimeCard(username, request);
@@ -92,7 +103,7 @@ public class MatchingServiceFacade {
         }
     }
 
-    // 판매자에게 거래 수락 요청 -> 이 시점에 Trade 생성 ( Status == BUY_REQUEST )
+    // 실시간 매칭 - 판매자에게 거래 수락 요청 -> 이 시점에 Trade 생성 ( Status == BUY_REQUEST, Card == SELLING )
     @Transactional
     public void createTradeFromBuyer(CreateRealTimeTradeRequest createTradeRequest, String username) {
         Long savedId = tradeInitiationService.createRealTimeTrade(createTradeRequest, username);
@@ -103,26 +114,28 @@ public class MatchingServiceFacade {
         notificationService.notify(tradeDto.getSeller(), tradeDto);
     }
 
-    // 판매자가 거래 수락 -> ( Status == ACCEPT )
+    // 실시간 매칭 - 판매자가 거래 수락 -> ( Status == ACCEPT, Card == TRADING )
     @Transactional
     public void acceptTrade(TradeApproveRequest tradeApproveRequest, String buyerUsername) {
         // 1. 거래 승인 로직 (거래 상태 변경)
-        Long tradeId = tradeInitiationService.acceptTrade(tradeApproveRequest.getTradeId(), buyerUsername);
+        Long tradeId = tradeInitiationService.acceptRealTimeTrade(tradeApproveRequest.getTradeId(), buyerUsername);
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
         // 2. 판매자에게 입금 요청 알림 전송
         notificationService.notify(tradeDto.getBuyer(), tradeDto);
     }
 
+    // 실시간 매칭 - 구매자가 금앱을 입금 -> ( Status == PAYMENT_CONFIRM, Card == TRADING )
     @Transactional
     public void payTrade(CreateRealTimeTradePaymentRequest request, String username) {
         // 결제 완료 로직
-        Long tradeId = tradeInitiationService.payTrade(request, username);
+        Long tradeId = tradeInitiationService.payRealTimeTrade(request, username);
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
 
         // 판매자에게 입금 완료 알림 전송
         notificationService.notify(tradeDto.getSeller(), tradeDto);
     }
 
+    // 실시간 매칭 - 판매자가 데이터를 전송 후 해당 증거 사진을 첨부 ( Status == DATA_SENT, Card == TRADING )
     @Transactional
     public void sendTradeData(Long tradeId, MultipartFile file, String username) {
         tradeProgressService.sendTradeData(tradeId, username);
@@ -134,6 +147,7 @@ public class MatchingServiceFacade {
         notificationService.notify(tradeDto.getBuyer(), tradeDto);
     }
 
+    // 실시간 매칭 - 구매자가 거래를 확정 ( Status == COMPLETED, Card == SOLD_OUT )
     @Transactional
     public void confirmTrade(ConfirmTradeRequest request, String username) {
         Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username);

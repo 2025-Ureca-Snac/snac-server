@@ -34,7 +34,7 @@ public interface TradeInitiationService {
 
     Long createRealTimeTrade(CreateRealTimeTradeRequest request, String username);
 
-    Long acceptTrade(Long tradeId, String username);
+    Long acceptRealTimeTrade(Long tradeId, String username);
 
-    Long payTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username);
+    Long payRealTimeTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username);
 }
