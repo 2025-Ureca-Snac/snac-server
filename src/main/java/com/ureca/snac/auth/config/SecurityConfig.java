@@ -68,7 +68,7 @@ public class SecurityConfig {
                             "http://127.0.0.1:3000",
                             "https://docs.tosspayments.com",
                             "https://snac-app.com",
-
+                            "https://www.snac-app.com",
                             "https://develop.df83wi2m9axuw.amplifyapp.com",
                             "https://seungwoo.i234.me"
 
