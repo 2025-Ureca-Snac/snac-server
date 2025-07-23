@@ -102,6 +102,7 @@ public class MatchingServiceFacade {
         notificationService.notify(tradeDto.getSeller(), tradeDto);
     }
 
+    // 판매자가 거래 수락 -> ( Status == ACCEPT )
     @Transactional
     public void acceptTrade(TradeApproveRequest tradeApproveRequest, String buyerUsername) {
         // 1. 거래 승인 로직 (거래 상태 변경)

@@ -16,10 +16,7 @@ import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.exception.TradeNotFoundException;
-import com.ureca.snac.trade.exception.TradePaymentMismatchException;
-import com.ureca.snac.trade.exception.TradePermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeSelfRequestException;
+import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
 import com.ureca.snac.trade.support.TradeSupport;
@@ -49,6 +46,22 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     public Long acceptTrade(Long tradeId, String username) {
         Member member = tradeSupport.findMember(username);
         Trade trade = tradeSupport.findLockedTrade(tradeId);
+        Card card = tradeSupport.findLockedCard(trade.getCardId());
+
+        // 카드는 거래 상태이여야 함
+        if (card.getSellStatus() != TRADING) {
+            throw new CardInvalidStatusException();
+        }
+
+        // 거래요청 상태이여야 함
+        if (trade.getStatus() != BUY_REQUESTED) {
+            throw new TradeStatusMismatchException();
+        }
+
+        // 판매자만 수락할 수 있어야 함
+        if (trade.getSeller() != member) {
+            throw new TradePermissionDeniedException();
+        }
 
         trade.changeStatus(ACCEPTED);
 
@@ -61,8 +74,23 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         // 1. 거래 조회 (락 걸어서)
         Trade trade = tradeSupport.findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
         Member member = tradeSupport.findMember(username);
-
         Wallet wallet = tradeSupport.findLockedWallet(member.getId());
+        Card card = tradeSupport.findLockedCard(trade.getCardId());
+
+        // 카드는 거래 상태이어야 함
+        if (card.getSellStatus() != TRADING) {
+            throw new CardInvalidStatusException();
+        }
+
+        // 거래는 수락 상태이여야 함
+        if (trade.getStatus() != ACCEPTED) {
+            throw new TradeStatusMismatchException();
+        }
+
+        // 구매자만 결제할 수 있어야 함
+        if (trade.getBuyer() != member) {
+            throw new TradePermissionDeniedException();
+        }
 
         int totalPay = createRealTimeTradePaymentRequest.getMoney() + createRealTimeTradePaymentRequest.getPoint();
 
