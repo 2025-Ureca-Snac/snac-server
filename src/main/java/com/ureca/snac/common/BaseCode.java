@@ -174,6 +174,7 @@ public enum BaseCode {
     CARD_ALREADY_SELLING("CARD_ALREADY_SELLING_400", HttpStatus.BAD_REQUEST, "이미 판매 중인 카드입니다."),
     CARD_INVALID_STATUS("CARD_INVALID_STATUS_400", HttpStatus.BAD_REQUEST, "카드 상태가 유효하지 않습니다."),
     CARD_ALREADY_SOLD_OUT("CARD_ALREADY_SOLD_OUT_400", HttpStatus.BAD_REQUEST, "이미 판매 완료된 카드입니다."),
+    NOT_REALTIME_SELL_CARD("NOT_REALTIME_SELL_CARD_400", HttpStatus.BAD_REQUEST, "실시간 판매 카드가 아닙니다."),
 
     // 거래 - 성공
     TRADE_CREATE_SUCCESS("TRADE_CREATE_SUCCESS_201", HttpStatus.CREATED, "거래가 정상적으로 생성되었습니다."),

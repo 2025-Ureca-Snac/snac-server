@@ -147,11 +147,24 @@ public class CardServiceImpl implements CardService {
         cardRepository.delete(card);
     }
 
+    @Override
     @Transactional
-    public List<CardDto> findByMemberUsernameAndSellStatusAndCardCategory(String username, SellStatus sellStatus, CardCategory cardCategory) {
+    public void deleteCardByRealTime(String username, Long cardId) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+
+        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
+
+        cardRepository.delete(card);
+    }
+
+    @Transactional
+    public List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
-        return cardRepository.findLockedByMemberAndSellStatusAndCardCategory(member, sellStatus, cardCategory)
+        return cardRepository.findLockedByMemberAndSellStatusInAndCardCategory(member, sellStatuses, cardCategory)
                 .stream()
                 .map(CardDto::from)
                 .toList();

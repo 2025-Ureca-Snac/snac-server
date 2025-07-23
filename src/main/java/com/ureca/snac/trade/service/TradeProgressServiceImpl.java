@@ -6,6 +6,7 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.TradeInvalidStatusException;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
+import com.ureca.snac.trade.exception.TradeStatusMismatchException;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeProgressService;
 import com.ureca.snac.trade.support.TradeSupport;
@@ -37,7 +38,7 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
         if (trade.getStatus() != PAYMENT_CONFIRMED) { // 결제가 완료되지 않은 상태에서는 판매자가 데이터를 전송할 수 없음
-            throw new TradeInvalidStatusException();
+            throw new TradeStatusMismatchException();
         }
 
         if (trade.getBuyer() == seller || trade.getSeller() != seller) { // 이미 지정된 판매자가 현재 요청자가 아닐 경우 권한 없음
