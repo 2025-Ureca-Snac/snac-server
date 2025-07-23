@@ -13,7 +13,6 @@ import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradePaymentMismatchException;
 import com.ureca.snac.trade.exception.TradePermissionDeniedException;
@@ -22,13 +21,15 @@ import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
 import com.ureca.snac.trade.support.TradeSupport;
 import com.ureca.snac.wallet.entity.Wallet;
+import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.ureca.snac.board.entity.constants.SellStatus.*;
-import static com.ureca.snac.trade.entity.TradeStatus.*;
+import static com.ureca.snac.trade.entity.TradeStatus.ACCEPTED;
+import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 
 @Slf4j
 @Service
@@ -38,6 +39,7 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     private final TradeRepository tradeRepository;
     private final TradeSupport tradeSupport;
 
+    private final WalletService walletService;
     // 이벤트 기록 저장
     private final AssetHistoryEventPublisher assetHistoryEventPublisher;
     private final AssetChangedEventFactory assetChangedEventFactory;
@@ -145,18 +147,16 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     }
 
     // === private helper === //
+
     /**
      * 거래 객체를 생성하고, 결제 금액을 차감한 후 저장합니다.
      *
      * @param createTradeRequest 거래 요청 정보
-     * @param username 요청자
-     * @param requiredStatus 거래 유형 (SELLING: 판매글, PENDING: 구매글)
+     * @param username           요청자
+     * @param requiredStatus     거래 유형 (SELLING: 판매글, PENDING: 구매글)
      */
     private Long buildTrade(CreateTradeRequest createTradeRequest, String username, SellStatus requiredStatus) {
         Member member = tradeSupport.findMember(username);
-        Wallet wallet = tradeSupport.findLockedWallet(member.getId());
-        //-------- Wallet 엔티티 직접 가져오지말고 WalletService DI 하는게 안나은가?-------
-
         Card card = tradeSupport.findLockedCard(createTradeRequest.getCardId());
 
         // 카드 상태가 판매 중이 아닌데 판매 거래 요청이 들어오면 예외
@@ -171,43 +171,53 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         ensureOwnership(card, member, requiredStatus);
 
         // 결제 금액 검증 (금액 + 포인트 == 카드 가격)
-        int totalPay = createTradeRequest.getMoney() + createTradeRequest.getPoint();
-//        long totalPay = createTradeRequest.getMoney() + createTradeRequest.getPoint();
+        long moneyToUse = createTradeRequest.getMoney();
+        long pointToUse = createTradeRequest.getPoint();
+        long totalPay = moneyToUse + pointToUse;
 
-        if (card.getPrice() != totalPay)
+        if (card.getPrice() != totalPay) {
             throw new TradePaymentMismatchException();
+        }
+
+        // 1.결제 먼저
+        long moneyBalanceAfter = -1L;
 
         // 금액 및 포인트 차감
-        if (createTradeRequest.getMoney() != 0) {
-            wallet.withdrawMoney(createTradeRequest.getMoney());
-            // 예를 들면 walletService.withdrawMoney(createTradeRequest.getMoney());
-        }
-        if (createTradeRequest.getPoint() != 0) {
-            wallet.withdrawPoint(createTradeRequest.getPoint());
+        if (moneyToUse > 0) {
+            moneyBalanceAfter =
+                    walletService.withdrawMoney(member.getId(), moneyToUse);
+            // wallet.withdrawMoney(createTradeRequest.getMoney());
         }
 
+        long pointBalanceAfter = -1L;
+        if (pointToUse > 0) {
+            pointBalanceAfter =
+                    walletService.withdrawPoint(member.getId(), pointToUse);
+//            wallet.withdrawPoint(createTradeRequest.getPoint());
+        }
+
+        // 2, 거래 생성
         // 거래 엔티티 생성 및 저장
-        Trade trade = Trade.buildTrade(createTradeRequest.getPoint(), member, member.getPhone(), card, requiredStatus);
+        Trade trade = Trade.buildTrade((int) pointToUse, member, member.getPhone(), card, requiredStatus);
         tradeRepository.save(trade);
-        
-        if (createTradeRequest.getMoney() > 0) {
-            long moneyBalanceAfter = wallet.getMoney();
-//            long moneyBalanceAfter = walletService.getMoneyBalance(member.getId());
-            String title = String.format("%s %dGB 머니 사용", card.getCarrier().name(), card.getDataAmount());
+
+        // 3 기록
+        if (moneyToUse > 0) {
+            String title = String.format("%s %dGB 머니 사용",
+                    card.getCarrier().name(), card.getDataAmount());
 
             AssetChangedEvent event = assetChangedEventFactory.createForBuyWithMoney(
-                    member.getId(), trade.getId(), title, Long.valueOf(createTradeRequest.getMoney()), moneyBalanceAfter);
+                    member.getId(), trade.getId(), title, moneyToUse, moneyBalanceAfter);
 
             assetHistoryEventPublisher.publish(event);
         }
 
-        if (createTradeRequest.getPoint() > 0) {
-            long pointBalanceAfter = wallet.getPoint();
-//            long pointBalanceAfter = walletService.getPointBalance(member.getId());
-            String title = String.format("%s %dGB 포인트 사용", card.getCarrier().name(), card.getDataAmount());
+        if (pointToUse > 0) {
+            String title = String.format("%s %dGB 포인트 사용",
+                    card.getCarrier().name(), card.getDataAmount());
 
             AssetChangedEvent event = assetChangedEventFactory.createForBuyWithPoint(
-                    member.getId(), trade.getId(), title, Long.valueOf(createTradeRequest.getPoint()), pointBalanceAfter);
+                    member.getId(), trade.getId(), title, pointToUse, pointBalanceAfter);
 
             assetHistoryEventPublisher.publish(event);
         }
