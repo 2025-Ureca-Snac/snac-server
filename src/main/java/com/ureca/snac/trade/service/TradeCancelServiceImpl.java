@@ -72,9 +72,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             trade.cancel(requester);
 
             Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
-            long refundMoney = (long) (trade.getPriceGb() - trade.getPoint()) * trade.getDataAmount();
+            long refundMoney = trade.getPriceGb() - trade.getPoint();
             if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
-            if (trade.getPoint() > 0) buyerWallet.depositPoint((long) trade.getPoint() * trade.getDataAmount());  // 구매자에게 사용한 포인트 환불
+            if (trade.getPoint() > 0) buyerWallet.depositPoint(trade.getPoint());  // 구매자에게 사용한 포인트 환불
 
             // 패널티: SELLER_FAULT
             penaltyService.givePenalty(requester.getEmail(), PenaltyReason.SELLER_FAULT);
@@ -125,9 +125,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         cancel.accept();
         trade.cancel(seller); //상태변경까지
         // 환불 로직 (TradeProgressService.cancelTrade에 있던 부분 재활용)
-        long refundMoney = (long) (trade.getPriceGb() - trade.getPoint()) * trade.getDataAmount();
+        long refundMoney = trade.getPriceGb() - trade.getPoint();
         if (refundMoney > 0) wallet.depositMoney(refundMoney);
-        if (trade.getPoint() > 0) wallet.depositPoint((long) trade.getPoint() * trade.getDataAmount());  // 구매자에게 사용한 포인트 환불
+        if (trade.getPoint() > 0) wallet.depositPoint(trade.getPoint());  // 구매자에게 사용한 포인트 환불
 
         // 패널티 (귀책자: 구매자)
         penaltyService.givePenalty(cancel.getRequester().getEmail(), PenaltyReason.BUYER_FAULT);
