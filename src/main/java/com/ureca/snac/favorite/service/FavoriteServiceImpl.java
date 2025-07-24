@@ -1,7 +1,6 @@
 package com.ureca.snac.favorite.service;
 
-import com.ureca.snac.favorite.dto.CursorResult;
-import com.ureca.snac.favorite.dto.FavoriteCursor;
+import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.favorite.entity.Favorite;
 import com.ureca.snac.favorite.exception.AlreadyFavoriteMember;
@@ -62,7 +61,7 @@ public class FavoriteServiceImpl implements FavoriteService {
             String fromUserEmail, LocalDateTime cursorCreatedAt,
             Long cursorId, Integer size
     ) {
-        log.info("단골 목록 조회] 누가 : {}, 시간 : {}, cursorID : {}, size : {}",
+        log.info("[단골 목록 조회] 시작. 누가 : {}, 시간 : {}, 커서 Id : {}, 페이지 크기 : {}",
                 fromUserEmail, cursorCreatedAt, cursorId, size);
         // size가 null 이거나 0 이하의 예외를 방지
         int pageSize = (size == null || size <= 0) ? SIZE : size;
@@ -84,25 +83,25 @@ public class FavoriteServiceImpl implements FavoriteService {
                 );
 
         // 데이터 변환
-        List<Favorite> favorites = favoriteSlice.getContent();
+        List<FavoriteMemberDto> favoriteDtos = new ArrayList<>();
 
-        List<FavoriteMemberDto> favoriteDto = new ArrayList<>();
-
-        for (Favorite favorite : favorites) {
+        for (Favorite favorite : favoriteSlice.getContent()) {
             Member toMember = favorite.getToMember();
             FavoriteMemberDto dto = FavoriteMemberDto.from(toMember);
-            favoriteDto.add(dto);
+            favoriteDtos.add(dto);
         }
 
-        FavoriteCursor nextCursor = null;
+        String nextCursor = null;
         // 커서 계산
-        if (!favorites.isEmpty()) {
-            Favorite lastFavorite = favorites.get(favorites.size() - 1);
+        if (favoriteSlice.hasNext() && !favoriteSlice.getContent().isEmpty()) {
+            Favorite lastFavorite =
+                    favoriteSlice.getContent().get(favoriteSlice.getContent().size() - 1);
 
-            nextCursor = new FavoriteCursor(lastFavorite.getCreatedAt(), lastFavorite.getId());
+            nextCursor = lastFavorite.getCreatedAt().toString() + "," + lastFavorite.getId();
         }
-
-        return CursorResult.of(favoriteDto, nextCursor, favoriteSlice.hasNext());
+        log.info("[단골 목록 조회] 완료. 조회된 단골 수 : {}, 다음 페이지 존재 여부 : {}",
+                favoriteDtos.size(), favoriteSlice.hasNext());
+        return new CursorResult<>(favoriteDtos, nextCursor, favoriteSlice.hasNext());
     }
 
     @Override

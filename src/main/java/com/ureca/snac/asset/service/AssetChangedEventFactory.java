@@ -5,6 +5,8 @@ import com.ureca.snac.asset.entity.SourceDomain;
 import com.ureca.snac.asset.entity.TransactionCategory;
 import com.ureca.snac.asset.entity.TransactionType;
 import com.ureca.snac.asset.event.AssetChangedEvent;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,126 +16,177 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AssetChangedEventFactory {
+
     /**
-     * 머니 충전 성공시의 이벤트 생성
-     *
-     * @param memberId     이벤트를 발생 시킨 회원 ID
-     * @param rechargeId   출처가 되는 충전 기록 ID
-     * @param amount       변동된 그액
-     * @param balanceAfter 거래 후 최종 잔액
-     * @return 자산 변동 이벤트
+     * 전략 패턴의 ENUM 구현체
+     * 각 AssetType, TransactionType, TransactionCategory 을 조합해서
+     * 하나의 거래 유형 전략 으로 정의
      */
-    public AssetChangedEvent createForRecharge(
-            Long memberId, Long rechargeId, Long amount, Long balanceAfter) {
-        return AssetChangedEvent.builder()
-                .memberId(memberId)
-                .assetType(AssetType.MONEY)
-                .transactionType(TransactionType.DEPOSIT)
-                .category(TransactionCategory.RECHARGE)
-                .amount(amount)
-                .balanceAfter(balanceAfter)
-                .title("스낵 머니 충전")
-                .sourceDomain(SourceDomain.MONEY_RECHARGE)
-                .sourceId(rechargeId)
-                .build();
+    @Getter
+    @RequiredArgsConstructor
+    private enum TradeEventType {
+        BUY_WITH_MONEY(
+                AssetType.MONEY,
+                TransactionType.WITHDRAWAL,
+                TransactionCategory.BUY
+        ),
+        BUY_WITH_POINT(
+                AssetType.POINT,
+                TransactionType.WITHDRAWAL,
+                TransactionCategory.POINT_USAGE
+        ),
+        SELL_TO_MONEY(
+                AssetType.MONEY,
+                TransactionType.DEPOSIT,
+                TransactionCategory.SELL
+        ),
+        CANCEL_MONEY_REFUND(
+                AssetType.MONEY,
+                TransactionType.DEPOSIT,
+                TransactionCategory.CANCEL
+        ),
+        CANCEL_POINT_REFUND(
+                AssetType.POINT,
+                TransactionType.DEPOSIT,
+                TransactionCategory.CANCEL
+        );
+
+        private final AssetType assetType;
+        private final TransactionType transactionType;
+        private final TransactionCategory category;
     }
 
     /**
-     * 머니 충전 취소 성공시의 이벤트 생성
+     * 거래 관련 이벤트 생성 헬퍼 메소드
+     * TradeEventType만 선택해서 전달하면됨 전략 패턴사용
      *
+     * @param eventType    Enum 전략
      * @param memberId     이벤트를 발생 시킨 회원 ID
-     * @param paymentId    출처가 되는 결제 기록 ID
+     * @param tradeId      출처가 되는 충전 기록 ID
+     * @param title        기록될 제목
      * @param amount       변동된 금액
-     * @param balanceAfter 거래후 최종 잔액
-     * @return 자산 변동 이벤트
+     * @param balanceAfter 최종 잔액
+     * @return 생성된 자산 변동 이벤트
      */
-    public AssetChangedEvent createForCancel(
-            Long memberId, Long paymentId, Long amount, Long balanceAfter) {
+    private AssetChangedEvent createTradeEvent(
+            TradeEventType eventType, Long memberId, Long tradeId,
+            String title, Long amount, Long balanceAfter) {
+
         return AssetChangedEvent.builder()
                 .memberId(memberId)
-                .assetType(AssetType.MONEY)
-                .transactionType(TransactionType.WITHDRAWAL)
-                .category(TransactionCategory.CANCEL)
+                .assetType(eventType.getAssetType())
+                .transactionType(eventType.getTransactionType())
+                .category(eventType.getCategory())
                 .amount(amount)
                 .balanceAfter(balanceAfter)
-                .title("스낵 머니 충전 취소")
-                .sourceDomain(SourceDomain.PAYMENT)
-                .sourceId(paymentId)
+                .title(title)
+                .sourceDomain(SourceDomain.TRADE)
+                .sourceId(tradeId)
                 .build();
     }
 
     /**
-     * 거래에 있어서 머니로 구매했을 때의 이벤트
-     *
-     * @param memberId     구매자 회원 ID
-     * @param tradeId      거래 기록 ID
-     * @param title        거래 내역에 표시될 제목 SKT 2GB 머니 사용
-     * @param amount       사용된 머니 금액
-     * @param balanceAfter 거래후 최종 머니 잔액
-     * @return 생성된 자산 변동 이벤트
+     * 전략 패턴의 ENUM 구현체
+     * 각 AssetType, TransactionType, TransactionCategory 을 조합하고
+     * title과 SourceDomain 까지 합쳐서 한다.
+     * 하나의 충전 유형 전략 으로 정의
      */
+    @Getter
+    @RequiredArgsConstructor
+    private enum RechargeEventType {
+        RECHARGE(
+                AssetType.MONEY,
+                TransactionType.DEPOSIT,
+                TransactionCategory.RECHARGE,
+                "%,d원 충전",
+                SourceDomain.MONEY_RECHARGE
+        ),
+        CANCEL(
+                AssetType.MONEY,
+                TransactionType.WITHDRAWAL,
+                TransactionCategory.CANCEL,
+                "%,d원 충전 취소",
+                SourceDomain.PAYMENT
+        );
+
+        private final AssetType assetType;
+        private final TransactionType transactionType;
+        private final TransactionCategory category;
+        private final String titleFormat;
+        private final SourceDomain sourceDomain;
+    }
+
+    private AssetChangedEvent createForRechargeEvent(
+            RechargeEventType rechargeEventType, Long memberId, Long sourceId,
+            Long amount, Long balanceAfter) {
+        return AssetChangedEvent.builder()
+                .memberId(memberId)
+                .assetType(rechargeEventType.getAssetType())
+                .transactionType(rechargeEventType.getTransactionType())
+                .category(rechargeEventType.getCategory())
+                .amount(amount)
+                .balanceAfter(balanceAfter)
+                .title(String.format(rechargeEventType.getTitleFormat(), amount))
+                .sourceDomain(rechargeEventType.getSourceDomain())
+                .sourceId(sourceId)
+                .build();
+    }
+
+    // 거래관련
     public AssetChangedEvent createForBuyWithMoney(
-            Long memberId, Long tradeId, String title, Long amount, Long balanceAfter) {
-        return AssetChangedEvent.builder()
-                .memberId(memberId)
-                .assetType(AssetType.MONEY)
-                .transactionType(TransactionType.WITHDRAWAL)
-                .category(TransactionCategory.BUY)
-                .amount(amount)
-                .balanceAfter(balanceAfter)
-                .title(title)
-                .sourceDomain(SourceDomain.TRADE)
-                .sourceId(tradeId)
-                .build();
+            Long memberId, Long tradeId,
+            String title, Long amount, Long balanceAfter) {
+        return createTradeEvent(TradeEventType.BUY_WITH_MONEY,
+                memberId, tradeId, title, amount, balanceAfter);
+
     }
 
-    /**
-     * 거래에 있어서 포인트로 구매했을 때의 이벤트
-     *
-     * @param memberId     구매자 회원 ID
-     * @param tradeId      거래 기록 ID
-     * @param title        거래 내역에 표시될 제목 SKT 2GB 포인트 사용
-     * @param amount       사용된 포인트 금액
-     * @param balanceAfter 거래후 최종 포인트 잔액
-     * @return 생성된 자산 변동 이벤트
-     */
     public AssetChangedEvent createForBuyWithPoint(
-            Long memberId, Long tradeId, String title, Long amount, Long balanceAfter) {
-        return AssetChangedEvent.builder()
-                .memberId(memberId)
-                .assetType(AssetType.POINT)
-                .transactionType(TransactionType.WITHDRAWAL)
-                .category(TransactionCategory.POINT_USAGE)
-                .amount(amount)
-                .balanceAfter(balanceAfter)
-                .title(title)
-                .sourceDomain(SourceDomain.TRADE)
-                .sourceId(tradeId)
-                .build();
+            Long memberId, Long tradeId,
+            String title, Long amount, Long balanceAfter) {
+        return createTradeEvent(TradeEventType.BUY_WITH_POINT,
+                memberId, tradeId, title, amount, balanceAfter);
+
     }
 
-    /**
-     * 거래에 있어서 판매해서 머니로 정산받는 이벤트
-     *
-     * @param memberId     판매자 회원 ID
-     * @param tradeId      거래 기록 ID
-     * @param title        거래 내역에 표시될 제목 SKT 2GB 판매 대금
-     * @param amount       정산받은 머니 금액
-     * @param balanceAfter 거래후 최종 머니 잔액
-     * @return 생성된 자산 변동 이벤트
-     */
     public AssetChangedEvent createForSell(
-            Long memberId, Long tradeId, String title, Long amount, Long balanceAfter) {
-        return AssetChangedEvent.builder()
-                .memberId(memberId)
-                .assetType(AssetType.MONEY)
-                .transactionType(TransactionType.DEPOSIT)
-                .category(TransactionCategory.SELL)
-                .amount(amount)
-                .balanceAfter(balanceAfter)
-                .title(title)
-                .sourceDomain(SourceDomain.TRADE)
-                .sourceId(tradeId)
-                .build();
+            Long memberId, Long tradeId,
+            String title, Long amount, Long balanceAfter) {
+        return createTradeEvent(TradeEventType.SELL_TO_MONEY,
+                memberId, tradeId, title, amount, balanceAfter);
+
+    }
+
+    public AssetChangedEvent createForTradeCancelWithMoney(
+            Long memberId, Long tradeId,
+            String title, Long amount, Long balanceAfter) {
+        return createTradeEvent(TradeEventType.CANCEL_MONEY_REFUND,
+                memberId, tradeId, title, amount, balanceAfter);
+
+    }
+
+    public AssetChangedEvent createForTradeCancelWithPoint(
+            Long memberId, Long tradeId,
+            String title, Long amount, Long balanceAfter) {
+        return createTradeEvent(TradeEventType.CANCEL_POINT_REFUND,
+                memberId, tradeId, title, amount, balanceAfter);
+
+    }
+
+    // 충전 관련
+    public AssetChangedEvent createForRechargeEvent(
+            Long memberId, Long rechargeId,
+            Long amount, Long balanceAfter) {
+        return createForRechargeEvent(RechargeEventType.RECHARGE,
+                memberId, rechargeId, amount, balanceAfter);
+
+    }
+
+    public AssetChangedEvent createForRechargeCancel(
+            Long memberId, Long paymentId,
+            Long amount, Long balanceAfter) {
+        return createForRechargeEvent(RechargeEventType.CANCEL,
+                memberId, paymentId, amount, balanceAfter);
+
     }
 }

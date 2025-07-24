@@ -82,15 +82,6 @@ public class TradeFacade {
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
     }
 
-    @Transactional
-    public void cancelTrade(Long tradeId, String username) {
-        Long cancelCardId = tradeProgressService.cancelTrade(tradeId, username);
-        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
-        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
-
-        cardService.deleteCardByTrade(cancelCardId);
-    }
-
     public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
         return tradeQueryService.scrollTrades(username, side, size, lastTradeId);
     }

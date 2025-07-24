@@ -1,21 +1,24 @@
 package com.ureca.snac.asset.service;
 
 import com.ureca.snac.asset.dto.AssetHistoryListRequest;
-import com.ureca.snac.asset.dto.AssetHistoryListResponse;
+import com.ureca.snac.asset.dto.AssetHistoryResponse;
 import com.ureca.snac.asset.entity.AssetHistory;
 import com.ureca.snac.asset.entity.AssetType;
 import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.repository.AssetHistoryRepository;
+import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -75,17 +78,33 @@ public class AssetHistoryServiceImpl implements AssetHistoryService {
     }
 
     @Override
-    public AssetHistoryListResponse getAssetHistories(String username, AssetHistoryListRequest request) {
+    public CursorResult<AssetHistoryResponse> getAssetHistories(
+            String username, AssetHistoryListRequest request) {
+
         log.info("[자산 내역] 요청을 처리. 회원 : {}, 조건 : {}", username, request);
-        Member member = memberRepository.findByEmail(username)
-                .orElseThrow(MemberNotFoundException::new);
-        List<AssetHistory> histories =
+
+        Member member = findMemberByEmail(username);
+        Slice<AssetHistory> historySlice =
                 assetHistoryRepository.findWithFilters(member.getId(), request);
-        return AssetHistoryListResponse.of(histories, request.size());
+
+        List<AssetHistoryResponse> historyDtos = new ArrayList<>();
+
+        for (AssetHistory history : historySlice.getContent()) {
+            historyDtos.add(AssetHistoryResponse.from(history));
+        }
+
+        String nextCursor = null;
+        if (historySlice.hasNext() && !historySlice.getContent().isEmpty()) {
+            AssetHistory lastHistory =
+                    historySlice.getContent().get(historyDtos.size() - 1);
+            nextCursor = lastHistory.getCreatedAt().toString() + ","
+                    + lastHistory.getId();
+        }
+        return new CursorResult<>(historyDtos, nextCursor, historySlice.hasNext());
     }
 
-//    private Member findMemberByEmail(String email) {
-//        return memberRepository.findByEmail(email)
-//                .orElseThrow(MemberNotFoundException::new);
-//    }
+    private Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
+    }
 }
