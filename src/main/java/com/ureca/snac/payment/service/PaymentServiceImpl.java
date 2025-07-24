@@ -7,8 +7,8 @@ import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.exception.PaymentNotFoundException;
-import com.ureca.snac.payment.exception.PaymentOwnershipMismatchException;
 import com.ureca.snac.payment.repository.PaymentRepository;
+import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +26,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentGatewayAdapter paymentGatewayAdapter;
     // 내부 하위 서비스 레이어
     private final PaymentInternalService paymentInternalService;
+    // 잔액검증만 쓸꺼
+    private final WalletService walletService;
+
 
     @Override
     @Transactional
@@ -40,19 +43,16 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentCancelResponse cancelPayment(String paymentKey, String reason, String email) {
         log.info("[결제 취소] 시작. 결제 ID : {}", paymentKey);
 
-        log.info("[결제 취소] 사전 검증 시작 email : {}", email);
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
 
         Payment payment = paymentRepository.findByPaymentKeyWithMember(paymentKey)
                 .orElseThrow(PaymentNotFoundException::new);
 
-        // 결제 멤버랑 현재 요청자 검토
-        if (!payment.isOwner(member)) {
-            log.info("[결제 취소] 실패 : 결제 소유주 불일치. 소유주 : {}, 요청자 : {}",
-                    payment.getMember().getId(), member.getId());
-            throw new PaymentOwnershipMismatchException();
-        }
+        long currentUserBalance = walletService.getMoneyBalance(member.getId());
+
+        // Payment 객체에게 모든 취소관련 검증을 위임
+        payment.validateForCancellation(member, currentUserBalance);
         log.info("[결제 취소] 검증 통과");
 
         // 외부 API 호출 트랜잭션 외부니까

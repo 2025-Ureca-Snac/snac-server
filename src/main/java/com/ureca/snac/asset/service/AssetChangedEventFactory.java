@@ -99,7 +99,7 @@ public class AssetChangedEventFactory {
                 TransactionType.DEPOSIT,
                 TransactionCategory.RECHARGE,
                 "%,d원 충전",
-                SourceDomain.MONEY_RECHARGE
+                SourceDomain.PAYMENT
         ),
         CANCEL(
                 AssetType.MONEY,
@@ -175,10 +175,10 @@ public class AssetChangedEventFactory {
 
     // 충전 관련
     public AssetChangedEvent createForRechargeEvent(
-            Long memberId, Long rechargeId,
+            Long memberId, Long paymentId,
             Long amount, Long balanceAfter) {
         return createForRechargeEvent(RechargeEventType.RECHARGE,
-                memberId, rechargeId, amount, balanceAfter);
+                memberId, paymentId, amount, balanceAfter);
 
     }
 
