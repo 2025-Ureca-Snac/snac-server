@@ -4,6 +4,7 @@ package com.ureca.snac.trade.service.interfaces;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
 import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
 import com.ureca.snac.trade.dto.TradeDto;
+import com.ureca.snac.trade.entity.CancelReason;
 
 import java.util.List;
 
@@ -34,4 +35,8 @@ public interface TradeProgressService {
     TradeDto cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
 
     TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
+
+    TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason);
+
+    TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username);
 }

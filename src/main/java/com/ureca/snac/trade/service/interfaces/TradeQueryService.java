@@ -5,6 +5,8 @@ import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 
+import java.util.List;
+
 public interface TradeQueryService {
     /**
      * 무한 스크롤 방식으로 거래 내역을 조회합니다.
@@ -34,4 +36,8 @@ public interface TradeQueryService {
     ProgressTradeCountResponse countBuyingProgress(String username);
 
     TradeDto findByTradeId(Long tradeId);
+
+    List<TradeDto> findBuyerRealTimeTrade(String buyerUsername);
+
+    List<TradeDto> findSellerRealTimeTrade(String sellerUsername);
 }

@@ -9,6 +9,7 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
 import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
 import com.ureca.snac.trade.dto.TradeDto;
+import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
@@ -163,6 +164,35 @@ public class TradeProgressServiceImpl implements TradeProgressService {
 
         trade.cancel(member);
         trade.changeCancelReason(SELLER_CHANGE_MIND);
+
+        return TradeDto.from(trade);
+    }
+
+    @Override
+    @Transactional
+    public TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason) {
+        Trade trade = tradeSupport.findLockedTrade(tradeId);
+        Member member = tradeSupport.findMember(username);
+
+        trade.cancel(member);
+        trade.changeCancelReason(reason);
+
+        return TradeDto.from(trade);
+    }
+
+    @Override
+    @Transactional
+    public TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username) {
+        Trade trade = tradeSupport.findLockedTrade(tradeId);
+        Member member = tradeSupport.findMember(username);
+
+        if (trade.getPriceGb() - trade.getPoint() > 0) {
+            walletService.depositMoney(member.getId(), trade.getPriceGb() - trade.getPoint());
+        }
+
+        if (trade.getPoint() > 0) {
+            walletService.depositPoint(member.getId(), trade.getPoint());
+        }
 
         return TradeDto.from(trade);
     }
