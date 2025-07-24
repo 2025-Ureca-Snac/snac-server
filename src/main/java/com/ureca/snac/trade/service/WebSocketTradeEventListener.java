@@ -8,6 +8,7 @@ import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.service.interfaces.BuyFilterService;
+import com.ureca.snac.trade.service.interfaces.TradeCancelService;
 import com.ureca.snac.trade.service.interfaces.TradeProgressService;
 import com.ureca.snac.trade.service.interfaces.TradeQueryService;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ public class WebSocketTradeEventListener {
     private final NotificationService notificationService;
     private final TradeProgressService tradeProgressService;
     private final TradeQueryService tradeQueryService;
+    private final TradeCancelService tradeCancelService;
     private final BuyFilterService buyFilterService;
     private final CardService cardService;
 
@@ -122,11 +124,11 @@ public class WebSocketTradeEventListener {
         List<TradeDto> buyerTrades = tradeQueryService.findBuyerRealTimeTrade(username);
         for (TradeDto trade : buyerTrades) {
             if (isCancellable(trade.getStatus())) {
-                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-                    tradeProgressService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-                }
+//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
+//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
+//                }
 
-                TradeDto tradeDto = tradeProgressService.cancelRealTimeTrade(
+                TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
                         trade.getId(),
                         username,
                         BUYER_FORCED_TERMINATION);
@@ -144,11 +146,11 @@ public class WebSocketTradeEventListener {
         List<TradeDto> sellerTrades = tradeQueryService.findSellerRealTimeTrade(username);
         for (TradeDto trade : sellerTrades) {
             if (isCancellable(trade.getStatus())) {
-                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-                    tradeProgressService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-                }
+//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
+//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
+//                }
 
-                TradeDto tradeDto = tradeProgressService.cancelRealTimeTrade(
+                TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
                         trade.getId(),
                         username,
                         SELLER_FORCED_TERMINATION
