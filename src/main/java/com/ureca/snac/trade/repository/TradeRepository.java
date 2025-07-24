@@ -4,6 +4,7 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.entity.TradeStatus;
+import com.ureca.snac.trade.entity.TradeType;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -47,4 +48,10 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Trade> findLockedByCardIdAndBuyer(Long cardId, Member buyer);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Trade> findAllByBuyerAndTradeType(Member member, TradeType tradeType);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Trade> findAllBySellerAndTradeType(Member member, TradeType tradeType);
 }
