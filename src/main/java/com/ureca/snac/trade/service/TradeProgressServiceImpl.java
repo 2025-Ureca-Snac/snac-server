@@ -4,6 +4,7 @@ import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
+import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
@@ -135,5 +136,32 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         return waitingTrades.stream()
                 .map(TradeDto::from)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public TradeDto cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username) {
+        Member member = tradeSupport.findMember(username);
+        Trade trade = tradeSupport.findLockedTrade(cancelRealTimeTradeRequest.getTradeId());
+
+        cardRepository.deleteById(trade.getCardId());
+        trade.cancel(member);
+        trade.changeCancelReason(BUYER_CHANGE_MIND);
+
+        return TradeDto.from(trade);
+    }
+
+    @Override
+    @Transactional
+    public TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username) {
+        Member member = tradeSupport.findMember(username);
+        Trade trade = tradeSupport.findLockedTrade(cancelRealTimeTradeRequest.getTradeId());
+
+        cardRepository.deleteById(trade.getCardId());
+
+        trade.cancel(member);
+        trade.changeCancelReason(SELLER_CHANGE_MIND);
+
+        return TradeDto.from(trade);
     }
 }

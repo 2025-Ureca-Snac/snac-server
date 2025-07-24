@@ -2,6 +2,7 @@ package com.ureca.snac.trade.service.interfaces;
 
 
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
+import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 
 import java.util.List;
@@ -37,4 +38,8 @@ public interface TradeProgressService {
     TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username);
 
     List<TradeDto> cancelBuyRequestBySellerOfCard(CancelBuyRequest request, String username);
+
+    TradeDto cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
+
+    TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
 }

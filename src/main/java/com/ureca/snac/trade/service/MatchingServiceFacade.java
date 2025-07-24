@@ -187,6 +187,20 @@ public class MatchingServiceFacade {
         }
     }
 
+    // ACCEPTED 거래 취소 - 구매자
+    @Transactional
+    public void cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest request, String username) {
+        TradeDto tradeDto = tradeProgressService.cancelAcceptedTradeByBuyer(request, username);
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getSeller(), tradeDto));
+    }
+
+    // ACCEPTED 거래 취소 - 판매자
+    @Transactional
+    public void cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest request, String username) {
+        TradeDto tradeDto = tradeProgressService.cancelAcceptedTradeBySeller(request, username);
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
+    }
+
     // 조건 비교 함수
     private boolean isMatching(CardDto card, BuyerFilterRequest filter) {
         boolean carrierMatch = card.getCarrier().equals(filter.getCarrier());
