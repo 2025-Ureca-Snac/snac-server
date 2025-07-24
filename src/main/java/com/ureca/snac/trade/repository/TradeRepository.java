@@ -41,4 +41,10 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     """)
     List<Trade> findByStatusAndUpdatedAtBefore(@Param("status") TradeStatus status,
                                                @Param("limit") LocalDateTime limit);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Trade> findLockedByCardIdAndStatus(Long cardId, TradeStatus tradeStatus);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Trade> findLockedByCardIdAndBuyer(Long cardId, Member buyer);
 }

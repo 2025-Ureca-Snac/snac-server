@@ -1,8 +1,11 @@
 package com.ureca.snac.payment.mapper;
 
+import com.ureca.snac.common.exception.ExternalApiException;
 import com.ureca.snac.infra.dto.response.TossCancelResponse;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import org.springframework.stereotype.Component;
+
+import static com.ureca.snac.common.BaseCode.TOSS_API_CALL_ERROR;
 
 /**
  * Mapper 패턴
@@ -20,11 +23,9 @@ public class PaymentCancelMapper {
         // Toss 응답이 비정상적이거나 취소내역이 없는 경우
         if (tossCancelResponse == null || tossCancelResponse.cancels() == null ||
                 tossCancelResponse.cancels().isEmpty()) {
-            // 예외 던지거나 최소한의 정보, paymentKey 반환 처리
-            return PaymentCancelResponse.builder()
-                    .paymentKey(tossCancelResponse != null ? tossCancelResponse.paymentKey() : null)
-                    .build();
+            throw new ExternalApiException(TOSS_API_CALL_ERROR);
         }
+
         TossCancelResponse.Cancel firstCancel = tossCancelResponse.cancels().get(0);
 
         return PaymentCancelResponse.builder()

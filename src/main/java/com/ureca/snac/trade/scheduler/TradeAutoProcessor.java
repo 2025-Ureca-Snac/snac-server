@@ -1,5 +1,9 @@
 package com.ureca.snac.trade.scheduler;
 
+import com.ureca.snac.asset.event.AssetChangedEvent;
+import com.ureca.snac.asset.service.AssetChangedEventFactory;
+import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
+import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.member.Activated;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
@@ -10,7 +14,7 @@ import com.ureca.snac.trade.repository.TradeCancelRepository;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
 import com.ureca.snac.trade.support.TradeSupport;
-import com.ureca.snac.wallet.entity.Wallet;
+import com.ureca.snac.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +36,16 @@ public class TradeAutoProcessor {
     private final TradeSupport tradeSupport;
     private final MemberRepository memberRepository;
     private final PenaltyService penaltyService;
-    private final TradeCancelRepository cancelRepo;
 
-    /** 판매자가 48 시간 내 전송 안 한 거래 자동 환불 */
+    private final TradeCancelRepository cancelRepo;
+    // 기록 이벤트
+    private final WalletService walletService;
+    private final AssetHistoryEventPublisher assetHistoryEventPublisher;
+    private final AssetChangedEventFactory assetChangedEventFactory;
+
+    /**
+     * 판매자가 48 시간 내 전송 안 한 거래 자동 환불
+     */
     @Scheduled(cron = "0 0 * * * *")       // 매 정시
     @Transactional
     public void refundIfSellerNoSend() {
@@ -44,10 +55,45 @@ public class TradeAutoProcessor {
                 .findByStatusAndUpdatedAtBefore(TradeStatus.PAYMENT_CONFIRMED, limit);
 
         trades.forEach(trade -> {
-            // 환불
-            Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
-            buyerWallet.depositMoney((long) (trade.getPriceGb() - trade.getPoint()) * trade.getDataAmount());
-            buyerWallet.depositPoint((long) trade.getPoint() * trade.getDataAmount());
+            Card card = tradeSupport.findLockedCard(trade.getCardId());
+            Member buyer = trade.getBuyer();
+
+            long moneyToRefund = trade.getPriceGb() - trade.getPoint();
+
+            if (moneyToRefund > 0) {
+                long moneyFinalBalance = walletService.depositMoney(buyer.getId(),
+                        moneyToRefund);
+
+                String title = String.format("%s %dGB 자동 환불",
+                        card.getCarrier().name(), card.getDataAmount());
+
+                AssetChangedEvent event = assetChangedEventFactory.createForTradeCancelWithMoney(
+                        buyer.getId(), trade.getId(), title,
+                        moneyToRefund, moneyFinalBalance
+                );
+                assetHistoryEventPublisher.publish(event);
+            }
+
+            long pointToRefund = trade.getPoint();
+            if (pointToRefund > 0) {
+                long pointFinalBalance = walletService.depositPoint(
+                        buyer.getId(), pointToRefund
+                );
+
+                String title = String.format("%s %dGB 자동 포인트 환불",
+                        card.getCarrier().name(), card.getDataAmount());
+
+                AssetChangedEvent event =
+                        assetChangedEventFactory.createForTradeCancelWithPoint(
+                                buyer.getId(), trade.getId(), title,
+                                pointToRefund, pointFinalBalance
+                        );
+                assetHistoryEventPublisher.publish(event);
+            }
+//            // 환불
+//            Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
+//            buyerWallet.depositMoney((long) (trade.getPriceGb() - trade.getPoint()) * trade.getDataAmount());
+//            buyerWallet.depositPoint((long) trade.getPoint() * trade.getDataAmount());
 
             // 상태 변경
             trade.cancel(trade.getBuyer());
@@ -59,7 +105,9 @@ public class TradeAutoProcessor {
         });
     }
 
-    /** 구매자가 48 시간 내 확정 안 한 거래 자동 정산 */
+    /**
+     * 구매자가 48 시간 내 확정 안 한 거래 자동 정산
+     */
     @Scheduled(cron = "0 30 * * * *")      // 매시 30분
     @Transactional
     public void payoutIfBuyerNoConfirm() {
@@ -69,9 +117,23 @@ public class TradeAutoProcessor {
                 .findByStatusAndUpdatedAtBefore(TradeStatus.DATA_SENT, limit);
 
         trades.forEach(trade -> {
-            // 정산
-            Wallet sellerWallet = tradeSupport.findLockedWallet(trade.getSeller().getId());
-            sellerWallet.depositMoney((long) trade.getPriceGb() * trade.getDataAmount());
+            Card card = tradeSupport.findLockedCard(trade.getCardId());
+            Member seller = trade.getSeller();
+
+            // 1. 판매 대금 정상
+            long amountToDeposit = trade.getPriceGb();
+            long finalBalance = walletService.depositMoney(seller.getId(), amountToDeposit);
+
+            String title = String.format("%s %dGB 자동 정산",
+                    card.getCarrier().name(), card.getDataAmount());
+            AssetChangedEvent event = assetChangedEventFactory.createForSell(
+                    seller.getId(), trade.getId(), title, amountToDeposit, finalBalance
+            );
+            assetHistoryEventPublisher.publish(event);
+
+//            // 정산
+//            Wallet sellerWallet = tradeSupport.findLockedWallet(trade.getSeller().getId());
+//            sellerWallet.depositMoney((long) trade.getPriceGb() * trade.getDataAmount());
 
             // 상태 변경
             trade.changeStatus(TradeStatus.COMPLETED);
