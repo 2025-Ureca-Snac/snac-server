@@ -171,6 +171,14 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    public List<CardDto> findAllDevCard() {
+        return cardRepository.findAll()
+                .stream()
+                .map(CardDto::from)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void deleteCardByTrade(Long cardId) {
         cardRepository.deleteById(cardId);

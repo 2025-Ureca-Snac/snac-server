@@ -66,5 +66,7 @@ public interface CardService {
     List<CardDto> findRealtimeCardsByFilter(BuyerFilterRequest filter);
 
     List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory);
+
+    List<CardDto> findAllDevCard();
 }
 
