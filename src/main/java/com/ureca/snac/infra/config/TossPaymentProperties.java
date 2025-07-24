@@ -14,8 +14,5 @@ public class TossPaymentProperties {
 
     private final String url;
 
-    private final String successUrl;
-    private final String failUrl;
-
     private final String secretKey;
 }

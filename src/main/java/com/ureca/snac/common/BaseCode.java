@@ -97,6 +97,7 @@ public enum BaseCode {
 
     // 결제 - 성공
     MONEY_RECHARGE_PREPARE_SUCCESS("MONEY_RECHARGE_PREPARE_SUCCESS_200", HttpStatus.OK, "머니 충전 요청에 성공했습니다"),
+    MONEY_RECHARGE_SUCCESS("MONEY_RECHARGE_SUCCESS_200", HttpStatus.OK, "머니 충전에 성공했습니다"),
     PAYMENT_CANCEL_SUCCESS("PAYMENT_CANCEL_SUCCESS_200", HttpStatus.OK, "결제 취소에 성공했습니다,"),
 
     // 결제 - 예외
@@ -106,10 +107,17 @@ public enum BaseCode {
     PAYMENT_AMOUNT_MISMATCH("PAYMENT_AMOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "주문 금액이 일치하지 않습니다"),
     PAYMENT_NOT_CANCELLABLE("PAYMENT_NOT_CANCELLABLE_409", HttpStatus.CONFLICT, "결제를 취소할 수 없는 상태입니다"),
     INVALID_PAYMENT_FOR_RECHARGE("INVALID_PAYMENT_FOR_RECHARGE_409", HttpStatus.CONFLICT, "충전 기록을 생성할 수 없는 결제입니다"),
+    PAYMENT_PERIOD_EXPIRED("PAYMENT_PERIOD_EXPIRED_400", HttpStatus.BAD_REQUEST, "취소 가능한 기간 지났습니다"),
 
-    // 토스 API
+    // 결제 취소 - 예외
+    ALREADY_USED_RECHARGE_CANNOT_CANCEL("ALREADY_USED_RECHARGE_CANNOT_CANCEL_409", HttpStatus.CONFLICT, "이미 사용된 내역이 있어 취소할 수 없습니다"),
+
+    // 토스 API - 예외
+    TOSS_INVALID_CARD_INFO("TOSS_INVALID_CARD_INFO_400", HttpStatus.BAD_REQUEST, "카드 정보가 유효하지 않습니다. 카드번호나 유효기간 확인해주세요"),
+    TOSS_NOT_ENOUGH_BALANCE("TOSS_NOT_ENOUGH_BALANCE_400", HttpStatus.BAD_REQUEST, "카드 잔액이 부족합니다"),
+    TOSS_INVALID_API_KEY("TOSS_INVALID_API_KEY_500", HttpStatus.INTERNAL_SERVER_ERROR,
+            "결제 연동 설정에 문제가 발생했습니다. 관리자에게 문의주세요"),
     TOSS_API_CALL_ERROR("TOSS_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "토스 결제 시스템 연동 중 오류 발생"),
-    TOSS_API_CALL_ERROR_CUSTOM("TOSS_API_CALL_ERROR_CUSTOM_400", HttpStatus.BAD_REQUEST, "Toss API custom"),
 
     // 지갑 - 성공
     WALLET_SUMMARY_SUCCESS("WALLET_SUMMARY_SUCCESS_200", HttpStatus.OK, "내 지갑 요약 정보 조회 성공했습니다"),

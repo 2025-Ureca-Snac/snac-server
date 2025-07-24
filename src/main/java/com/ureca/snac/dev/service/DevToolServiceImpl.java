@@ -51,7 +51,7 @@ public class DevToolServiceImpl implements DevToolService {
                 request.amount(),
                 balanceAfter,
                 "개발용 강제 충전",
-                SourceDomain.MONEY_RECHARGE,
+                null,
                 ctx.recharge().getId()
         );
 
