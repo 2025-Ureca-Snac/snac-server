@@ -107,6 +107,29 @@ public class RabbitMQConfig {
     }
 
 
+    /* ------------------- Direct : 거래 취소 전용 ------------------- */
+    public static final String CANCEL_EXCHANGE = "cancel_exchange";
+    public static final String CANCEL_QUEUE = "cancel_queue";
+    public static final String CANCEL_ROUTING_KEY = "trade.cancel";
+
+    @Bean
+    public DirectExchange cancelExchange() {
+        return new DirectExchange(CANCEL_EXCHANGE);
+    }
+
+    @Bean
+    public Queue cancelQueue() {
+        return new Queue(CANCEL_QUEUE, false);
+    }
+
+    @Bean
+    public Binding cancelBinding(DirectExchange cancelExchange, Queue cancelQueue) {
+        return BindingBuilder.bind(cancelQueue)
+                .to(cancelExchange)
+                .with(CANCEL_ROUTING_KEY);
+    }
+
+
     /* ------------------- Direct : SMS 전용 ------------------- */
     public static final String SMS_EXCHANGE = "sms_exchange";
 

@@ -2,6 +2,7 @@ package com.ureca.snac.notification.listener;
 
 import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.config.RabbitMQConfig;
+import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.SocketErrorDto;
 import com.ureca.snac.trade.dto.TradeDto;
@@ -37,6 +38,19 @@ public class NotificationListener {
                 username,
                 "/queue/matching",
                 cardDto
+        );
+    }
+
+    // 취소 관련 리스너
+    @RabbitListener(queues = RabbitMQConfig.CANCEL_QUEUE)
+    public void onTradeCancel(CancelTradeDto cancelDto) {
+        log.info("[거래 취소] 사용자: {}, tradeId: {}", cancelDto.getUsername(), cancelDto.getTradeDto().getId());
+
+        // WebSocket으로 /user/queue/cancel로 전송
+        messaging.convertAndSendToUser(
+                cancelDto.getUsername(),       // 대상 사용자
+                "/queue/cancel",               // 목적지
+                cancelDto                      // 보낼 DTO(메시지)
         );
     }
 
