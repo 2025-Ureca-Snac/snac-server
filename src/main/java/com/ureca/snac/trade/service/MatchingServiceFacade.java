@@ -201,6 +201,22 @@ public class MatchingServiceFacade {
         notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
     }
 
+    @Transactional
+    public void cancelPaymentTradeByBuyer(CancelRealTimeTradeRequest request, String username) {
+        tradeProgressService.cancelRealTimeTradeWithRefund(request.getTradeId(), username);
+
+        TradeDto tradeDto = tradeProgressService.cancelRealTimeTrade(request.getTradeId(), username, request.getReason());
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getSeller(), tradeDto));
+    }
+
+    @Transactional
+    public void cancelPaymentTradeBySeller(CancelRealTimeTradeRequest request, String username) {
+        tradeProgressService.cancelRealTimeTradeWithRefund(request.getTradeId(), username);
+        TradeDto tradeDto = tradeProgressService.cancelRealTimeTrade(request.getTradeId(), username, request.getReason());
+
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
+    }
+
     // 조건 비교 함수
     private boolean isMatching(CardDto card, BuyerFilterRequest filter) {
         boolean carrierMatch = card.getCarrier().equals(filter.getCarrier());

@@ -187,11 +187,11 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         Member member = tradeSupport.findMember(username);
 
         if (trade.getPriceGb() - trade.getPoint() > 0) {
-            walletService.depositMoney(member.getId(), trade.getPriceGb() - trade.getPoint());
+            walletService.depositMoney(trade.getBuyer().getId(), trade.getPriceGb() - trade.getPoint());
         }
 
         if (trade.getPoint() > 0) {
-            walletService.depositPoint(member.getId(), trade.getPoint());
+            walletService.depositPoint(trade.getBuyer().getId(), trade.getPoint());
         }
 
         return TradeDto.from(trade);
