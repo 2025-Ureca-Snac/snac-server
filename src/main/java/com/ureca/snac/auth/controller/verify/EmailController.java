@@ -1,8 +1,8 @@
-package com.ureca.snac.auth.controller;
+package com.ureca.snac.auth.controller.verify;
 
 import com.ureca.snac.auth.dto.request.EmailRequest;
 import com.ureca.snac.auth.dto.request.VerificationEmailRequest;
-import com.ureca.snac.auth.service.EmailService;
+import com.ureca.snac.auth.service.verify.EmailService;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

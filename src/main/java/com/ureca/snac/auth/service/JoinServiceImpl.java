@@ -5,6 +5,8 @@ import com.ureca.snac.auth.exception.EmailDuplicateException;
 import com.ureca.snac.auth.exception.EmailNotVerifiedException;
 import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.repository.AuthRepository;
+import com.ureca.snac.auth.service.verify.EmailService;
+import com.ureca.snac.auth.service.verify.SnsService;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;

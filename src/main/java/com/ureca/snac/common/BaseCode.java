@@ -31,6 +31,26 @@ public enum BaseCode {
     // 소셜 로그인 시도 - 실패
     OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
 
+    // 카카오 연동 해제 관련
+    KAKAO_UNLINK_SUCCESS("KAKAO_UNLINK_SUCCESS_200", HttpStatus.OK, "카카오 연결 끊기에 성공했습니다."),
+    KAKAO_UNLINK_FAILED("KAKAO_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "카카오 연결 끊기에 실패했습니다."),
+    KAKAO_NO_LINKED("KAKAO_NO_LINKED_400", HttpStatus.BAD_REQUEST, "카카오 연동이 되어있지 않습니다."),
+    KAKAO_API_CALL_ERROR("KAKAO_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "카카오 API 연동 중 오류가 발생했습니다."),
+
+    // 네이버 연동 해제 관련
+    NAVER_UNLINK_SUCCESS("NAVER_UNLINK_SUCCESS_200", HttpStatus.OK, "네이버 연결 끊기에 성공했습니다."),
+    NAVER_NO_LINKED      ("NAVER_NO_LINKED_400",      HttpStatus.BAD_REQUEST,            "네이버 연동이 되어있지 않습니다."),
+    NAVER_TOKEN_NOT_FOUND("NAVER_TOKEN_NOT_FOUND_400", HttpStatus.BAD_REQUEST, "Naver access token이 없습니다."),
+    NAVER_API_CALL_ERROR("NAVER_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "네이버 API 연동 중 오류가 발생했습니다."),
+
+
+    // Google 연동 해제 관련
+    GOOGLE_UNLINK_SUCCESS("GOOGLE_UNLINK_SUCCESS_200", HttpStatus.OK, "Google 연결 끊기에 성공했습니다."),
+    GOOGLE_NO_LINKED     ("GOOGLE_NO_LINKED_400",     HttpStatus.BAD_REQUEST,            "Google 연동이 되어있지 않습니다."),
+    GOOGLE_UNLINK_FAILED ("GOOGLE_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR,  "Google 연결 끊기에 실패했습니다."),
+    GOOGLE_TOKEN_NOT_FOUND("GOOGLE_TOKEN_NOT_FOUND_400", HttpStatus.BAD_REQUEST, "Google access token이 없습니다."),
+
+
     // 로그아웃 시도 - 성공
     LOGOUT_SUCCESS("LOGOUT_SUCCESS_200", HttpStatus.OK, "로그아웃에 성공했습니다."),
 

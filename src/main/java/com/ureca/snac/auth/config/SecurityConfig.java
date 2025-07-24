@@ -7,7 +7,6 @@ import com.ureca.snac.auth.filter.LoginFilter;
 import com.ureca.snac.auth.oauth2.CustomAuthorizationRequestResolver;
 import com.ureca.snac.auth.oauth2.CustomOAuth2FailHandler;
 import com.ureca.snac.auth.oauth2.CustomOAuth2SuccessHandler;
-import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.service.CustomOAuth2UserService;
 import com.ureca.snac.auth.util.JWTUtil;
@@ -21,7 +20,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -39,7 +37,6 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
-    private final AuthRepository authRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customSuccessHandler;
     private final CustomOAuth2FailHandler customFailHandler;
@@ -57,7 +54,8 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, RefreshRepository refreshRepository, InMemoryClientRegistrationRepository clientRegistrationRepository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, RefreshRepository refreshRepository) throws Exception {
+
         http.
                 cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration cfg = new CorsConfiguration();
@@ -69,8 +67,10 @@ public class SecurityConfig {
                             "https://docs.tosspayments.com",
                             "https://snac-app.com",
                             "https://www.snac-app.com",
+                            "https://api.snac-app.com",
                             "https://develop.df83wi2m9axuw.amplifyapp.com",
-                            "https://seungwoo.i234.me"
+                            "https://seungwoo.i234.me",
+                            "https://kapi.kakao.com"
 
                     ));
                     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

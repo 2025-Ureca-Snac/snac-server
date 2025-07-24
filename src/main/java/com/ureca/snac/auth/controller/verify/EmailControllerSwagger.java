@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.controller;
+package com.ureca.snac.auth.controller.verify;
 
 import com.ureca.snac.auth.dto.request.EmailRequest;
 import com.ureca.snac.auth.dto.request.VerificationEmailRequest;
