@@ -43,8 +43,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             throw new TradeInvalidStatusException();
 
         // 이미 요청이 있으면 중복 차단
-        if (cancelRepo.findByTradeId(tradeId).isPresent())
-            throw new TradeAlreadyCancelRequestedException();
+        if (cancelRepo.existsByTradeIdAndStatus(tradeId, CancelStatus.REQUESTED)
+        ) throw new TradeAlreadyCancelRequestedException();
 
         boolean isSeller = requester.equals(trade.getSeller());
 

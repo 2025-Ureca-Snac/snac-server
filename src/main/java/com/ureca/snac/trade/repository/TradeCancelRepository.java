@@ -14,5 +14,5 @@ public interface TradeCancelRepository extends JpaRepository<TradeCancel, Long> 
 
 //    List<TradeCancel> findByStatusAndCreatedAtBefore(CancelStatus status, LocalDateTime before);
 //
-//    boolean existsByTradeIdAndStatus(Long tradeId, CancelStatus status);
+    boolean existsByTradeIdAndStatus(Long tradeId, CancelStatus status);
 }
