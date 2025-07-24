@@ -25,15 +25,6 @@ public interface TradeProgressService {
      */
     Long confirmTrade(Long tradeId, String username);
 
-
-    /**
-     * 구매자가 거래를 확정합니다.
-     *
-     * @param tradeId 거래 ID
-     * @param username 요청 구매자 이메일
-     */
-    Long cancelTrade(Long tradeId, String username);
-
     List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId);
 
     TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username);
