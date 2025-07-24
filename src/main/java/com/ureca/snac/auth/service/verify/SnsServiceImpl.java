@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.service;
+package com.ureca.snac.auth.service.verify;
 
 import com.ureca.snac.auth.exception.SmsSendFailedException;
 import com.ureca.snac.auth.exception.VerificationFailedException;
@@ -12,7 +12,6 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Random;
 
 @Service

@@ -12,6 +12,7 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.Duration;
+
 
 @Service
 @Slf4j
@@ -29,11 +32,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final JWTUtil jwtUtil;
     private final AuthRepository authRepository;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         log.info("loadUser 메소드 시작");
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+        log.info("accessToken: {}", accessToken);
+
         OAuth2User oAuth2User = super.loadUser(userRequest);
         log.info("OAuth2 사용자 정보: {}", oAuth2User.getAttributes());
 
@@ -64,6 +71,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.info("state 디코딩 실패, 로그인 플로우");
             isLinking = false;
         }
+
+        String redisKey = provider + ":" + providerId;
+        stringRedisTemplate.opsForValue().set(redisKey, accessToken, Duration.ofMinutes(3));
+        log.info("AccessToken Redis 저장: {} = {}", redisKey, accessToken);
+
 
         if (isLinking) {
             // 소셜 연동
