@@ -5,6 +5,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.board.controller.request.CreateCardRequest;
 import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
@@ -93,4 +94,10 @@ public interface CardControllerSwagger {
     @ErrorCode404(description = "삭제 실패 - 존재하지 않는 글 ID")
     @DeleteMapping("/{cardId}")
     ResponseEntity<ApiResponse<?>> removeCard(@PathVariable("cardId") Long cardId, @AuthenticationPrincipal CustomUserDetails customUserDetails);
+
+    @Operation(
+            summary = "개발용 카드 전체 조회",
+            description = "등록된 카드 목록 전체를 조회합니다."
+    )
+    ResponseEntity<ApiResponse<List<CardDto>>> getDevCardList();
 }
