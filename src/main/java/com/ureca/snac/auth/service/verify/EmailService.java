@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.service;
+package com.ureca.snac.auth.service.verify;
 
 
 public interface EmailService {

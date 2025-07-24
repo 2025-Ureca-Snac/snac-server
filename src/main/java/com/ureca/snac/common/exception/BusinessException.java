@@ -9,4 +9,6 @@ public class BusinessException extends BaseCustomException {
     public BusinessException(BaseCode baseCode) {
         super(baseCode);
     }
+    public BusinessException(BaseCode baseCode, String msg) { super(baseCode, msg); }
+
 }

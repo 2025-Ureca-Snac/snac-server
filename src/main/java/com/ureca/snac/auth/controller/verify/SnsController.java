@@ -1,8 +1,8 @@
-package com.ureca.snac.auth.controller;
+package com.ureca.snac.auth.controller.verify;
 
 import com.ureca.snac.auth.dto.request.PhoneRequest;
 import com.ureca.snac.auth.dto.request.VerificationPhoneRequest;
-import com.ureca.snac.auth.service.SnsService;
+import com.ureca.snac.auth.service.verify.SnsService;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

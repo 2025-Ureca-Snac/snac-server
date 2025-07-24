@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.service;
+package com.ureca.snac.auth.service.verify;
 
 import com.ureca.snac.auth.exception.EmailSendFailedException;
 import com.ureca.snac.auth.exception.VerificationFailedException;
