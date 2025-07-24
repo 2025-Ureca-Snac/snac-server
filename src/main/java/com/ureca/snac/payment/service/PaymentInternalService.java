@@ -47,7 +47,7 @@ public class PaymentInternalService {
         log.info("[내부 처리] Payment 엔티티 상태 CANCELED 상태");
 
         // 머니 잔액을 회수
-        Long balanceAfter = walletService.depositMoney(member.getId(),
+        Long balanceAfter = walletService.withdrawMoney(member.getId(),
                 managedPayment.getAmount());
         log.info("[내부 처리] 지갑 머니 회수(출금) 완료 회원 ID : {}, 최종 잔액 : {}",
                 member.getId(), balanceAfter);
