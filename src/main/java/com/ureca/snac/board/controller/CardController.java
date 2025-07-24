@@ -4,6 +4,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.board.controller.request.CreateCardRequest;
 import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
@@ -74,5 +75,11 @@ public class CardController implements CardControllerSwagger{
         cardService.deleteCard(customUserDetails.getUsername(), cardId);
 
         return ResponseEntity.ok(ApiResponse.ok(CARD_DELETE_SUCCESS));
+    }
+
+    @Override
+    @GetMapping("/dev")
+    public ResponseEntity<ApiResponse<List<CardDto>>> getDevCardList() {
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, cardService.findAllDevCard()));
     }
 }
