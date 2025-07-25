@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class MyPageResponse {
     private String name;
     private String phone;
@@ -18,6 +18,7 @@ public class MyPageResponse {
     private boolean isNaverConnected;
     private boolean isGoogleConnected;
     private boolean isKakaoConnected;
+    private Long favoriteCount;
 
     public static MyPageResponse from(Member member) {
         return MyPageResponse.builder()
