@@ -39,15 +39,15 @@ public enum BaseCode {
 
     // 네이버 연동 해제 관련
     NAVER_UNLINK_SUCCESS("NAVER_UNLINK_SUCCESS_200", HttpStatus.OK, "네이버 연결 끊기에 성공했습니다."),
-    NAVER_NO_LINKED      ("NAVER_NO_LINKED_400",      HttpStatus.BAD_REQUEST,            "네이버 연동이 되어있지 않습니다."),
+    NAVER_NO_LINKED("NAVER_NO_LINKED_400", HttpStatus.BAD_REQUEST, "네이버 연동이 되어있지 않습니다."),
     NAVER_TOKEN_NOT_FOUND("NAVER_TOKEN_NOT_FOUND_400", HttpStatus.BAD_REQUEST, "Naver access token이 없습니다."),
     NAVER_API_CALL_ERROR("NAVER_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "네이버 API 연동 중 오류가 발생했습니다."),
 
 
     // Google 연동 해제 관련
     GOOGLE_UNLINK_SUCCESS("GOOGLE_UNLINK_SUCCESS_200", HttpStatus.OK, "Google 연결 끊기에 성공했습니다."),
-    GOOGLE_NO_LINKED     ("GOOGLE_NO_LINKED_400",     HttpStatus.BAD_REQUEST,            "Google 연동이 되어있지 않습니다."),
-    GOOGLE_UNLINK_FAILED ("GOOGLE_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR,  "Google 연결 끊기에 실패했습니다."),
+    GOOGLE_NO_LINKED("GOOGLE_NO_LINKED_400", HttpStatus.BAD_REQUEST, "Google 연동이 되어있지 않습니다."),
+    GOOGLE_UNLINK_FAILED("GOOGLE_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Google 연결 끊기에 실패했습니다."),
     GOOGLE_TOKEN_NOT_FOUND("GOOGLE_TOKEN_NOT_FOUND_400", HttpStatus.BAD_REQUEST, "Google access token이 없습니다."),
 
 
@@ -120,6 +120,8 @@ public enum BaseCode {
     MONEY_RECHARGE_SUCCESS("MONEY_RECHARGE_SUCCESS_200", HttpStatus.OK, "머니 충전에 성공했습니다"),
     PAYMENT_CANCEL_SUCCESS("PAYMENT_CANCEL_SUCCESS_200", HttpStatus.OK, "결제 취소에 성공했습니다,"),
 
+    PAYMENT_FAILURE_LOGGED("PAYMENT_FAILURE_LOGGED_200", HttpStatus.OK, "결제 실패 내역 기록이 성공했습니다,"),
+
     // 결제 - 예외
     PAYMENT_NOT_FOUND("PAYMENT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "존재하지 않는 결제입니다"),
     PAYMENT_ALREADY_PROCESSED_PAYMENT("PAYMENT_ALREADY_PROCESSED_PAYMENT_409", HttpStatus.CONFLICT, "이미 처리된 결제입니다"),
@@ -129,6 +131,8 @@ public enum BaseCode {
     INVALID_PAYMENT_FOR_RECHARGE("INVALID_PAYMENT_FOR_RECHARGE_409", HttpStatus.CONFLICT, "충전 기록을 생성할 수 없는 결제입니다"),
     PAYMENT_PERIOD_EXPIRED("PAYMENT_PERIOD_EXPIRED_400", HttpStatus.BAD_REQUEST, "취소 가능한 기간 지났습니다"),
 
+    PAYMENT_INTERNAL_ERROR("PAYMENT_INTERNAL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 심각한 내부 오류가 발생했습니다 " +
+            "관리자에게 문의주세요"),
     // 결제 취소 - 예외
     ALREADY_USED_RECHARGE_CANNOT_CANCEL("ALREADY_USED_RECHARGE_CANNOT_CANCEL_409", HttpStatus.CONFLICT, "이미 사용된 내역이 있어 취소할 수 없습니다"),
 

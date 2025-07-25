@@ -48,6 +48,10 @@ public class Payment extends BaseTimeEntity {
 
     private String cancelReason;
 
+    private String failureCode;
+
+    private String failureMessage;
+
     /**
      * prepare 상태의 객체 생성 팩토리 메소드 + private 빌더 객체 생성 통제
      * Builder 반환 대신 Payment 객체 반환
@@ -95,6 +99,23 @@ public class Payment extends BaseTimeEntity {
     public void cancel(String reason) {
         this.cancelReason = reason;
         this.status = PaymentStatus.CANCELED;
+    }
+
+    // 상태 실패
+    // 1차방어선 예상된 실패 발생 결제 시도를 취소로 기록
+    public void reportFailureAsCancellation(String failureCode, String failureMessage) {
+        validateIsNotAlreadyProcessed();
+        this.status = PaymentStatus.CANCELED;
+        this.failureCode = failureCode;
+        this.failureMessage = failureMessage;
+    }
+
+    // 예상하지 못한 실패 발생 시 결제를 FAIL로 2차 방어선
+    public void recordFailure(String failureCode, String failureMessage) {
+        validateIsNotAlreadyProcessed();
+        this.status = PaymentStatus.FAIL;
+        this.failureCode = failureCode;
+        this.failureMessage = failureMessage;
     }
 
     // 유효성 검증 메소드
@@ -168,5 +189,13 @@ public class Payment extends BaseTimeEntity {
     // 기록 금액 검증
     private boolean isAmount(Long amount) {
         return this.amount.equals(amount);
+    }
+
+    // 이미 처리된 결제인지 검증
+    private void validateIsNotAlreadyProcessed() {
+        if (this.status != PaymentStatus.PENDING) {
+            // 이미 처리된 결제임
+            throw new PaymentAlreadyProcessedPaymentException();
+        }
     }
 }

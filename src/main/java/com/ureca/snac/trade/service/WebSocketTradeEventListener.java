@@ -8,6 +8,7 @@ import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.service.interfaces.BuyFilterService;
+import com.ureca.snac.trade.service.interfaces.TradeCancelService;
 import com.ureca.snac.trade.service.interfaces.TradeProgressService;
 import com.ureca.snac.trade.service.interfaces.TradeQueryService;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ public class WebSocketTradeEventListener {
     private final NotificationService notificationService;
     private final TradeProgressService tradeProgressService;
     private final TradeQueryService tradeQueryService;
+    private final TradeCancelService tradeCancelService;
     private final BuyFilterService buyFilterService;
     private final CardService cardService;
 
@@ -96,8 +98,8 @@ public class WebSocketTradeEventListener {
             // 3) DB 카드 삭제
             List<CardDto> cards = cardService.findByMemberUsernameAndSellStatusesAndCardCategory(username, List.of(SELLING, TRADING), REALTIME_SELL);
             for (CardDto card : cards) {
-                cardService.deleteCardByRealTime(username, card.getId());
-                log.info("판매자 카드 삭제: {} (cardId={})", username, card.getId());
+                cardService.deleteCardByRealTime(username, card.getCardId());
+                log.info("판매자 카드 삭제: {} (cardId={})", username, card.getCardId());
             }
 
             // 4) 강제 종료 처리
@@ -122,17 +124,17 @@ public class WebSocketTradeEventListener {
         List<TradeDto> buyerTrades = tradeQueryService.findBuyerRealTimeTrade(username);
         for (TradeDto trade : buyerTrades) {
             if (isCancellable(trade.getStatus())) {
-                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-                    tradeProgressService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-                }
+//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
+//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
+//                }
 
-                TradeDto tradeDto = tradeProgressService.cancelRealTimeTrade(
-                        trade.getId(),
+                TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
+                        trade.getTradeId(),
                         username,
                         BUYER_FORCED_TERMINATION);
 
 
-                log.info("강제종료(구매자): username={} tradeId={}", username, tradeDto.getId());
+                log.info("강제종료(구매자): username={} tradeId={}", username, tradeDto.getTradeId());
 
                 CancelTradeDto cancelTradeDto = new CancelTradeDto(tradeDto.getSeller(), tradeDto);
 
@@ -144,17 +146,17 @@ public class WebSocketTradeEventListener {
         List<TradeDto> sellerTrades = tradeQueryService.findSellerRealTimeTrade(username);
         for (TradeDto trade : sellerTrades) {
             if (isCancellable(trade.getStatus())) {
-                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-                    tradeProgressService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-                }
+//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
+//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
+//                }
 
-                TradeDto tradeDto = tradeProgressService.cancelRealTimeTrade(
-                        trade.getId(),
+                TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
+                        trade.getTradeId(),
                         username,
                         SELLER_FORCED_TERMINATION
                 );
 
-                log.info("강제종료(판매자): username={} tradeId={}", username, trade.getId());
+                log.info("강제종료(판매자): username={} tradeId={}", username, trade.getTradeId());
 
                 CancelTradeDto cancelTradeDto = new CancelTradeDto(tradeDto.getBuyer(), tradeDto);
 

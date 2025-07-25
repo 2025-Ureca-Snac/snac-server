@@ -92,108 +92,108 @@ public class TradeProgressServiceImpl implements TradeProgressService {
     }
 
     // 선택받지 못한 트레이드 자동 취소
-    @Override
-    @Transactional
-    public List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId) {
-        List<Trade> waitingTrades = tradeRepository.findLockedByCardIdAndStatus(cardId, BUY_REQUESTED)
-                .stream()
-                .filter(t -> !t.getId().equals(acceptedTradeId))
-                .toList();
-
-        waitingTrades.forEach(t -> {
-            t.changeStatus(CANCELED);
-            t.changeCancelReason(NOT_SELECTED);
-        });
-
-        return waitingTrades.stream()
-                .map(TradeDto::from)
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username) {
-        Member member = tradeSupport.findMember(username);
-
-        Trade trade = tradeRepository.findLockedByCardIdAndBuyer(request.getCardId(),  member)
-                .orElseThrow(TradeNotFoundException::new);
-
-        trade.cancel(member);
-        trade.changeCancelReason(BUYER_CHANGE_MIND);
-
-        return TradeDto.from(trade);
-    }
-
-    @Override
-    @Transactional
-    public List<TradeDto> cancelBuyRequestBySellerOfCard(CancelBuyRequest request, String username) {
-        List<Trade> waitingTrades = tradeRepository.findLockedByCardIdAndStatus(request.getCardId(), BUY_REQUESTED);
-
-        cardRepository.deleteById(request.getCardId());
-
-        waitingTrades.forEach(t -> {
-            t.changeStatus(CANCELED);
-            t.changeCancelReason(SELLER_CHANGE_MIND);
-        });
-
-        return waitingTrades.stream()
-                .map(TradeDto::from)
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public TradeDto cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username) {
-        Member member = tradeSupport.findMember(username);
-        Trade trade = tradeSupport.findLockedTrade(cancelRealTimeTradeRequest.getTradeId());
-
-        cardRepository.deleteById(trade.getCardId());
-        trade.cancel(member);
-        trade.changeCancelReason(BUYER_CHANGE_MIND);
-
-        return TradeDto.from(trade);
-    }
-
-    @Override
-    @Transactional
-    public TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username) {
-        Member member = tradeSupport.findMember(username);
-        Trade trade = tradeSupport.findLockedTrade(cancelRealTimeTradeRequest.getTradeId());
-
-        cardRepository.deleteById(trade.getCardId());
-
-        trade.cancel(member);
-        trade.changeCancelReason(SELLER_CHANGE_MIND);
-
-        return TradeDto.from(trade);
-    }
-
-    @Override
-    @Transactional
-    public TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason) {
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Member member = tradeSupport.findMember(username);
-
-        trade.cancel(member);
-        trade.changeCancelReason(reason);
-
-        return TradeDto.from(trade);
-    }
-
-    @Override
-    @Transactional
-    public TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username) {
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Member member = tradeSupport.findMember(username);
-
-        if (trade.getPriceGb() - trade.getPoint() > 0) {
-            walletService.depositMoney(member.getId(), trade.getPriceGb() - trade.getPoint());
-        }
-
-        if (trade.getPoint() > 0) {
-            walletService.depositPoint(member.getId(), trade.getPoint());
-        }
-
-        return TradeDto.from(trade);
-    }
+//    @Override
+//    @Transactional
+//    public List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId) {
+//        List<Trade> waitingTrades = tradeRepository.findLockedByCardIdAndStatus(cardId, BUY_REQUESTED)
+//                .stream()
+//                .filter(t -> !t.getId().equals(acceptedTradeId))
+//                .toList();
+//
+//        waitingTrades.forEach(t -> {
+//            t.changeStatus(CANCELED);
+//            t.changeCancelReason(NOT_SELECTED);
+//        });
+//
+//        return waitingTrades.stream()
+//                .map(TradeDto::from)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional
+//    public TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username) {
+//        Member member = tradeSupport.findMember(username);
+//
+//        Trade trade = tradeRepository.findLockedByCardIdAndBuyer(request.getCardId(),  member)
+//                .orElseThrow(TradeNotFoundException::new);
+//
+//        trade.cancel(member);
+//        trade.changeCancelReason(BUYER_CHANGE_MIND);
+//
+//        return TradeDto.from(trade);
+//    }
+//
+//    @Override
+//    @Transactional
+//    public List<TradeDto> cancelBuyRequestBySellerOfCard(CancelBuyRequest request, String username) {
+//        List<Trade> waitingTrades = tradeRepository.findLockedByCardIdAndStatus(request.getCardId(), BUY_REQUESTED);
+//
+//        cardRepository.deleteById(request.getCardId());
+//
+//        waitingTrades.forEach(t -> {
+//            t.changeStatus(CANCELED);
+//            t.changeCancelReason(SELLER_CHANGE_MIND);
+//        });
+//
+//        return waitingTrades.stream()
+//                .map(TradeDto::from)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional
+//    public TradeDto cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username) {
+//        Member member = tradeSupport.findMember(username);
+//        Trade trade = tradeSupport.findLockedTrade(cancelRealTimeTradeRequest.getTradeId());
+//
+//        cardRepository.deleteById(trade.getCardId());
+//        trade.cancel(member);
+//        trade.changeCancelReason(BUYER_CHANGE_MIND);
+//
+//        return TradeDto.from(trade);
+//    }
+//
+//    @Override
+//    @Transactional
+//    public TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username) {
+//        Member member = tradeSupport.findMember(username);
+//        Trade trade = tradeSupport.findLockedTrade(cancelRealTimeTradeRequest.getTradeId());
+//
+//        cardRepository.deleteById(trade.getCardId());
+//
+//        trade.cancel(member);
+//        trade.changeCancelReason(SELLER_CHANGE_MIND);
+//
+//        return TradeDto.from(trade);
+//    }
+//
+//    @Override
+//    @Transactional
+//    public TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason) {
+//        Trade trade = tradeSupport.findLockedTrade(tradeId);
+//        Member member = tradeSupport.findMember(username);
+//
+//        trade.cancel(member);
+//        trade.changeCancelReason(reason);
+//
+//        return TradeDto.from(trade);
+//    }
+//
+//    @Override
+//    @Transactional
+//    public TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username) {
+//        Trade trade = tradeSupport.findLockedTrade(tradeId);
+//        Member member = tradeSupport.findMember(username);
+//
+//        if (trade.getPriceGb() - trade.getPoint() > 0) {
+//            walletService.depositMoney(trade.getBuyer().getId(), trade.getPriceGb() - trade.getPoint());
+//        }
+//
+//        if (trade.getPoint() > 0) {
+//            walletService.depositPoint(trade.getBuyer().getId(), trade.getPoint());
+//        }
+//
+//        return TradeDto.from(trade);
+//    }
 }

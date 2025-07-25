@@ -36,6 +36,7 @@ public class MatchingServiceFacade {
     private final TradeInitiationService tradeInitiationService;
     private final TradeQueryService tradeQueryService;
     private final TradeProgressService tradeProgressService;
+    private final TradeCancelService tradeCancelService;
     private final BuyFilterService buyFilterService;
     private final AttachmentService attachmentService;
 
@@ -75,6 +76,9 @@ public class MatchingServiceFacade {
 
     /*-------------------------------------------- 실시간 거래 프로세스 -------------------------------------------- */
 
+    public void removeBuyerFilter(String username) {
+        buyFilterService.deleteBuyerFilterByUsername(username);
+    }
 
     // 실시간 매칭 - 판매자 판매글 생성 후 필터 조건에 맞는 구매자에게 해당 정보 전송
     @Transactional
@@ -125,7 +129,7 @@ public class MatchingServiceFacade {
         notificationService.notify(tradeDto.getBuyer(), tradeDto);
 
         // 3. 연결되지 않는 다른 거래는 자동 취소
-        List<TradeDto> trades = tradeProgressService.cancelOtherTradesOfCard(tradeDto.getCardId(), tradeId);
+        List<TradeDto> trades = tradeCancelService.cancelOtherTradesOfCard(tradeDto.getCardId(), tradeId);
 
         for (TradeDto dto : trades) {
             CancelTradeDto cancelTradeDto = new CancelTradeDto(dto.getBuyer(), dto);
@@ -172,7 +176,7 @@ public class MatchingServiceFacade {
     // BUY_REQUEST 구매자 기준 취소
     @Transactional
     public void cancelBuyRequestByBuyer(CancelBuyRequest request, String username) {
-        TradeDto tradeDto = tradeProgressService.cancelBuyRequestByBuyerOfCard(request, username);
+        TradeDto tradeDto = tradeCancelService.cancelBuyRequestByBuyerOfCard(request, username);
 
         notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getSeller(), tradeDto));
     }
@@ -180,7 +184,7 @@ public class MatchingServiceFacade {
     // BUY_REQUEST 판매자 기준 취소
     @Transactional
     public void cancelBuyRequestBySeller(CancelBuyRequest request, String username) {
-        List<TradeDto> trades = tradeProgressService.cancelBuyRequestBySellerOfCard(request, username);
+        List<TradeDto> trades = tradeCancelService.cancelBuyRequestBySellerOfCard(request, username);
 
         for (TradeDto tradeDto : trades) {
             notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
@@ -190,14 +194,30 @@ public class MatchingServiceFacade {
     // ACCEPTED 거래 취소 - 구매자
     @Transactional
     public void cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest request, String username) {
-        TradeDto tradeDto = tradeProgressService.cancelAcceptedTradeByBuyer(request, username);
+        TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(request.getTradeId(), username, request.getReason());
         notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getSeller(), tradeDto));
     }
 
     // ACCEPTED 거래 취소 - 판매자
     @Transactional
     public void cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest request, String username) {
-        TradeDto tradeDto = tradeProgressService.cancelAcceptedTradeBySeller(request, username);
+        TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(request.getTradeId(), username, request.getReason());
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
+    }
+
+    @Transactional
+    public void cancelPaymentTradeByBuyer(CancelRealTimeTradeRequest request, String username) {
+//        tradeCancelService.cancelRealTimeTradeWithRefund(request.getTradeId(), username);
+
+        TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(request.getTradeId(), username, request.getReason());
+        notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getSeller(), tradeDto));
+    }
+
+    @Transactional
+    public void cancelPaymentTradeBySeller(CancelRealTimeTradeRequest request, String username) {
+//        tradeCancelService.cancelRealTimeTradeWithRefund(request.getTradeId(), username);
+        TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(request.getTradeId(), username, request.getReason());
+
         notificationService.sendCancelNotification(new CancelTradeDto(tradeDto.getBuyer(), tradeDto));
     }
 

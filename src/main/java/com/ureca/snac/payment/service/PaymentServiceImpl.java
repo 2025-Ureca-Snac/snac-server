@@ -5,6 +5,7 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
+import com.ureca.snac.payment.dto.PaymentFailureRequest;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;
@@ -66,5 +67,23 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("[결제 취소] 내부 상태 변경 완료");
 
         return cancelResponse;
+    }
+
+    @Override
+    public void processPaymentFailure(PaymentFailureRequest request) {
+        log.warn("[결제 실패 처리] 시작. 주문 ID : {}, 에러 코드 : {}",
+                request.orderId(), request.errorCode());
+
+        Payment payment = paymentRepository.findByOrderId(request.orderId())
+                .orElseThrow(PaymentNotFoundException::new);
+
+        payment.reportFailureAsCancellation(request.errorCode(),
+                request.errorMessage());
+
+        // 디비 반영
+        paymentRepository.save(payment);
+
+        log.warn("[결제 실패 처리] 완료. 주문 ID : {} 상태를 CANCELED 로 변경",
+                payment.getOrderId());
     }
 }

@@ -71,6 +71,12 @@ public class MatchingController implements MatchingControllerSwagger {
     }
 
     // 취소
+    @MessageMapping("/filter/remove")
+    public void removeBuyerFilter(Principal principal) {
+        log.info("[매칭] /filter/remove 호출, 사용자: {}", principal.getName());
+        matchingServiceFacade.removeBuyerFilter(principal.getName());
+    }
+
     @MessageMapping("/trade/buy-request/cancel/buyer")
     public void cancelBuyRequestByBuyer(@Payload CancelBuyRequest request, Principal principal) {
         log.info("[매칭] /trade/buy-request/cancel/buyer 호출, 사용자: {}, 카드ID: {}", principal.getName(), request.getCardId());
@@ -93,5 +99,17 @@ public class MatchingController implements MatchingControllerSwagger {
     public void cancelAcceptedTradeBySeller(@Payload CancelRealTimeTradeRequest request, Principal principal) {
         log.info("[거래취소] /trade/accepted/cancel/seller, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
         matchingServiceFacade.cancelAcceptedTradeBySeller(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/payment/cancel/buyer")
+    public void cancelPaymentTradeByBuyer(@Payload CancelRealTimeTradeRequest request, Principal principal) {
+        log.info("[거래취소] /trade/payment/cancel/buyer, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
+        matchingServiceFacade.cancelPaymentTradeByBuyer(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/payment/cancel/seller")
+    public void cancelPaymentTradeBySeller(@Payload CancelRealTimeTradeRequest request, Principal principal) {
+        log.info("[거래취소] /trade/payment/cancel/seller, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
+        matchingServiceFacade.cancelPaymentTradeBySeller(request, principal.getName());
     }
 }
