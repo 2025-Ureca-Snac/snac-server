@@ -98,8 +98,8 @@ public class WebSocketTradeEventListener {
             // 3) DB 카드 삭제
             List<CardDto> cards = cardService.findByMemberUsernameAndSellStatusesAndCardCategory(username, List.of(SELLING, TRADING), REALTIME_SELL);
             for (CardDto card : cards) {
-                cardService.deleteCardByRealTime(username, card.getId());
-                log.info("판매자 카드 삭제: {} (cardId={})", username, card.getId());
+                cardService.deleteCardByRealTime(username, card.getCardId());
+                log.info("판매자 카드 삭제: {} (cardId={})", username, card.getCardId());
             }
 
             // 4) 강제 종료 처리
@@ -129,12 +129,12 @@ public class WebSocketTradeEventListener {
 //                }
 
                 TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
-                        trade.getId(),
+                        trade.getTradeId(),
                         username,
                         BUYER_FORCED_TERMINATION);
 
 
-                log.info("강제종료(구매자): username={} tradeId={}", username, tradeDto.getId());
+                log.info("강제종료(구매자): username={} tradeId={}", username, tradeDto.getTradeId());
 
                 CancelTradeDto cancelTradeDto = new CancelTradeDto(tradeDto.getSeller(), tradeDto);
 
@@ -151,12 +151,12 @@ public class WebSocketTradeEventListener {
 //                }
 
                 TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
-                        trade.getId(),
+                        trade.getTradeId(),
                         username,
                         SELLER_FORCED_TERMINATION
                 );
 
-                log.info("강제종료(판매자): username={} tradeId={}", username, trade.getId());
+                log.info("강제종료(판매자): username={} tradeId={}", username, trade.getTradeId());
 
                 CancelTradeDto cancelTradeDto = new CancelTradeDto(tradeDto.getBuyer(), tradeDto);
 

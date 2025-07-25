@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class CardDto {
-    private Long id;
+    private Long cardId;
     private String name;
     private String email;
     private SellStatus sellStatus;

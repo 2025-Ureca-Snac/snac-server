@@ -51,7 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendCancelNotification(CancelTradeDto dto) {
-        log.info("[거래 취소 발행] username={} tradeId={}", dto.getUsername(), dto.getTradeDto().getId());
+        log.info("[거래 취소 발행] username={} tradeId={}", dto.getUsername(), dto.getTradeDto().getTradeId());
         rabbitTemplate.convertAndSend(CANCEL_EXCHANGE, CANCEL_ROUTING_KEY, dto);
     }
 

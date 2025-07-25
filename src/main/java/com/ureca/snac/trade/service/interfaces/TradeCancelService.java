@@ -22,6 +22,4 @@ public interface TradeCancelService {
 //    TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
 
     TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason);
-
-    TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username);
 }
