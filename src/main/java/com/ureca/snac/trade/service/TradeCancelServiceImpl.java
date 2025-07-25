@@ -257,7 +257,6 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     }
 
     // ACCEPT, PAYMENT 단계의 취소를 처리하는 메서드입니다.
-
     @Override
     @Transactional
     public TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason) {
@@ -276,24 +275,6 @@ public class TradeCancelServiceImpl implements TradeCancelService {
 
         return TradeDto.from(trade);
     }
-
-    @Override
-    @Transactional
-    public TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username) {
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Member member = tradeSupport.findMember(username);
-
-        if (trade.getPriceGb() - trade.getPoint() > 0) {
-            walletService.depositMoney(trade.getBuyer().getId(), trade.getPriceGb() - trade.getPoint());
-        }
-
-        if (trade.getPoint() > 0) {
-            walletService.depositPoint(trade.getBuyer().getId(), trade.getPoint());
-        }
-
-        return TradeDto.from(trade);
-    }
-
 
 //    @Override
 //    @Transactional
