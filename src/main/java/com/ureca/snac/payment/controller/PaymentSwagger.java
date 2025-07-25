@@ -4,6 +4,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.payment.dto.PaymentCancelRequest;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
+import com.ureca.snac.payment.dto.PaymentFailureRequest;
 import com.ureca.snac.swagger.annotation.UserInfo;
 import com.ureca.snac.swagger.annotation.error.ErrorCode401;
 import com.ureca.snac.swagger.annotation.error.ErrorCode403;
@@ -37,5 +38,15 @@ public interface PaymentSwagger {
             @PathVariable String paymentKey,
             @Valid @RequestBody PaymentCancelRequest request,
             @UserInfo CustomUserDetails userDetails
+    );
+
+    @Operation(summary = "결제 실패 기록",
+            description = "클라이언트가 결제 실패 후, 그 결과를 서버에 기록하기 위해 호출하는 API")
+    @ApiSuccessResponse(description = "결제 실패 내역 기록 성공")
+    @ErrorCode404(description = "기록할 결제 정보를 찾을 수 없습니다")
+    @ErrorCode409(description = "이미 처리된 결제 입니다")
+    @PostMapping("/fail")
+    ResponseEntity<ApiResponse<Void>> handlePaymentFailure(
+            @Valid @RequestBody PaymentFailureRequest request
     );
 }

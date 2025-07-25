@@ -1,5 +1,6 @@
 package com.ureca.snac.money.service;
 
+import com.ureca.snac.common.exception.InternalServerException;
 import com.ureca.snac.infra.PaymentGatewayAdapter;
 import com.ureca.snac.infra.dto.response.TossConfirmResponse;
 import com.ureca.snac.member.Member;
@@ -11,11 +12,14 @@ import com.ureca.snac.money.dto.MoneyRechargeSuccessResponse;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;
+import com.ureca.snac.payment.service.PaymentRecoveryService;
 import com.ureca.snac.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.ureca.snac.common.BaseCode.PAYMENT_INTERNAL_ERROR;
 
 @Slf4j
 @Service
@@ -29,6 +33,9 @@ public class MoneyServiceImpl implements MoneyService {
 
     // 머니 입금 DB 처리 담당 서비스
     private final MoneyDepositor moneyDepositor;
+
+    // 결제 취소 2단계 로직 서비스
+    private final PaymentRecoveryService paymentRecoveryService;
 
     @Override
     @Transactional
@@ -57,7 +64,7 @@ public class MoneyServiceImpl implements MoneyService {
             String paymentKey, String orderId, Long amount, String email) {
 
         // 1단계 시작
-        log.info("[머니 충전 처리] 시작. 주문번호 : {}, 요청 금액 : {}", orderId, amount);
+        log.info("[머니 충전 처리] 시작. 주문 번호 : {}, 요청 금액 : {}", orderId, amount);
 
         Member member = findMemberByEmail(email);
         Payment payment = findAndValidatePayment(orderId, amount, member);
@@ -65,7 +72,20 @@ public class MoneyServiceImpl implements MoneyService {
         TossConfirmResponse tossConfirmResponse =
                 paymentGatewayAdapter.confirmPayment(paymentKey, orderId, amount);
 
-        moneyDepositor.deposit(payment, member, tossConfirmResponse);
+        try {
+            // 내부 DB 변경 하는 로직 요구
+            moneyDepositor.deposit(payment, member, tossConfirmResponse);
+
+        } catch (Exception e) {
+            // 머니 충전 누락 실패시 서비스 호출
+
+            log.error("[결제 누락 위험 감지] 내부 DB 처리 실패. 복구 서비스 호출 주문 번호 : {}",
+                    orderId);
+
+            paymentRecoveryService.processInternalFailure(payment, e);
+
+            throw new InternalServerException(PAYMENT_INTERNAL_ERROR);
+        }
 
         log.info("[머니 충전 처리 완료] 모든 프로세스 종료");
 
