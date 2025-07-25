@@ -6,12 +6,7 @@ import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.trade.controller.request.CancelBuyRequest;
-import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
-import com.ureca.snac.trade.dto.TradeDto;
-import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeStatusMismatchException;
 import com.ureca.snac.trade.repository.TradeRepository;
@@ -23,11 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static com.ureca.snac.board.entity.constants.SellStatus.SOLD_OUT;
-import static com.ureca.snac.trade.entity.CancelReason.*;
-import static com.ureca.snac.trade.entity.TradeStatus.*;
+import static com.ureca.snac.trade.entity.TradeStatus.DATA_SENT;
+import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 
 @Slf4j
 @Service

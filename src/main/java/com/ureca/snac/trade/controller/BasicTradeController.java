@@ -9,6 +9,7 @@ import com.ureca.snac.trade.service.TradeFacade;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import com.ureca.snac.trade.service.response.TradeIdResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,14 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
                                                                          @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ApiResponse.of(TRADE_SCROLL_SUCCESS,
                 tradeFacade.scrollTrades(userDetails.getUsername(), side, size, cursorId)));
+    }
+
+    @GetMapping("/{tradeId}")
+    public ResponseEntity<ApiResponse<TradeResponse>> retrieveTrade(@PathVariable("tradeId") Long tradeId,
+                                                                    @AuthenticationPrincipal UserDetails userDetails) {
+
+        return ResponseEntity.ok(ApiResponse.of(TRADE_READ_SUCCESS,
+                tradeFacade.getTradeById(tradeId, userDetails.getUsername())));
     }
 
     @PatchMapping("/{tradeId}/cancel/request")

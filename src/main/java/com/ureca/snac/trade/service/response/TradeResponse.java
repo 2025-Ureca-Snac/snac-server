@@ -26,6 +26,19 @@ public class TradeResponse {
 
     private LocalDateTime createdAt;
 
+    public static TradeResponse from(Trade trade) {
+        return new TradeResponse(
+                trade.getId(),
+                trade.getPriceGb(),
+                trade.getDataAmount(),
+                null,
+                trade.getCarrier(),
+                trade.getCancelReason(),
+                trade.getStatus(),
+                trade.getCreatedAt()
+        );
+    }
+
     public static TradeResponse from(Trade trade, TradeSide side) {
         String phoneToShow = null;
 
