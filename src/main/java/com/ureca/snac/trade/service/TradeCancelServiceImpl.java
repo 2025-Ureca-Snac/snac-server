@@ -4,6 +4,7 @@ import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
 import com.ureca.snac.trade.dto.TradeDto;
@@ -32,6 +33,7 @@ import static com.ureca.snac.trade.entity.TradeStatus.CANCELED;
 public class TradeCancelServiceImpl implements TradeCancelService {
 
     private final TradeCancelRepository cancelRepo;
+    private final CardRepository cardRepo;
     private final TradeRepository tradeRepo;
     private final TradeSupport tradeSupport;
     private final PenaltyService penaltyService;
@@ -227,7 +229,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     public List<TradeDto> cancelBuyRequestBySellerOfCard(CancelBuyRequest request, String username) {
         List<Trade> waitingTrades = tradeRepo.findLockedByCardIdAndStatus(request.getCardId(), BUY_REQUESTED);
 
-        cancelRepo.deleteById(request.getCardId());
+        cardRepo.deleteById(request.getCardId());
 
         waitingTrades.forEach(t -> {
             t.changeStatus(CANCELED);
@@ -268,7 +270,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             refundToBuyerAndPublishEvent(trade, card, trade.getBuyer());
         }
 
-        cancelRepo.deleteById(trade.getCardId());
+        cardRepo.deleteById(trade.getCardId());
 
         trade.cancel(member);
         trade.changeCancelReason(reason);

@@ -71,6 +71,12 @@ public class MatchingController implements MatchingControllerSwagger {
     }
 
     // 취소
+    @MessageMapping("/filter/remove")
+    public void removeBuyerFilter(Principal principal) {
+        log.info("[매칭] /filter/remove 호출, 사용자: {}", principal.getName());
+        matchingServiceFacade.removeBuyerFilter(principal.getName());
+    }
+
     @MessageMapping("/trade/buy-request/cancel/buyer")
     public void cancelBuyRequestByBuyer(@Payload CancelBuyRequest request, Principal principal) {
         log.info("[매칭] /trade/buy-request/cancel/buyer 호출, 사용자: {}, 카드ID: {}", principal.getName(), request.getCardId());

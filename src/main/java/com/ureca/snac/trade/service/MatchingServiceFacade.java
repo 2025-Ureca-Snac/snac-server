@@ -76,6 +76,9 @@ public class MatchingServiceFacade {
 
     /*-------------------------------------------- 실시간 거래 프로세스 -------------------------------------------- */
 
+    public void removeBuyerFilter(String username) {
+        buyFilterService.deleteBuyerFilterByUsername(username);
+    }
 
     // 실시간 매칭 - 판매자 판매글 생성 후 필터 조건에 맞는 구매자에게 해당 정보 전송
     @Transactional
