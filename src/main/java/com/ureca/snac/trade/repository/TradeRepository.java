@@ -16,12 +16,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static jakarta.persistence.LockModeType.PESSIMISTIC_WRITE;
+
 public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTradeRepository {
     Optional<Trade> findByCardIdAndBuyerIdAndStatusNot(Long cardId, Long buyerId, TradeStatus status);
     Optional<Trade> findByIdAndStatus(Long id, TradeStatus status);   // 수락용
 
     @EntityGraph(attributePaths = {"seller", "buyer"})
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(PESSIMISTIC_WRITE)
     Optional<Trade> findLockedById(Long tradeId);
 
     long countBySellerAndStatusIn(Member seller, Collection<TradeStatus> statuses);
@@ -29,10 +31,10 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
 
     List<Trade> findAllByStatusAndCarrierAndCreatedAtBetween(TradeStatus status, Carrier carrier, LocalDateTime start, LocalDateTime end);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(PESSIMISTIC_WRITE)
     Optional<Trade> findLockedByCardId(Long cardId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(PESSIMISTIC_WRITE)
     @Query("""
         select t
           from Trade t
@@ -41,4 +43,15 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     """)
     List<Trade> findByStatusAndUpdatedAtBefore(@Param("status") TradeStatus status,
                                                @Param("limit") LocalDateTime limit);
+
+    @Lock(PESSIMISTIC_WRITE)
+    @Query("""
+  select t from Trade t
+   where t.status = :status
+     and t.updatedAt < :limit
+     and t.autoConfirmPaused = false
+""")
+    List<Trade> findByStatusAndUpdatedAtBeforeAndAutoConfirmPausedFalse(
+            @Param("status") TradeStatus status,
+            @Param("limit")  LocalDateTime limit);
 }
