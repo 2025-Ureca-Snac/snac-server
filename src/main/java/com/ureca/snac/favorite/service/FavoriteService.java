@@ -41,4 +41,14 @@ public interface FavoriteService {
      * @param toMemberId    삭제 당하는 회원 ID
      */
     void deleteFavorite(String fromUserEmail, Long toMemberId);
+
+
+
+    /**
+     * 내가 등록한 단골의 총 개수를 조회.
+     *
+     * @param fromUserEmail 검색할 주체 회원 이메일
+     * @return 등록된 단골 수
+     */
+    Long getFavoriteCount(String fromUserEmail);
 }
