@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 public class DisputeCreateRequest {
     private DisputeType type;
-    private String reason;
+    private String description;
 }

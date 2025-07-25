@@ -15,9 +15,10 @@ public class DisputeDetailResponse {
     private Long id;
     private DisputeStatus status;
     private DisputeType type;
-    private String reason;
+    private String description;
+    private String answer;
+
     private List<String> attachmentUrls;
-    private List<CommentResponse> comments;
     private LocalDateTime createdAt;
-    private LocalDateTime resolvedAt;
+    private LocalDateTime answerAt;
 }

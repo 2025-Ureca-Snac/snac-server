@@ -8,8 +8,10 @@ import java.util.List;
 
 public interface DisputeService {
     Long createDispute(
-            Long tradeId, String userEmail,
-            DisputeType type, String reason,
+            Long tradeId,
+            String userEmail,
+            DisputeType type,
+            String description,
             List<MultipartFile> files
     );
     DisputeDetailResponse getDispute(Long id, String requesterEmail);

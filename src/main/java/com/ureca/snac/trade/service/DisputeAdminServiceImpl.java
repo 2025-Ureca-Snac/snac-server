@@ -1,21 +1,16 @@
 package com.ureca.snac.trade.service;
 
-import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.Role;
-import com.ureca.snac.trade.dto.dispute.DisputeResolveRequest;
-import com.ureca.snac.trade.entity.AuthorType;
-import com.ureca.snac.trade.entity.Dispute;
-import com.ureca.snac.trade.entity.DisputeStatus;
+import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
+import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.DisputeAdminPermissionDeniedException;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
-import com.ureca.snac.trade.exception.DisputePermissionDeniedException;
 import com.ureca.snac.trade.repository.DisputeRepository;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
-import com.ureca.snac.trade.service.interfaces.DisputeCommentService;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
 import com.ureca.snac.trade.support.TradeSupport;
+import com.ureca.snac.wallet.entity.Wallet;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,36 +21,35 @@ import org.springframework.stereotype.Service;
 public class DisputeAdminServiceImpl implements DisputeAdminService {
 
     private final DisputeRepository disputeRepository;
-    private final DisputeCommentService disputeCommentService;
     private final PenaltyService penaltyService;
     private final TradeSupport tradeSupport;
 
     @Override
-    public void requestExtra(Long id, String adminEmail, String memo) {
+    public void answer(Long id, DisputeAnswerRequest dto, String adminEmail) {
         assertAdmin(adminEmail); // 권한 확인
-        // 상태 in_review 에서 awaiting_user
-        disputeCommentService.addComment(id, adminEmail, memo, AuthorType.ADMIN, true);
 
-    }
-
-    @Override
-    public void resolve(Long id, DisputeResolveRequest dto, String adminEmail) {
         Dispute dispute = disputeRepository.findById(id)
                 .orElseThrow(DisputeNotFoundException::new);
 
-        assertAdmin(adminEmail); // 권한 확인
+        Trade trade = dispute.getTrade();
 
-        if (dto.getResult() == DisputeStatus.RESOLVED) {
-            // 환불 + 패널티(SELLER_FAULT) TODO
-            dispute.resolve();
-        } else if (dto.getResult() == DisputeStatus.REJECTED) {
-            // 패널티(BUYER_FAULT) TODO
-            dispute.reject();
+        if (dto.isNeedMore()) {
+            dispute.needMore(dto.getAnswer()); // 상태 needMore 로 두고, answer 저장, answerAt 같이
+            return;
         }
-        // 관리자 처리 답변 저장
-        if (dto.getAdminComment() != null) {
-            disputeCommentService.addComment(id, adminEmail, dto.getAdminComment(), AuthorType.ADMIN, false);
-        }
+
+        // 최종처리, 환불 등
+        dispute.answered(dto.getAnswer()); // 답변
+
+        Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
+        long refundMoney = trade.getPriceGb() - trade.getPoint();
+        if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
+        if (trade.getPoint() > 0) buyerWallet.depositPoint(trade.getPoint());
+
+        trade.changeStatus(TradeStatus.CANCELED);
+        trade.resumeAutoConfirm(); // 타이머 재개
+
+        penaltyService.givePenalty(trade.getSeller().getEmail(), PenaltyReason.SELLER_FAULT);
     }
 
     private void assertAdmin(String email) {

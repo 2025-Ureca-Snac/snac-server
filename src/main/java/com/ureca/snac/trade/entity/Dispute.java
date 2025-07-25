@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Table(name = "dispute")
 public class Dispute extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY) // 거래 FK
@@ -29,35 +30,36 @@ public class Dispute extends BaseTimeEntity {
     private DisputeType type;
 
     @Column(columnDefinition = "TEXT")
-    private String reason; // 사용자 입력
+    private String description; // 사용자 입력
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DisputeStatus status;
 
-    private LocalDateTime resolvedAt;
+    // 관리자 답변
+    @Column(columnDefinition = "TEXT")
+    private String answer;
+    private LocalDateTime answerAt;
+
 
     @Builder
-    public Dispute(Trade trade, Member reporter, DisputeType type, String reason) {
+    public Dispute(Trade trade, Member reporter, DisputeType type, String description) {
         this.trade = trade;
         this.reporter = reporter;
         this.type = type;
-        this.reason = reason;
-        this.status = DisputeStatus.OPEN;
+        this.description = description;
+        this.status = DisputeStatus.IN_PROGRESS;
     }
 
     // 상태 변경
-    public void awaitingUser() {
-        this.status = DisputeStatus.AWAITING_USER;
+    public void needMore(String answer) {
+        this.answer     = answer;
+        this.answerAt   = LocalDateTime.now();
+        this.status     = DisputeStatus.NEED_MORE;
     }
-    public void inReview() {
-        this.status = DisputeStatus.IN_REVIEW;
+    public void answered(String answer) {
+        this.answer     = answer;
+        this.answerAt   = LocalDateTime.now();
+        this.status     = DisputeStatus.ANSWERED;
     }
-    public void resolve() {
-        this.status = DisputeStatus.RESOLVED; this.resolvedAt = LocalDateTime.now();
-    }
-    public void reject() {
-        this.status = DisputeStatus.REJECTED; this.resolvedAt = LocalDateTime.now();
-    }
-
 }
