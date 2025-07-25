@@ -79,7 +79,7 @@ public class TradeFacade {
 
     @Transactional
     public void confirmTrade(Long tradeId, String username) {
-        Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username);
+        Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username, true);
 
         TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confirmTradeId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);

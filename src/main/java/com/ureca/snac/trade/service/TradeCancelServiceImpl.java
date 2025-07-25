@@ -18,6 +18,7 @@ import com.ureca.snac.trade.support.TradeSupport;
 import com.ureca.snac.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ import static com.ureca.snac.trade.entity.CancelReason.NOT_SELECTED;
 import static com.ureca.snac.trade.entity.TradeStatus.BUY_REQUESTED;
 import static com.ureca.snac.trade.entity.TradeStatus.CANCELED;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -262,6 +264,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     @Override
     @Transactional
     public TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason) {
+        log.info("[거래취소] 실시간 거래 취소 요청 - tradeId: {}, username: {}, reason: {}", tradeId, username, reason);
+
         Member member = tradeSupport.findMember(username);
         Trade trade = tradeSupport.findLockedTrade(tradeId);
         Card card = tradeSupport.findLockedCard(trade.getCardId());
@@ -270,7 +274,10 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             refundToBuyerAndPublishEvent(trade, card, trade.getBuyer());
         }
 
-        cardRepo.deleteById(trade.getCardId());
+        // 거래 수락전이라면 카드를 삭제하면 안됨
+        if (trade.getStatus() != BUY_REQUESTED) {
+            cardRepo.deleteById(trade.getCardId());
+        }
 
         trade.cancel(member);
         trade.changeCancelReason(reason);
