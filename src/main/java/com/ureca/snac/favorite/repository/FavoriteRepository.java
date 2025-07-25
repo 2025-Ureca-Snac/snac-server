@@ -57,4 +57,13 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
             @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
             @Param("cursorId") Long cursorId,
             Pageable pageable);
+
+
+    /**
+     * 특정 사용자가 등록한 단골 수 조회
+     *
+     * @param fromMember 단골 목록 조회하고 싶은 회원
+     * @return 단골 수
+     */
+    Long countByFromMember(Member fromMember);
 }

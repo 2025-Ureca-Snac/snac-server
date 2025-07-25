@@ -84,8 +84,10 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);
-        cookie.setPath("/api");
-
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+//        cookie.setSecure(true);
+        cookie.setDomain("snac-app.com");
         response.addCookie(cookie);
 
 

@@ -117,6 +117,14 @@ public class FavoriteServiceImpl implements FavoriteService {
         log.info("[단골 삭제] 얘가 쟤를 삭제 : {} -> {}", fromMember.getId(), toMemberId);
     }
 
+    @Override
+    public Long getFavoriteCount(String fromUserEmail) {
+        Member fromMember = findMemberByEmail(fromUserEmail);
+        Long count = favoriteRepository.countByFromMember(fromMember);
+        log.info("[단골 수 조회] 회원ID: {}, count: {}", fromMember.getId(), count);
+        return count;
+    }
+
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);

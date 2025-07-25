@@ -178,6 +178,9 @@ public enum BaseCode {
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 
+    // 마이페이지 - 성공
+    MYPAGE_GET_SUCCESS("MYPAGE_GET_SUCCESS_200", HttpStatus.OK, "마이페이지 정보 조회에 성공했습니다."),
+
     // 비밀번호 변경 – 성공
     PASSWORD_CHANGED("PASSWORD_CHANGED_200", HttpStatus.OK, "비밀번호가 변경되었습니다."),
 
