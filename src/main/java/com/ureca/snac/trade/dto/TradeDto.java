@@ -10,7 +10,7 @@ import lombok.*;
 @Getter @Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TradeDto {
-    private Long id;
+    private Long tradeId;
     private Long cardId;
     private Integer sellerRatingScore;
     private String seller;
@@ -25,7 +25,7 @@ public class TradeDto {
 
     public static TradeDto from(Trade trade) {
         return TradeDto.builder()
-                .id(trade.getId())
+                .tradeId(trade.getId())
                 .cardId(trade.getCardId())
                 .sellerRatingScore(trade.getSeller().getRatingScore())
                 .seller(trade.getSeller().getEmail())
