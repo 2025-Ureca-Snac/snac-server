@@ -55,11 +55,13 @@ public class TradeFacade {
     }
 
     @Transactional
-    public void acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
+    public Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
         Long tradeId = tradeInitiationService.acceptBuyRequest(claimBuyRequest, username);
 
         TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
+
+        return tradeId;
     }
 
     // === TradeProgressService === //
