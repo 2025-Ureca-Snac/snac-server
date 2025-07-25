@@ -4,6 +4,7 @@ import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 
 import java.util.List;
 
@@ -36,6 +37,8 @@ public interface TradeQueryService {
     ProgressTradeCountResponse countBuyingProgress(String username);
 
     TradeDto findByTradeId(Long tradeId);
+
+    TradeResponse getTradeById(Long tradeId, String username);
 
     List<TradeDto> findBuyerRealTimeTrade(String buyerUsername);
 

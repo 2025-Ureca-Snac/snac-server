@@ -21,6 +21,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     Optional<Trade> findByCardIdAndBuyerIdAndStatusNot(Long cardId, Long buyerId, TradeStatus status);
     Optional<Trade> findByIdAndStatus(Long id, TradeStatus status);   // 수락용
 
+    @Query("SELECT t FROM Trade t WHERE t.id = :id AND (t.buyer = :member OR t.seller = :member)")
+    Optional<Trade> findByIdAndParticipant(@Param("id") Long id, @Param("member") Member member);
+
     @EntityGraph(attributePaths = {"seller", "buyer"})
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Trade> findLockedById(Long tradeId);

@@ -95,15 +95,15 @@ public class WebSocketTradeEventListener {
             // 2) 필터 조건 삭제
             buyFilterService.deleteBuyerFilterByUsername(username);
 
-            // 3) DB 카드 삭제
+            // 3) 강제 종료 처리
+            forceCancelRealTimeTrades(username);
+
+            // 4) DB 카드 삭제
             List<CardDto> cards = cardService.findByMemberUsernameAndSellStatusesAndCardCategory(username, List.of(SELLING, TRADING), REALTIME_SELL);
             for (CardDto card : cards) {
                 cardService.deleteCardByRealTime(username, card.getCardId());
                 log.info("판매자 카드 삭제: {} (cardId={})", username, card.getCardId());
             }
-
-            // 4) 강제 종료 처리
-            forceCancelRealTimeTrades(username);
 
             // 5) 최종 접속자 수 브로드캐스트
             broadcastUserCount();

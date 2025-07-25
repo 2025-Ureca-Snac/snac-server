@@ -163,7 +163,7 @@ public class MatchingServiceFacade {
     // 실시간 매칭 - 구매자가 거래를 확정 ( Status == COMPLETED, Card == SOLD_OUT )
     @Transactional
     public void confirmTrade(ConfirmTradeRequest request, String username) {
-        Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username);
+        Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username, false);
 
         TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
 

@@ -6,12 +6,7 @@ import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.trade.controller.request.CancelBuyRequest;
-import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
-import com.ureca.snac.trade.dto.TradeDto;
-import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeStatusMismatchException;
 import com.ureca.snac.trade.repository.TradeRepository;
@@ -23,11 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static com.ureca.snac.board.entity.constants.SellStatus.SOLD_OUT;
-import static com.ureca.snac.trade.entity.CancelReason.*;
-import static com.ureca.snac.trade.entity.TradeStatus.*;
+import static com.ureca.snac.trade.entity.TradeStatus.DATA_SENT;
+import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 
 @Slf4j
 @Service
@@ -63,24 +56,33 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         return trade.getId();
     }
 
+    // 해당 확정 메서드는 현재 실시간 매칭과 일반 매칭에 사용합니다.
+    // 마지막에 상대방이 나간 경우 카드가 삭제되는 문제가 발생하여 거래가 확정이 안되는 문제가 있어 파라미터 hasCard를 추가합니다.
+    // 일반 매칭 hasCard == true, 실시간 매칭 == false
     @Override
     @Transactional
-    public Long confirmTrade(Long tradeId, String username) {
+    public Long confirmTrade(Long tradeId, String username, Boolean hasCard) {
         Trade trade = tradeSupport.findLockedTrade(tradeId);
         Member buyer = tradeSupport.findMember(username);
 //        Wallet wallet = tradeSupport.findLockedWallet(trade.getSeller().getId());
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
         Member seller = trade.getSeller();
 
         trade.confirm(buyer); // 거래 상태를 확정으로 변경
-        card.changeSellStatus(SOLD_OUT); // 카드 상태를 판매 완료로 변경
+
+        if (hasCard) {
+            Card card = tradeSupport.findLockedCard(trade.getCardId());
+            card.changeSellStatus(SOLD_OUT); // 카드 상태를 판매 완료로 변경
+        } else {
+            // 실시간 매칭에서는 거래가 끝난 경우 카드는 필요 없으므로 삭제
+            cardRepository.deleteById(trade.getCardId());
+        }
 
         long amountToDeposit = trade.getPriceGb();
         long finalBalance = walletService.depositMoney(seller.getId(),
                 amountToDeposit);
 
-        String title = String.format("%s %dGB 판매 대금", card.getCarrier().name(),
-                card.getDataAmount());
+        String title = String.format("%s %dGB 판매 대금", trade.getCarrier().name(),
+                trade.getDataAmount());
         AssetChangedEvent event = assetChangedEventFactory.createForSell(
                 seller.getId(), trade.getId(), title,
                 amountToDeposit, finalBalance

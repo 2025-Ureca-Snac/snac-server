@@ -8,6 +8,8 @@ import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.TradeFacade;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeIdResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,25 +47,25 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     public ResponseEntity<ApiResponse<?>> createSellTrade(@RequestBody CreateTradeRequest createTradeRequest,
                                                           @AuthenticationPrincipal UserDetails userDetails) {
 
-        tradeFacade.createSellTrade(createTradeRequest, userDetails.getUsername());
+        Long sellTradeId = tradeFacade.createSellTrade(createTradeRequest, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.ok(TRADE_CREATE_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.of(TRADE_CREATE_SUCCESS, new TradeIdResponse(sellTradeId)));
     }
 
     @PostMapping("/buy")
     public ResponseEntity<ApiResponse<?>> createBuyTrade(@RequestBody CreateTradeRequest createTradeRequest,
                                                          @AuthenticationPrincipal UserDetails userDetails) {
-        tradeFacade.createBuyTrade(createTradeRequest, userDetails.getUsername());
+        Long buyTradeId = tradeFacade.createBuyTrade(createTradeRequest, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.ok(TRADE_CREATE_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.of(TRADE_CREATE_SUCCESS, new TradeIdResponse(buyTradeId)));
     }
 
     @PostMapping("/buy/accept")
     public ResponseEntity<ApiResponse<?>> acceptBuyRequest(@RequestBody ClaimBuyRequest claimBuyRequest,
                                                            @AuthenticationPrincipal UserDetails userDetails) {
-        tradeFacade.acceptBuyRequest(claimBuyRequest, userDetails.getUsername());
+        Long acceptedTradeId = tradeFacade.acceptBuyRequest(claimBuyRequest, userDetails.getUsername());
         return ResponseEntity
-                .ok(ApiResponse.ok(TRADE_ACCEPT_SUCCESS));
+                .ok(ApiResponse.of(TRADE_ACCEPT_SUCCESS, new TradeIdResponse(acceptedTradeId)));
     }
 
     @PatchMapping(value = "/{tradeId}/send-data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -90,6 +92,14 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
                                                                          @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ApiResponse.of(TRADE_SCROLL_SUCCESS,
                 tradeFacade.scrollTrades(userDetails.getUsername(), side, size, cursorId)));
+    }
+
+    @GetMapping("/{tradeId}")
+    public ResponseEntity<ApiResponse<TradeResponse>> retrieveTrade(@PathVariable("tradeId") Long tradeId,
+                                                                    @AuthenticationPrincipal UserDetails userDetails) {
+
+        return ResponseEntity.ok(ApiResponse.of(TRADE_READ_SUCCESS,
+                tradeFacade.getTradeById(tradeId, userDetails.getUsername())));
     }
 
     @PatchMapping("/{tradeId}/cancel/request")

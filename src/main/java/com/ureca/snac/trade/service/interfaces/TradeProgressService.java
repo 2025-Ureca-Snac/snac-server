@@ -1,13 +1,6 @@
 package com.ureca.snac.trade.service.interfaces;
 
 
-import com.ureca.snac.trade.controller.request.CancelBuyRequest;
-import com.ureca.snac.trade.controller.request.CancelRealTimeTradeRequest;
-import com.ureca.snac.trade.dto.TradeDto;
-import com.ureca.snac.trade.entity.CancelReason;
-
-import java.util.List;
-
 public interface TradeProgressService {
 
     /**
@@ -24,7 +17,7 @@ public interface TradeProgressService {
      * @param tradeId  거래 ID
      * @param username 요청 판매자 이메일
      */
-    Long confirmTrade(Long tradeId, String username);
+    Long confirmTrade(Long tradeId, String username, Boolean hasCard);
 
 //    List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId);
 //

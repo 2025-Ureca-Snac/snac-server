@@ -64,10 +64,21 @@ public class TradeQueryServiceImpl implements TradeQueryService {
                 List.of(DATA_SENT, PAYMENT_CONFIRMED)));
     }
 
+    // 메시지 알림용 trade 반환 메서드
     @Override
     public TradeDto findByTradeId(Long tradeId) {
         return tradeRepository.findById(tradeId)
                 .map(TradeDto::from)
+                .orElseThrow(TradeNotFoundException::new);
+    }
+
+    // 일반 거래에 사용하는 trade 반환 메서드
+    @Override
+    public TradeResponse getTradeById(Long tradeId, String username) {
+        Member member = tradeSupport.findMember(username);
+
+        return tradeRepository.findByIdAndParticipant(tradeId, member)
+                .map(TradeResponse::from)
                 .orElseThrow(TradeNotFoundException::new);
     }
 

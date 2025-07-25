@@ -221,6 +221,7 @@ public enum BaseCode {
     TRADE_SCROLL_SUCCESS("TRADE_SCROLL_SUCCESS_200", HttpStatus.OK, "거래 내역 조회에 성공하였습니다."),
     TRADE_PROGRESS_COUNT_SUCCESS("TRADE_PROGRESS_COUNT_SUCCESS_200", HttpStatus.OK, "진행 중인 거래 건수를 성공적으로 조회했습니다."),
     TRADE_STATISTICS_READ_SUCCESS("STATISTICS_READ_SUCCESS_200", HttpStatus.OK, "거래 통계 데이터를 성공적으로 조회했습니다."),
+    TRADE_READ_SUCCESS("TRADE_READ_SUCCESS_200", HttpStatus.OK, "거래 정보를 성공적으로 조회했습니다."),
 
     // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),

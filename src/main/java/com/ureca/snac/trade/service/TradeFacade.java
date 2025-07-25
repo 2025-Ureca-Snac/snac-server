@@ -10,6 +10,7 @@ import com.ureca.snac.trade.entity.CancelReason;
 import com.ureca.snac.trade.service.interfaces.*;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import com.ureca.snac.trade.support.TradeMessageBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,11 +56,13 @@ public class TradeFacade {
     }
 
     @Transactional
-    public void acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
+    public Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
         Long tradeId = tradeInitiationService.acceptBuyRequest(claimBuyRequest, username);
 
         TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
+
+        return tradeId;
     }
 
     // === TradeProgressService === //
@@ -76,10 +79,14 @@ public class TradeFacade {
 
     @Transactional
     public void confirmTrade(Long tradeId, String username) {
-        Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username);
+        Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username, true);
 
         TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confirmTradeId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
+    }
+
+    public TradeResponse getTradeById(Long tradeId, String username) {
+        return tradeQueryService.getTradeById(tradeId, username);
     }
 
     public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
