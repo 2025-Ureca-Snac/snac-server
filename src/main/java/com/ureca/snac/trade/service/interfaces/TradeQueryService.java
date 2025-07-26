@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.service.interfaces;
 
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -18,7 +19,7 @@ public interface TradeQueryService {
      * @param lastTradeId 커서용 마지막 거래 ID
      * @return 거래 목록 및 다음 페이지 정보
      */
-    ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId);
+    ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, TradeQueryType tradeQueryType, Long lastTradeId);
 
     /**
      * 판매자 관점 진행 중 거래 수를 조회합니다.

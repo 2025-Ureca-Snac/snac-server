@@ -4,6 +4,7 @@ import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeMessageDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.CancelReason;
@@ -89,8 +90,8 @@ public class TradeFacade {
         return tradeQueryService.getTradeById(tradeId, username);
     }
 
-    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
-        return tradeQueryService.scrollTrades(username, side, size, lastTradeId);
+    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, TradeQueryType tradeQueryType, Long lastTradeId) {
+        return tradeQueryService.scrollTrades(username, side, size, tradeQueryType, lastTradeId);
     }
 
     public ProgressTradeCountResponse countSellingProgress(String username) {

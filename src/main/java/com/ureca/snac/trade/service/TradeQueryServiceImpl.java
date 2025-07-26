@@ -1,6 +1,7 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
@@ -30,13 +31,16 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     private final TradeRepository tradeRepository;
     private final TradeSupport tradeSupport;
 
+    // 판매 또는 구매에 대한 거래내역을 가져옵니다.
+    // TradeSide를 기준으로 BUY, SELL을 구분합니다.
+    // 요청한 사이즈보다 1개 더 조회하여 다음페이지가 있는지 체크합니다.
     @Override
-    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
+    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, TradeQueryType tradeQueryType, Long lastTradeId) {
         Member member = tradeSupport.findMember(username);
 
         List<Trade> trades = (side == TradeSide.BUY)
-                ? tradeRepository.findTradesByBuyerInfinite(member.getId(), lastTradeId, size + 1)
-                : tradeRepository.findTradesBySellerInfinite(member.getId(), lastTradeId, size + 1);
+                ? tradeRepository.findTradesByBuyerInfinite(member.getId(), lastTradeId, tradeQueryType,  size + 1)
+                : tradeRepository.findTradesBySellerInfinite(member.getId(), lastTradeId, tradeQueryType,  size + 1);
 
         boolean hasNext = trades.size() > size;
 
@@ -78,7 +82,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         Member member = tradeSupport.findMember(username);
 
         return tradeRepository.findByIdAndParticipant(tradeId, member)
-                .map(TradeResponse::from)
+                .map(t -> TradeResponse.from(t, member.getEmail()))
                 .orElseThrow(TradeNotFoundException::new);
     }
 

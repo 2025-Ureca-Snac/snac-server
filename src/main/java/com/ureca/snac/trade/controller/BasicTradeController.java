@@ -3,6 +3,7 @@ package com.ureca.snac.trade.controller;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.CancelTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.TradeFacade;
@@ -88,10 +89,11 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     @GetMapping("/scroll")
     public ResponseEntity<ApiResponse<ScrollTradeResponse>> scrollTrades(@RequestParam TradeSide side,
                                                                          @RequestParam(defaultValue = "10") int size,
+                                                                         @RequestParam(required = false) TradeQueryType tradeQueryType,
                                                                          @RequestParam(required = false, name = "cursorId") Long cursorId,
                                                                          @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ApiResponse.of(TRADE_SCROLL_SUCCESS,
-                tradeFacade.scrollTrades(userDetails.getUsername(), side, size, cursorId)));
+                tradeFacade.scrollTrades(userDetails.getUsername(), side, size, tradeQueryType, cursorId)));
     }
 
     @GetMapping("/{tradeId}")

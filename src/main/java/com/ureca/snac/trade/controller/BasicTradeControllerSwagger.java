@@ -6,9 +6,11 @@ import com.ureca.snac.swagger.annotation.response.ApiCreatedResponse;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,6 +84,7 @@ public interface BasicTradeControllerSwagger {
     @GetMapping("/scroll")
     ResponseEntity<ApiResponse<ScrollTradeResponse>> scrollTrades(@RequestParam TradeSide side,
                                                                   @RequestParam(defaultValue = "10") int size,
+                                                                  @RequestParam(required = false) TradeQueryType tradeQueryType,
                                                                   @RequestParam(required = false, name = "cursorId") Long cursorId,
                                                                   @AuthenticationPrincipal UserDetails userDetails);
 
@@ -93,4 +96,16 @@ public interface BasicTradeControllerSwagger {
     @PostMapping("/buy/accept")
     ResponseEntity<ApiResponse<?>> acceptBuyRequest(@RequestBody ClaimBuyRequest claimBuyRequest,
                                                     @AuthenticationPrincipal UserDetails userDetails);
+
+    @Operation(
+            summary     = "단건 거래 조회",
+            description = "tradeId를 기반으로 단일 거래 정보를 조회합니다."
+    )
+    @ApiSuccessResponse(description = "거래 조회 성공")
+    @ErrorCode400(description = "잘못된 요청 파라미터")
+    @ErrorCode401(description = "인증되지 않은 사용자 접근")
+    @ErrorCode404(description = "거래를 찾을 수 없습니다")
+    @GetMapping("/{tradeId}")
+    ResponseEntity<ApiResponse<TradeResponse>> retrieveTrade(@PathVariable("tradeId") Long tradeId,
+                                                             @AuthenticationPrincipal UserDetails userDetails);
 }
