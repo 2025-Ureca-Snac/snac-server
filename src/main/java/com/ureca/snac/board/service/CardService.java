@@ -68,7 +68,14 @@ public interface CardService {
 
     List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory);
 
+    /**
+     * 카드를 PK(id) 기준으로 조회합니다.
+     *
+     * @param cardId PK
+     * @return 카드 정보
+     */
     CardResponse findCardById(Long cardId);
+    List<CardResponse> getSellingCardsByEmail(String email);
     List<CardDto> findAllDevCard();
 }
 

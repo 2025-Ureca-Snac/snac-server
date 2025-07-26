@@ -90,4 +90,11 @@ public class CardController implements CardControllerSwagger{
     public ResponseEntity<ApiResponse<CardResponse>> getCardById(@PathVariable("cardId") Long cardId) {
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, cardService.findCardById(cardId)));
     }
+
+    @Override
+    @GetMapping("/favorite/{email}")
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getCardsByFavoriteUser(@PathVariable("email") String email) {
+        List<CardResponse> response = cardService.getSellingCardsByEmail(email);
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
+    }
 }

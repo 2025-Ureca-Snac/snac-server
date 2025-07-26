@@ -53,8 +53,7 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     public CardDto createRealtimeCard(String username, CreateRealTimeCardRequest request) {
-        Member member = memberRepository.findByEmail(username)
-                .orElseThrow(MemberNotFoundException::new);
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
         Card card = Card.builder()
                 .member(member)
@@ -175,6 +174,16 @@ public class CardServiceImpl implements CardService {
         return cardRepository.findById(cardId)
                 .map(CardResponse::from)
                 .orElseThrow(CardNotFoundException::new);
+    }
+
+    @Override
+    public List<CardResponse> getSellingCardsByEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+
+        return cardRepository.findByMemberAndSellStatusOrderByUpdatedAtDesc(member, SellStatus.SELLING)
+                .stream()
+                .map(CardResponse::from)
+                .toList();
     }
 
     @Override

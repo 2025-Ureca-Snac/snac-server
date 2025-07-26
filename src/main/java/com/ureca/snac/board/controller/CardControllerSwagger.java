@@ -114,4 +114,12 @@ public interface CardControllerSwagger {
     @ApiSuccessResponse(description = "카드 상세 정보 조회 성공")
     @GetMapping("/{cardId}")
     ResponseEntity<ApiResponse<CardResponse>> getCardById(@PathVariable("cardId") Long cardId);
+
+    @Operation(
+            summary = "단골 사용자의 판매 중인 카드 목록 조회",
+            description = "email을 기반으로 해당 사용자가 등록한 판매 중인 카드 목록을 조회합니다."
+    )
+    @ApiSuccessResponse(description = "조회 성공")
+    @ErrorCode404(description = "사용자가 존재하지 않음")
+    ResponseEntity<ApiResponse<List<CardResponse>>> getCardsByFavoriteUser(@PathVariable("email") String email);
 }
