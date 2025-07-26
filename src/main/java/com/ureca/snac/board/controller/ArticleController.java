@@ -47,4 +47,12 @@ public class ArticleController implements ArticleControllerSwagger {
         return ResponseEntity.ok(ApiResponse.of(ARTICLE_UPDATE_SUCCESS, new UpdateArticleResponse(updateArticleId)));
     }
 
+    @DeleteMapping("/{articleId}")
+    public ResponseEntity<ApiResponse<?>> removeArticle(@PathVariable("articleId") Long articleId,
+                                                        @AuthenticationPrincipal UserDetails userDetails) {
+        articleService.deleteArticle(articleId, userDetails.getUsername());
+
+        return ResponseEntity.ok(ApiResponse.ok(ARTICLE_DELETE_SUCCESS));
+    }
+
 }

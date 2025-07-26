@@ -60,6 +60,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional
     public Long updateArticle(Long articleId, UpdateArticleRequest request, MultipartFile file, String username) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
@@ -74,7 +75,12 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional
     public void deleteArticle(Long articleId, String username) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+        Article article = articleRepository.findByMemberAndId(member, articleId).orElseThrow(ArticleNotFoundException::new);
+        s3Uploader.delete(article.getArticleUrl());
 
+        articleRepository.delete(article);
     }
 }
