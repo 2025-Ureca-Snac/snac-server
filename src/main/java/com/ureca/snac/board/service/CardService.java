@@ -9,6 +9,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.service.response.CardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 
@@ -67,6 +68,14 @@ public interface CardService {
 
     List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory);
 
+    /**
+     * 카드를 PK(id) 기준으로 조회합니다.
+     *
+     * @param cardId PK
+     * @return 카드 정보
+     */
+    CardResponse findCardById(Long cardId);
+    List<CardResponse> getSellingCardsByEmail(String email);
     List<CardDto> findAllDevCard();
 }
 

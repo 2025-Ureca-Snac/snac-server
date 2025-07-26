@@ -47,12 +47,13 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     @Override
     public void requestCancel(Long tradeId, String userEmail, CancelReason reason) {
 
+        Member requester = tradeSupport.findMember(userEmail);
+
         Trade trade = tradeSupport.findLockedTrade(tradeId);
 
         // 제목 생성위해서 만들었음.. 리팩토링 시 변경 가능
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
-        Member requester = tradeSupport.findMember(userEmail);
         // 구매자 따로 뺏음
         Member buyer = trade.getBuyer();
 

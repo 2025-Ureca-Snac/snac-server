@@ -51,7 +51,7 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
         // 카드는 판매 상태이여야 함
-        if (card.getSellStatus() == TRADING) {
+        if (card.getSellStatus() != SELLING) {
             throw new CardInvalidStatusException();
         }
 
@@ -75,10 +75,10 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Transactional
     public Long payRealTimeTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username) {
         // 1. 거래 조회 (락 걸어서)
-        Trade trade = tradeSupport.findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
         Member member = tradeSupport.findMember(username);
-        Wallet wallet = tradeSupport.findLockedWallet(member.getId());
+        Trade trade = tradeSupport.findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
         Card card = tradeSupport.findLockedCard(trade.getCardId());
+        Wallet wallet = tradeSupport.findLockedWallet(member.getId());
 
         // 카드는 거래 상태이어야 함
         if (card.getSellStatus() != TRADING) {
@@ -172,11 +172,11 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Override
     @Transactional
     public Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
-        Card card = tradeSupport.findLockedCard(claimBuyRequest.getCardId());
         Member seller = tradeSupport.findMember(username);
         Trade trade = tradeRepository
                 .findLockedByCardId(claimBuyRequest.getCardId())
                 .orElseThrow(TradeNotFoundException::new);
+        Card card = tradeSupport.findLockedCard(claimBuyRequest.getCardId());
 
         // 판매 가능 상태가 아니라면 이미 거래 중으로 간주
         if (card.getSellStatus() != SELLING) {

@@ -16,6 +16,7 @@ public class CardResponse {
     private Long id;
     private String name;
     private String email;
+    private Integer ratingScore;
     private SellStatus sellStatus;
     private CardCategory cardCategory;
     private Carrier carrier;
@@ -29,6 +30,7 @@ public class CardResponse {
                 card.getId(),
                 card.getMember().getName(),
                 card.getMember().getEmail(),
+                card.getMember().getRatingScore(),
                 card.getSellStatus(),
                 card.getCardCategory(),
                 card.getCarrier(),

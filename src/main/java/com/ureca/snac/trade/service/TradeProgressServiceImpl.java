@@ -39,8 +39,8 @@ public class TradeProgressServiceImpl implements TradeProgressService {
     @Override
     @Transactional
     public Long sendTradeData(Long tradeId, String username) {
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
         Member seller = tradeSupport.findMember(username);
+        Trade trade = tradeSupport.findLockedTrade(tradeId);
         Card card = tradeSupport.findLockedCard(trade.getCardId());
 
         if (trade.getStatus() != PAYMENT_CONFIRMED) { // 결제가 완료되지 않은 상태에서는 판매자가 데이터를 전송할 수 없음
