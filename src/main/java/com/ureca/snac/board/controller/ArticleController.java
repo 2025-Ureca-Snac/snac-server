@@ -1,0 +1,35 @@
+package com.ureca.snac.board.controller;
+
+import com.ureca.snac.board.controller.request.CreateArticleRequest;
+import com.ureca.snac.board.service.ArticleService;
+import com.ureca.snac.board.service.response.CreateArticleResponse;
+import com.ureca.snac.common.ApiResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import static com.ureca.snac.common.BaseCode.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/articles")
+@RequiredArgsConstructor
+public class ArticleController implements ArticleControllerSwagger {
+
+    private final ArticleService articleService;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<CreateArticleResponse>> addArticle(@ModelAttribute CreateArticleRequest createArticleRequest,
+                                                                         @RequestPart MultipartFile file,
+                                                                         @AuthenticationPrincipal UserDetails userDetails) {
+        Long articleId = articleService.createArticle(createArticleRequest, file, userDetails.getUsername());
+
+        return ResponseEntity.status(ARTICLE_CREATE_SUCCESS.getStatus())
+                .body(ApiResponse.of(ARTICLE_CREATE_SUCCESS, new CreateArticleResponse(articleId)));
+    }
+}
