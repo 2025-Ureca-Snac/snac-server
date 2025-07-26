@@ -171,6 +171,13 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    public CardResponse findCardById(Long cardId) {
+        return cardRepository.findById(cardId)
+                .map(CardResponse::from)
+                .orElseThrow(CardNotFoundException::new);
+    }
+
+    @Override
     public List<CardDto> findAllDevCard() {
         return cardRepository.findAll()
                 .stream()

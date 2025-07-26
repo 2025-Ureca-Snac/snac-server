@@ -9,6 +9,8 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
+import com.ureca.snac.board.service.response.CardResponse;
+import com.ureca.snac.board.service.response.CreateCardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +34,12 @@ public class CardController implements CardControllerSwagger{
 
     @Override
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createCard(@Validated @RequestBody CreateCardRequest request,
-                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        cardService.createCard(customUserDetails.getUsername(), request);
+    public ResponseEntity<ApiResponse<CreateCardResponse>> createCard(@Validated @RequestBody CreateCardRequest request,
+                                                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long cardId = cardService.createCard(customUserDetails.getUsername(), request);
 
         return ResponseEntity.status(CARD_CREATE_SUCCESS.getStatus())
-                .body(ApiResponse.ok(CARD_CREATE_SUCCESS));
+                .body(ApiResponse.of(CARD_CREATE_SUCCESS, new CreateCardResponse(cardId)));
     }
 
     @Override
@@ -81,5 +83,11 @@ public class CardController implements CardControllerSwagger{
     @GetMapping("/dev")
     public ResponseEntity<ApiResponse<List<CardDto>>> getDevCardList() {
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, cardService.findAllDevCard()));
+    }
+
+    @Override
+    @GetMapping("/{cardId}")
+    public ResponseEntity<ApiResponse<CardResponse>> getCardById(@PathVariable("cardId") Long cardId) {
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, cardService.findCardById(cardId)));
     }
 }

@@ -9,6 +9,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.service.response.CardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 
@@ -67,6 +68,7 @@ public interface CardService {
 
     List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory);
 
+    CardResponse findCardById(Long cardId);
     List<CardDto> findAllDevCard();
 }
 
