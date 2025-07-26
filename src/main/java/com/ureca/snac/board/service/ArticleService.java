@@ -14,7 +14,7 @@ public interface ArticleService {
 
     List<ArticleResponse> getArticles();
 
-    ArticleResponse updateArticle(Long articleId, UpdateArticleRequest request, String username);
+    Long updateArticle(Long articleId, UpdateArticleRequest request, MultipartFile file, String username);
 
     void deleteArticle(Long articleId, String username);
 }

@@ -3,6 +3,7 @@ package com.ureca.snac.board.service;
 import com.ureca.snac.board.controller.request.CreateArticleRequest;
 import com.ureca.snac.board.controller.request.UpdateArticleRequest;
 import com.ureca.snac.board.entity.Article;
+import com.ureca.snac.board.exception.ArticleNotFoundException;
 import com.ureca.snac.board.repository.ArticleRepository;
 import com.ureca.snac.board.service.response.ArticleResponse;
 import com.ureca.snac.common.s3.S3Path;
@@ -59,8 +60,17 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleResponse updateArticle(Long articleId, UpdateArticleRequest request, String username) {
-        return null;
+    public Long updateArticle(Long articleId, UpdateArticleRequest request, MultipartFile file, String username) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+
+        Article article = articleRepository.findByMemberAndId(member, articleId).orElseThrow(ArticleNotFoundException::new);
+
+        s3Uploader.delete(article.getArticleUrl());
+        String s3Key = s3Uploader.upload(file, S3Path.ARTICLE_CONTENT);
+
+        article.update(s3Key, request.getTitle());
+
+        return article.getId();
     }
 
     @Override

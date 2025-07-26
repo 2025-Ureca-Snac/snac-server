@@ -1,9 +1,12 @@
 package com.ureca.snac.board.controller;
 
 import com.ureca.snac.board.controller.request.CreateArticleRequest;
+import com.ureca.snac.board.controller.request.UpdateArticleRequest;
 import com.ureca.snac.board.service.ArticleService;
 import com.ureca.snac.board.service.response.CreateArticleResponse;
+import com.ureca.snac.board.service.response.UpdateArticleResponse;
 import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.common.BaseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -32,4 +35,16 @@ public class ArticleController implements ArticleControllerSwagger {
         return ResponseEntity.status(ARTICLE_CREATE_SUCCESS.getStatus())
                 .body(ApiResponse.of(ARTICLE_CREATE_SUCCESS, new CreateArticleResponse(articleId)));
     }
+
+    @PutMapping(value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<?>> editArticle(@PathVariable("articleId") Long articleId,
+                                                      @ModelAttribute UpdateArticleRequest updateArticleRequest,
+                                                      @RequestPart MultipartFile file,
+                                                      @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long updateArticleId = articleService.updateArticle(articleId, updateArticleRequest, file, userDetails.getUsername());
+
+        return ResponseEntity.ok(ApiResponse.of(ARTICLE_UPDATE_SUCCESS, new UpdateArticleResponse(updateArticleId)));
+    }
+
 }

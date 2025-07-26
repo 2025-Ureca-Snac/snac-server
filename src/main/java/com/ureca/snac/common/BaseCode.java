@@ -278,6 +278,7 @@ public enum BaseCode {
 
     // S3
     S3_UPLOAD_FAILED("S3_UPLOAD_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),
+    S3_DELETE_FAILED("S3_DELETE_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 삭제에 실패했습니다"),
     ATTACHMENT_UPLOAD_SUCCESS("ATTACHMENT_UPLOAD_SUCCESS_201", HttpStatus.CREATED, "이미지가 성공적으로 업로드되었습니다."),
     ATTACHMENT_PRESIGNED_URL_ISSUED("ATTACHMENT_PRESIGNED_URL_ISSUED_200", HttpStatus.OK, "첨부 이미지에 대한 접근 URL이 발급되었습니다.");
     private final String code;
