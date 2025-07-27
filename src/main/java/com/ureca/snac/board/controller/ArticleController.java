@@ -1,12 +1,11 @@
 package com.ureca.snac.board.controller;
 
-import com.ureca.snac.board.controller.request.CreateArticleRequest;
-import com.ureca.snac.board.controller.request.UpdateArticleRequest;
 import com.ureca.snac.board.service.ArticleService;
+import com.ureca.snac.board.service.response.ArticleResponse;
 import com.ureca.snac.board.service.response.CreateArticleResponse;
+import com.ureca.snac.board.service.response.ListArticleResponse;
 import com.ureca.snac.board.service.response.UpdateArticleResponse;
 import com.ureca.snac.common.ApiResponse;
-import com.ureca.snac.common.BaseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -27,10 +26,11 @@ public class ArticleController implements ArticleControllerSwagger {
     private final ArticleService articleService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<CreateArticleResponse>> addArticle(@ModelAttribute CreateArticleRequest createArticleRequest,
+    public ResponseEntity<ApiResponse<CreateArticleResponse>> addArticle(@RequestParam String title,
                                                                          @RequestPart MultipartFile file,
+                                                                         @RequestPart MultipartFile image,
                                                                          @AuthenticationPrincipal UserDetails userDetails) {
-        Long articleId = articleService.createArticle(createArticleRequest, file, userDetails.getUsername());
+        Long articleId = articleService.createArticle(title, file, image, userDetails.getUsername());
 
         return ResponseEntity.status(ARTICLE_CREATE_SUCCESS.getStatus())
                 .body(ApiResponse.of(ARTICLE_CREATE_SUCCESS, new CreateArticleResponse(articleId)));
@@ -38,13 +38,15 @@ public class ArticleController implements ArticleControllerSwagger {
 
     @PutMapping(value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> editArticle(@PathVariable("articleId") Long articleId,
-                                                      @ModelAttribute UpdateArticleRequest updateArticleRequest,
+                                                      @RequestParam String title,
                                                       @RequestPart MultipartFile file,
+                                                      @RequestPart MultipartFile image,
                                                       @AuthenticationPrincipal UserDetails userDetails) {
 
-        Long updateArticleId = articleService.updateArticle(articleId, updateArticleRequest, file, userDetails.getUsername());
+        Long updateArticleId = articleService.updateArticle(articleId, title, file, image, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.of(ARTICLE_UPDATE_SUCCESS, new UpdateArticleResponse(updateArticleId)));
+        return ResponseEntity
+                .ok(ApiResponse.of(ARTICLE_UPDATE_SUCCESS, new UpdateArticleResponse(updateArticleId)));
     }
 
     @DeleteMapping("/{articleId}")
@@ -52,7 +54,21 @@ public class ArticleController implements ArticleControllerSwagger {
                                                         @AuthenticationPrincipal UserDetails userDetails) {
         articleService.deleteArticle(articleId, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.ok(ARTICLE_DELETE_SUCCESS));
+        return ResponseEntity
+                .ok(ApiResponse.ok(ARTICLE_DELETE_SUCCESS));
     }
 
+    @GetMapping("/{articleId}")
+    public ResponseEntity<ApiResponse<ArticleResponse>> getArticle(@PathVariable("articleId") Long articleId) {
+        return ResponseEntity
+                .ok(ApiResponse.of(ARTICLE_READ_SUCCESS, articleService.getArticle(articleId)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<ListArticleResponse>> getArticles(@RequestParam(required = false) Long lastArticleId,
+                                                                        @RequestParam(defaultValue = "9") Integer size){
+
+        return ResponseEntity
+                .ok(ApiResponse.of(ACCOUNT_LIST_SUCCESS, articleService.getArticles(lastArticleId, size)));
+    }
 }

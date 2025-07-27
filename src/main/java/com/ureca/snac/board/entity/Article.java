@@ -25,18 +25,23 @@ public class Article extends BaseTimeEntity {
     @Column(name = "article_url", nullable = false)
     private String articleUrl;
 
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
+
     @Column(name = "title")
     private String title;
 
     @Builder
-    private Article(Member member, String articleUrl, String title) {
+    private Article(Member member, String articleUrl, String imageUrl, String title) {
         this.member = member;
         this.articleUrl = articleUrl;
+        this.imageUrl = imageUrl;
         this.title = title;
     }
 
-    public void update(String articleUrl, String title) {
+    public void update(String articleUrl, String imageUrl, String title) {
         this.articleUrl = articleUrl;
+        this.imageUrl = imageUrl;
         this.title = title;
     }
 }

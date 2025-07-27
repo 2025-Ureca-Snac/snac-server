@@ -1,20 +1,17 @@
 package com.ureca.snac.board.service;
 
-import com.ureca.snac.board.controller.request.CreateArticleRequest;
-import com.ureca.snac.board.controller.request.UpdateArticleRequest;
 import com.ureca.snac.board.service.response.ArticleResponse;
+import com.ureca.snac.board.service.response.ListArticleResponse;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 public interface ArticleService {
-    Long createArticle(CreateArticleRequest request, MultipartFile file, String username);
+    Long createArticle(String title, MultipartFile file, MultipartFile image, String username);
 
     ArticleResponse getArticle(Long articleId);
 
-    List<ArticleResponse> getArticles();
+    ListArticleResponse getArticles(Long lastArticleId, Integer size);
 
-    Long updateArticle(Long articleId, UpdateArticleRequest request, MultipartFile file, String username);
+    Long updateArticle(Long articleId, String title, MultipartFile file, MultipartFile image, String username);
 
     void deleteArticle(Long articleId, String username);
 }
