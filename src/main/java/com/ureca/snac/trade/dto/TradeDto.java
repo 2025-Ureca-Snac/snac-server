@@ -7,14 +7,22 @@ import com.ureca.snac.trade.entity.TradeStatus;
 import lombok.*;
 
 @Builder
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TradeDto {
     private Long tradeId;
     private Long cardId;
-    private Integer sellerRatingScore;
+
+    private Long sellerId;
     private String seller;
+    private String sellerNickName;
+    private Integer sellerRatingScore;
+
+    private Long buyerId;
     private String buyer;
+    private String buyerNickname;
+
     private Carrier carrier;
     private Integer priceGb;
     private Integer dataAmount;
@@ -27,9 +35,16 @@ public class TradeDto {
         return TradeDto.builder()
                 .tradeId(trade.getId())
                 .cardId(trade.getCardId())
-                .sellerRatingScore(trade.getSeller().getRatingScore())
+
+                .sellerId(trade.getSeller().getId())
                 .seller(trade.getSeller().getEmail())
+                .sellerNickName(trade.getSeller().getNickname())
+                .sellerRatingScore(trade.getSeller().getRatingScore())
+
+                .buyerId(trade.getBuyer().getId())
                 .buyer(trade.getBuyer().getEmail())
+                .buyerNickname(trade.getBuyer().getNickname())
+                
                 .carrier(trade.getCarrier())
                 .priceGb(trade.getPriceGb())
                 .dataAmount(trade.getDataAmount())

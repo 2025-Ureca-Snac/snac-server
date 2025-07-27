@@ -7,6 +7,7 @@ import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeQueryType;
+import com.ureca.snac.trade.dto.TradeConfirmResponse;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
@@ -74,8 +75,8 @@ public interface BasicTradeControllerSwagger {
     @ErrorCode403(description = "구매자만 거래를 확정할 수 있습니다.")
     @ErrorCode404(description = "거래를 찾을 수 없습니다.")
     @PatchMapping("/{tradeId}/confirm")
-    ResponseEntity<ApiResponse<?>> confirmTrade(@PathVariable Long tradeId,
-                                                @AuthenticationPrincipal UserDetails userDetails);
+    ResponseEntity<ApiResponse<TradeConfirmResponse>> confirmTrade(@PathVariable Long tradeId,
+                                                                   @AuthenticationPrincipal UserDetails userDetails);
 
     @Operation(summary = "거래 내역 조회 (무한 스크롤)", description = "로그인한 사용자의 거래 내역을 BUY/SELL 관점으로 무한 스크롤 방식으로 조회합니다.")
     @ApiSuccessResponse(description = "거래 내역 조회 성공")
@@ -98,7 +99,7 @@ public interface BasicTradeControllerSwagger {
                                                     @AuthenticationPrincipal UserDetails userDetails);
 
     @Operation(
-            summary     = "단건 거래 조회",
+            summary = "단건 거래 조회",
             description = "tradeId를 기반으로 단일 거래 정보를 조회합니다."
     )
     @ApiSuccessResponse(description = "거래 조회 성공")

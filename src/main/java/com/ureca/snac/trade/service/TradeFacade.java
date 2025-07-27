@@ -2,9 +2,12 @@ package com.ureca.snac.trade.service;
 
 import com.ureca.snac.board.service.CardService;
 import com.ureca.snac.config.RabbitMQConfig;
+import com.ureca.snac.favorite.service.FavoriteService;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeQueryType;
+import com.ureca.snac.trade.dto.TradeConfirmResponse;
+import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeMessageDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.CancelReason;
@@ -37,6 +40,8 @@ public class TradeFacade {
     private final RabbitTemplate rabbitTemplate;
 
     private final TradeCancelService tradeCancelService;
+
+    private final FavoriteService favoriteService;
 
     // === TradeInitiationService === //
     @Transactional
@@ -79,11 +84,33 @@ public class TradeFacade {
     }
 
     @Transactional
-    public void confirmTrade(Long tradeId, String username) {
-        Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username, true);
+    public TradeConfirmResponse confirmTrade(Long tradeId, String username) {
+//        Long confirmTradeId = tradeProgressService.confirmTrade(tradeId, username, true);
+        TradeDto confrimTradeDto = tradeProgressService.confirmTrade(tradeId, username, true);
 
-        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confirmTradeId);
+//        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confirmTradeId);
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(confrimTradeDto.getTradeId());
+
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
+
+        Long partnerId;
+        String partnerNickname;
+
+        if (confrimTradeDto.getBuyer().equals(username)) {
+            partnerId = confrimTradeDto.getSellerId();
+            partnerNickname = confrimTradeDto.getSellerNickName();
+        } else {
+            partnerId = confrimTradeDto.getBuyerId();
+            partnerNickname = confrimTradeDto.getBuyerNickname();
+        }
+        boolean isFavorite = favoriteService.checkFavoriteStatus(username, partnerId);
+
+        return new TradeConfirmResponse(
+                confrimTradeDto.getTradeId(),
+                partnerId,
+                partnerNickname,
+                isFavorite
+        );
     }
 
     public TradeResponse getTradeById(Long tradeId, String username) {
