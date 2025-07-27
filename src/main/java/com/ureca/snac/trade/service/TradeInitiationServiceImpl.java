@@ -95,21 +95,53 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
             throw new TradePermissionDeniedException();
         }
 
-        int totalPay = createRealTimeTradePaymentRequest.getMoney() + createRealTimeTradePaymentRequest.getPoint();
+        long moneyToUse = createRealTimeTradePaymentRequest.getMoney();
+        long pointToUse = createRealTimeTradePaymentRequest.getPoint();
+        long totalPay = moneyToUse + pointToUse;
 
         if (trade.getPriceGb() != totalPay)
             throw new TradePaymentMismatchException();
 
-        // 결제
-        if (createRealTimeTradePaymentRequest.getMoney() != 0) {
-            wallet.withdrawMoney(createRealTimeTradePaymentRequest.getMoney());
+        // 1.결제 먼저
+        long moneyBalanceAfter = -1L;
+
+        // 금액 및 포인트 차감
+        if (moneyToUse > 0) {
+            moneyBalanceAfter =
+                    walletService.withdrawMoney(member.getId(), moneyToUse);
+            // wallet.withdrawMoney(createTradeRequest.getMoney());
         }
-        if (createRealTimeTradePaymentRequest.getPoint() != 0) {
-            wallet.withdrawPoint(createRealTimeTradePaymentRequest.getPoint());
+
+        long pointBalanceAfter = -1L;
+        if (pointToUse > 0) {
+            pointBalanceAfter =
+                    walletService.withdrawPoint(member.getId(), pointToUse);
+//            wallet.withdrawPoint(createTradeRequest.getPoint());
         }
 
         trade.changePoint(createRealTimeTradePaymentRequest.getPoint());
         trade.changeStatus(PAYMENT_CONFIRMED);
+
+        // 3 기록
+        if (moneyToUse > 0) {
+            String title = String.format("%s %dGB 머니 사용",
+                    card.getCarrier().name(), card.getDataAmount());
+
+            AssetChangedEvent event = assetChangedEventFactory.createForBuyWithMoney(
+                    member.getId(), trade.getId(), title, moneyToUse, moneyBalanceAfter);
+
+            assetHistoryEventPublisher.publish(event);
+        }
+
+        if (pointToUse > 0) {
+            String title = String.format("%s %dGB 포인트 사용",
+                    card.getCarrier().name(), card.getDataAmount());
+
+            AssetChangedEvent event = assetChangedEventFactory.createForBuyWithPoint(
+                    member.getId(), trade.getId(), title, pointToUse, pointBalanceAfter);
+
+            assetHistoryEventPublisher.publish(event);
+        }
 
         return trade.getId();
     }

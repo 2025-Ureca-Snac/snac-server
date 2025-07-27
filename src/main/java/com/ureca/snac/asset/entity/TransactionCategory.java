@@ -28,7 +28,7 @@ public enum TransactionCategory {
     public boolean isValidFor(AssetType assetType) {
         return switch (assetType) {
             case MONEY -> this == RECHARGE || this == CANCEL || this == BUY || this == SELL;
-            case POINT -> this == EVENT || this == POINT_USAGE;
+            case POINT -> this == EVENT || this == POINT_USAGE || this == CANCEL;
         };
     }
 
@@ -38,7 +38,7 @@ public enum TransactionCategory {
      */
     public boolean isConsistentWith(TransactionType transactionType) {
         return switch (transactionType) {
-            case DEPOSIT -> this == RECHARGE || this == SELL || this == EVENT;
+            case DEPOSIT -> this == RECHARGE || this == SELL || this == EVENT || this == CANCEL;
             case WITHDRAWAL -> this == BUY || this == CANCEL || this == POINT_USAGE;
         };
     }

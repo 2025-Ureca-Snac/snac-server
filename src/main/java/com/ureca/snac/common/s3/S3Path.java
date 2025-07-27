@@ -6,5 +6,5 @@ package com.ureca.snac.common.s3;
 public class S3Path {
     public static final String TRADE_ATTACHMENT = "trade/attachments"; // 거래 첨부 이미지
     public static final String USER_PROFILE = "users/profile"; // 예) 프로필 이미지
-    public static final String BOARD_IMAGE = "boards/images"; // 예) 게시판 이미지
+    public static final String ARTICLE_CONTENT = "article/content"; // 예) 게시판 이미지
 }

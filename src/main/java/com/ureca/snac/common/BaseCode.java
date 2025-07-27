@@ -105,6 +105,17 @@ public enum BaseCode {
     // 닉네임 변경 시간 검증 - 실패
     NICKNAME_CHANGE_TOO_EARLY("NICKNAME_CHANGE_TOO_EARLY_400", HttpStatus.BAD_REQUEST, "닉네임은 최근 변경 시점 24시간이 지난 후 수정할 수 있습니다."),
 
+    // 게시글 - 성공
+    ARTICLE_CREATE_SUCCESS("ARTICLE_CREATE_SUCCESS_201", HttpStatus.CREATED, "게시글이 성공적으로 등록되었습니다."),
+    ARTICLE_READ_SUCCESS("ARTICLE_READ_SUCCESS_200", HttpStatus.OK, "게시글을 성공적으로 조회했습니다."),
+    ARTICLE_LIST_SUCCESS("ARTICLE_LIST_SUCCESS_200", HttpStatus.OK, "게시글 목록을 성공적으로 조회했습니다."),
+    ARTICLE_UPDATE_SUCCESS("ARTICLE_UPDATE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 수정되었습니다."),
+    ARTICLE_DELETE_SUCCESS("ARTICLE_DELETE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 삭제되었습니다."),
+
+    // 게시글 - 실패
+    ARTICLE_NOT_FOUND("ARTICLE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
+    ARTICLE_PERMISSION_DENIED("ARTICLE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "해당 게시글에 대한 권한이 없습니다."),
+
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
     BANK_READ_SUCCESS("BANK_READ_SUCCESS_200", HttpStatus.OK, "은행 정보를 성공적으로 조회했습니다."),
@@ -267,6 +278,7 @@ public enum BaseCode {
 
     // S3
     S3_UPLOAD_FAILED("S3_UPLOAD_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),
+    S3_DELETE_FAILED("S3_DELETE_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 삭제에 실패했습니다"),
     ATTACHMENT_UPLOAD_SUCCESS("ATTACHMENT_UPLOAD_SUCCESS_201", HttpStatus.CREATED, "이미지가 성공적으로 업로드되었습니다."),
     ATTACHMENT_PRESIGNED_URL_ISSUED("ATTACHMENT_PRESIGNED_URL_ISSUED_200", HttpStatus.OK, "첨부 이미지에 대한 접근 URL이 발급되었습니다.");
     private final String code;
