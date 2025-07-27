@@ -12,7 +12,7 @@ public interface DisputeService {
             String userEmail,
             DisputeType type,
             String description,
-            List<MultipartFile> files
+            List<String> attachmentKeys
     );
     DisputeDetailResponse getDispute(Long id, String requesterEmail);
 }

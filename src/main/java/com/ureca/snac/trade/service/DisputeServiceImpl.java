@@ -17,7 +17,6 @@ import com.ureca.snac.trade.support.TradeSupport;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class DisputeServiceImpl implements DisputeService {
     @Override
     public Long createDispute(Long tradeId, String email,
                               DisputeType type, String description,
-                              List<MultipartFile> files) {
+                              List<String> attachmentKeys) {
 
         Trade trade = tradeSupport.findLockedTrade(tradeId);
         Member reporter = tradeSupport.findMember(email);
@@ -54,8 +53,7 @@ public class DisputeServiceImpl implements DisputeService {
                         .build()
         );
 
-        for (MultipartFile file : files) {
-            String key = s3Uploader.upload(file, "disputes/attachments");
+        for (String key : attachmentKeys) {
             disputeAttachmentRepository.save(new DisputeAttachment(dispute, key));
         }
         return dispute.getId();
