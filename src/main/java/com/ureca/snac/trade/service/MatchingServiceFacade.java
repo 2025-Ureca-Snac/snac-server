@@ -85,6 +85,8 @@ public class MatchingServiceFacade {
     public void createRealtimeCardAndNotifyBuyers(String username, CreateRealTimeCardRequest request) {
         CardDto realtimeCard = cardService.createRealtimeCard(username, request);
 
+        notificationService.sendMatchingNotification(username, realtimeCard);
+
         //  Redis에서 전체 구매자 필터 key 조회 (예: buyer_filter:{username})
         Set<String> keys = redisTemplate.keys(BUYER_FILTER_PREFIX + "*");
         if (keys.isEmpty()) return;
@@ -106,8 +108,6 @@ public class MatchingServiceFacade {
                 log.warn("[매칭] 구매자 필터 파싱 실패: key={}, err={}", key, e.toString());
             }
         }
-
-        notificationService.sendMatchingNotification(username, realtimeCard);
     }
 
     // 실시간 매칭 - 판매자에게 거래 수락 요청 -> 이 시점에 Trade 생성 ( Status == BUY_REQUEST, Card == SELLING )
