@@ -1,6 +1,5 @@
 package com.ureca.snac.trade.dto.dispute;
 
-import com.ureca.snac.trade.dto.dispute.CommentResponse;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import lombok.AllArgsConstructor;
