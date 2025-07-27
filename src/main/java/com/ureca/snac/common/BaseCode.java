@@ -271,6 +271,7 @@ public enum BaseCode {
     DISPUTE_COMMENT_SUCCESS("DISPUTE_COMMENT_SUCCESS_201", HttpStatus.CREATED, "신고 답변이 등록되었습니다."),
     DISPUTE_NEED_MORE("DISPUTE_NEED_MORE_200", HttpStatus.OK,"추가 자료 요청"),
     DISPUTE_ANSWERED_SUCCESS("DISPUTE_ANSWERED_SUCCESS_200", HttpStatus.OK,"신고가 처리되었습니다."),
+    DISPUTE_REJECTED_SUCCESS("DISPUTE_REJECTED_SUCCESS_200", HttpStatus.OK,"신고 기각 처리되었습니다."),
     DISPUTE_COMMENT_READ_SUCCESS ("DISPUTE_COMMENT_READ_SUCCESS_200",HttpStatus.OK,"신고 답변 조회 성공"),
 
     // 계좌 - 성공

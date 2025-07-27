@@ -29,8 +29,11 @@ public class DisputeAdminController {
             @AuthenticationPrincipal UserDetails userDetails) {
         disputeAdminService.answer(id, disputeAnswerRequest, userDetails.getUsername());
 
-        BaseCode baseCode = disputeAnswerRequest.isNeedMore()
-                ?  DISPUTE_NEED_MORE : DISPUTE_ANSWERED_SUCCESS;
+        BaseCode baseCode = switch (disputeAnswerRequest.getResult()) {
+            case NEED_MORE -> DISPUTE_NEED_MORE;
+            case REJECTED  -> DISPUTE_REJECTED_SUCCESS;
+            default        -> DISPUTE_ANSWERED_SUCCESS;
+        };
 
         return ResponseEntity.ok(ApiResponse.ok(baseCode));
     }
