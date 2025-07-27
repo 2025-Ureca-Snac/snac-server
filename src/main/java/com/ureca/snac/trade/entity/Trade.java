@@ -183,6 +183,7 @@ public class Trade extends BaseTimeEntity {
     }
     public void resumeAutoConfirm() {
         this.autoConfirmPaused = false;
+    }
 
     public void changeCancelReason(CancelReason cancelReason) {
         this.cancelReason = cancelReason;
