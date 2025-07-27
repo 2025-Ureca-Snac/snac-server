@@ -106,6 +106,8 @@ public class MatchingServiceFacade {
                 log.warn("[매칭] 구매자 필터 파싱 실패: key={}, err={}", key, e.toString());
             }
         }
+
+        notificationService.sendMatchingNotification(username, realtimeCard);
     }
 
     // 실시간 매칭 - 판매자에게 거래 수락 요청 -> 이 시점에 Trade 생성 ( Status == BUY_REQUEST, Card == SELLING )
