@@ -163,12 +163,13 @@ public class MatchingServiceFacade {
     // 실시간 매칭 - 구매자가 거래를 확정 ( Status == COMPLETED, Card == SOLD_OUT )
     @Transactional
     public void confirmTrade(ConfirmTradeRequest request, String username) {
-        Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username, false);
+//        Long tradeId = tradeProgressService.confirmTrade(request.getTradeId(), username, false);
+        TradeDto confrimTradeDto = tradeProgressService.confirmTrade(request.getTradeId(), username, false);
 
-        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
+//        TradeDto tradeDto = tradeQueryService.findByTradeId(tradeId);
 
         // 판매자에게 확정 정보 제공
-        notificationService.notify(tradeDto.getSeller(), tradeDto);
+        notificationService.notify(confrimTradeDto.getSeller(), confrimTradeDto);
     }
 
     /*-------------------------------------------- 실시간 거래 프로세스 -------------------------------------------- */
