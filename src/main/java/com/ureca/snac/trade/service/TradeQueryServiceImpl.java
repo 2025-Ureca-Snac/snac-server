@@ -1,9 +1,11 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.entity.TradeType;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeQueryService;
@@ -29,13 +31,16 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     private final TradeRepository tradeRepository;
     private final TradeSupport tradeSupport;
 
+    // 판매 또는 구매에 대한 거래내역을 가져옵니다.
+    // TradeSide를 기준으로 BUY, SELL을 구분합니다.
+    // 요청한 사이즈보다 1개 더 조회하여 다음페이지가 있는지 체크합니다.
     @Override
-    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, Long lastTradeId) {
+    public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, TradeQueryType tradeQueryType, Long lastTradeId) {
         Member member = tradeSupport.findMember(username);
 
         List<Trade> trades = (side == TradeSide.BUY)
-                ? tradeRepository.findTradesByBuyerInfinite(member.getId(), lastTradeId, size + 1)
-                : tradeRepository.findTradesBySellerInfinite(member.getId(), lastTradeId, size + 1);
+                ? tradeRepository.findTradesByBuyerInfinite(member.getId(), lastTradeId, tradeQueryType,  size + 1)
+                : tradeRepository.findTradesBySellerInfinite(member.getId(), lastTradeId, tradeQueryType,  size + 1);
 
         boolean hasNext = trades.size() > size;
 
@@ -63,10 +68,43 @@ public class TradeQueryServiceImpl implements TradeQueryService {
                 List.of(DATA_SENT, PAYMENT_CONFIRMED)));
     }
 
+    // 메시지 알림용 trade 반환 메서드
     @Override
     public TradeDto findByTradeId(Long tradeId) {
         return tradeRepository.findById(tradeId)
                 .map(TradeDto::from)
                 .orElseThrow(TradeNotFoundException::new);
+    }
+
+    // 일반 거래에 사용하는 trade 반환 메서드
+    @Override
+    public TradeResponse getTradeById(Long tradeId, String username) {
+        Member member = tradeSupport.findMember(username);
+
+        return tradeRepository.findByIdAndParticipant(tradeId, member)
+                .map(t -> TradeResponse.from(t, member.getEmail()))
+                .orElseThrow(TradeNotFoundException::new);
+    }
+
+    @Override
+    @Transactional
+    public List<TradeDto> findBuyerRealTimeTrade(String buyerUsername) {
+        Member member = tradeSupport.findMember(buyerUsername);
+
+        return tradeRepository
+                .findAllByBuyerAndTradeType(member, TradeType.REALTIME)
+                .stream().map(TradeDto::from)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<TradeDto> findSellerRealTimeTrade(String sellerUsername) {
+        Member member = tradeSupport.findMember(sellerUsername);
+
+        return tradeRepository
+                .findAllBySellerAndTradeType(member, TradeType.REALTIME)
+                .stream().map(TradeDto::from)
+                .toList();
     }
 }

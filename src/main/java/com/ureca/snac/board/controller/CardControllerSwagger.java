@@ -5,9 +5,12 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.board.controller.request.CreateCardRequest;
 import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
+import com.ureca.snac.board.service.response.CardResponse;
+import com.ureca.snac.board.service.response.CreateCardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.swagger.annotation.error.ErrorCode400;
@@ -29,6 +32,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.ureca.snac.common.BaseCode.CARD_READ_SUCCESS;
+
 
 @Tag(name = "판매글/구매글 관리", description = "판매글(SELL), 구매글(BUY) 등록, 조회, 삭제, 수정 기능 제공")
 @SecurityRequirement(name = "Authorization")
@@ -42,7 +47,8 @@ public interface CardControllerSwagger {
     @ErrorCode400(description = "등록 실패 - 입력값이 잘못되었습니다.")
     @ErrorCode401(description = "인증되지 않은 사용자 접근")
     @PostMapping
-    ResponseEntity<ApiResponse<?>> createCard(@Validated @RequestBody CreateCardRequest request, @AuthenticationPrincipal CustomUserDetails customUserDetails);
+    ResponseEntity<ApiResponse<CreateCardResponse>> createCard(@Validated @RequestBody CreateCardRequest request,
+                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails);
 
     @Operation(
             summary = "판매글 또는 구매글 수정",
@@ -77,7 +83,7 @@ public interface CardControllerSwagger {
                                                                         description = "카드 카테고리",
                                                                         schema = @Schema(type = "string", allowableValues = {"BUY", "SELL"}))@RequestParam CardCategory cardCategory,
                                                                 @RequestParam(required = false) Carrier carrier,
-                                                                @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
+                                                                @RequestParam(value = "priceRanges") PriceRange priceRange,
                                                                 @RequestParam SellStatusFilter sellStatusFilter,
                                                                 @RequestParam(defaultValue = "true") Boolean highRatingFirst,
                                                                 @RequestParam(defaultValue = "54") Integer size,
@@ -93,4 +99,27 @@ public interface CardControllerSwagger {
     @ErrorCode404(description = "삭제 실패 - 존재하지 않는 글 ID")
     @DeleteMapping("/{cardId}")
     ResponseEntity<ApiResponse<?>> removeCard(@PathVariable("cardId") Long cardId, @AuthenticationPrincipal CustomUserDetails customUserDetails);
+
+    @Operation(
+            summary = "개발용 카드 전체 조회",
+            description = "등록된 카드 목록 전체를 조회합니다."
+    )
+    ResponseEntity<ApiResponse<List<CardDto>>> getDevCardList();
+
+
+    @Operation(
+            summary = "카드 상세 조회",
+            description = "ID를 통해 등록된 카드의 상세 정보를 조회합니다."
+    )
+    @ApiSuccessResponse(description = "카드 상세 정보 조회 성공")
+    @GetMapping("/{cardId}")
+    ResponseEntity<ApiResponse<CardResponse>> getCardById(@PathVariable("cardId") Long cardId);
+
+    @Operation(
+            summary = "단골 사용자의 판매 중인 카드 목록 조회",
+            description = "email을 기반으로 해당 사용자가 등록한 판매 중인 카드 목록을 조회합니다."
+    )
+    @ApiSuccessResponse(description = "조회 성공")
+    @ErrorCode404(description = "사용자가 존재하지 않음")
+    ResponseEntity<ApiResponse<List<CardResponse>>> getCardsByFavoriteUser(@PathVariable("email") String email);
 }

@@ -31,6 +31,26 @@ public enum BaseCode {
     // 소셜 로그인 시도 - 실패
     OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
 
+    // 카카오 연동 해제 관련
+    KAKAO_UNLINK_SUCCESS("KAKAO_UNLINK_SUCCESS_200", HttpStatus.OK, "카카오 연결 끊기에 성공했습니다."),
+    KAKAO_UNLINK_FAILED("KAKAO_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "카카오 연결 끊기에 실패했습니다."),
+    KAKAO_NO_LINKED("KAKAO_NO_LINKED_400", HttpStatus.BAD_REQUEST, "카카오 연동이 되어있지 않습니다."),
+    KAKAO_API_CALL_ERROR("KAKAO_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "카카오 API 연동 중 오류가 발생했습니다."),
+
+    // 네이버 연동 해제 관련
+    NAVER_UNLINK_SUCCESS("NAVER_UNLINK_SUCCESS_200", HttpStatus.OK, "네이버 연결 끊기에 성공했습니다."),
+    NAVER_NO_LINKED("NAVER_NO_LINKED_400", HttpStatus.BAD_REQUEST, "네이버 연동이 되어있지 않습니다."),
+    NAVER_TOKEN_NOT_FOUND("NAVER_TOKEN_NOT_FOUND_400", HttpStatus.BAD_REQUEST, "Naver access token이 없습니다."),
+    NAVER_API_CALL_ERROR("NAVER_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "네이버 API 연동 중 오류가 발생했습니다."),
+
+
+    // Google 연동 해제 관련
+    GOOGLE_UNLINK_SUCCESS("GOOGLE_UNLINK_SUCCESS_200", HttpStatus.OK, "Google 연결 끊기에 성공했습니다."),
+    GOOGLE_NO_LINKED("GOOGLE_NO_LINKED_400", HttpStatus.BAD_REQUEST, "Google 연동이 되어있지 않습니다."),
+    GOOGLE_UNLINK_FAILED("GOOGLE_UNLINK_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "Google 연결 끊기에 실패했습니다."),
+    GOOGLE_TOKEN_NOT_FOUND("GOOGLE_TOKEN_NOT_FOUND_400", HttpStatus.BAD_REQUEST, "Google access token이 없습니다."),
+
+
     // 로그아웃 시도 - 성공
     LOGOUT_SUCCESS("LOGOUT_SUCCESS_200", HttpStatus.OK, "로그아웃에 성공했습니다."),
 
@@ -85,6 +105,17 @@ public enum BaseCode {
     // 닉네임 변경 시간 검증 - 실패
     NICKNAME_CHANGE_TOO_EARLY("NICKNAME_CHANGE_TOO_EARLY_400", HttpStatus.BAD_REQUEST, "닉네임은 최근 변경 시점 24시간이 지난 후 수정할 수 있습니다."),
 
+    // 게시글 - 성공
+    ARTICLE_CREATE_SUCCESS("ARTICLE_CREATE_SUCCESS_201", HttpStatus.CREATED, "게시글이 성공적으로 등록되었습니다."),
+    ARTICLE_READ_SUCCESS("ARTICLE_READ_SUCCESS_200", HttpStatus.OK, "게시글을 성공적으로 조회했습니다."),
+    ARTICLE_LIST_SUCCESS("ARTICLE_LIST_SUCCESS_200", HttpStatus.OK, "게시글 목록을 성공적으로 조회했습니다."),
+    ARTICLE_UPDATE_SUCCESS("ARTICLE_UPDATE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 수정되었습니다."),
+    ARTICLE_DELETE_SUCCESS("ARTICLE_DELETE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 삭제되었습니다."),
+
+    // 게시글 - 실패
+    ARTICLE_NOT_FOUND("ARTICLE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
+    ARTICLE_PERMISSION_DENIED("ARTICLE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "해당 게시글에 대한 권한이 없습니다."),
+
     // 은행 - 성공
     BANK_CREATE_SUCCESS("BANK_CREATE_SUCCESS_201", HttpStatus.CREATED, "은행이 성공적으로 생성되었습니다."),
     BANK_READ_SUCCESS("BANK_READ_SUCCESS_200", HttpStatus.OK, "은행 정보를 성공적으로 조회했습니다."),
@@ -97,7 +128,10 @@ public enum BaseCode {
 
     // 결제 - 성공
     MONEY_RECHARGE_PREPARE_SUCCESS("MONEY_RECHARGE_PREPARE_SUCCESS_200", HttpStatus.OK, "머니 충전 요청에 성공했습니다"),
+    MONEY_RECHARGE_SUCCESS("MONEY_RECHARGE_SUCCESS_200", HttpStatus.OK, "머니 충전에 성공했습니다"),
     PAYMENT_CANCEL_SUCCESS("PAYMENT_CANCEL_SUCCESS_200", HttpStatus.OK, "결제 취소에 성공했습니다,"),
+
+    PAYMENT_FAILURE_LOGGED("PAYMENT_FAILURE_LOGGED_200", HttpStatus.OK, "결제 실패 내역 기록이 성공했습니다,"),
 
     // 결제 - 예외
     PAYMENT_NOT_FOUND("PAYMENT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "존재하지 않는 결제입니다"),
@@ -106,10 +140,19 @@ public enum BaseCode {
     PAYMENT_AMOUNT_MISMATCH("PAYMENT_AMOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "주문 금액이 일치하지 않습니다"),
     PAYMENT_NOT_CANCELLABLE("PAYMENT_NOT_CANCELLABLE_409", HttpStatus.CONFLICT, "결제를 취소할 수 없는 상태입니다"),
     INVALID_PAYMENT_FOR_RECHARGE("INVALID_PAYMENT_FOR_RECHARGE_409", HttpStatus.CONFLICT, "충전 기록을 생성할 수 없는 결제입니다"),
+    PAYMENT_PERIOD_EXPIRED("PAYMENT_PERIOD_EXPIRED_400", HttpStatus.BAD_REQUEST, "취소 가능한 기간 지났습니다"),
 
-    // 토스 API
+    PAYMENT_INTERNAL_ERROR("PAYMENT_INTERNAL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 심각한 내부 오류가 발생했습니다 " +
+            "관리자에게 문의주세요"),
+    // 결제 취소 - 예외
+    ALREADY_USED_RECHARGE_CANNOT_CANCEL("ALREADY_USED_RECHARGE_CANNOT_CANCEL_409", HttpStatus.CONFLICT, "이미 사용된 내역이 있어 취소할 수 없습니다"),
+
+    // 토스 API - 예외
+    TOSS_INVALID_CARD_INFO("TOSS_INVALID_CARD_INFO_400", HttpStatus.BAD_REQUEST, "카드 정보가 유효하지 않습니다. 카드번호나 유효기간 확인해주세요"),
+    TOSS_NOT_ENOUGH_BALANCE("TOSS_NOT_ENOUGH_BALANCE_400", HttpStatus.BAD_REQUEST, "카드 잔액이 부족합니다"),
+    TOSS_INVALID_API_KEY("TOSS_INVALID_API_KEY_500", HttpStatus.INTERNAL_SERVER_ERROR,
+            "결제 연동 설정에 문제가 발생했습니다. 관리자에게 문의주세요"),
     TOSS_API_CALL_ERROR("TOSS_API_CALL_ERROR_500", HttpStatus.INTERNAL_SERVER_ERROR, "토스 결제 시스템 연동 중 오류 발생"),
-    TOSS_API_CALL_ERROR_CUSTOM("TOSS_API_CALL_ERROR_CUSTOM_400", HttpStatus.BAD_REQUEST, "Toss API custom"),
 
     // 지갑 - 성공
     WALLET_SUMMARY_SUCCESS("WALLET_SUMMARY_SUCCESS_200", HttpStatus.OK, "내 지갑 요약 정보 조회 성공했습니다"),
@@ -146,6 +189,9 @@ public enum BaseCode {
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 
+    // 마이페이지 - 성공
+    MYPAGE_GET_SUCCESS("MYPAGE_GET_SUCCESS_200", HttpStatus.OK, "마이페이지 정보 조회에 성공했습니다."),
+
     // 비밀번호 변경 – 성공
     PASSWORD_CHANGED("PASSWORD_CHANGED_200", HttpStatus.OK, "비밀번호가 변경되었습니다."),
 
@@ -174,6 +220,7 @@ public enum BaseCode {
     CARD_ALREADY_SELLING("CARD_ALREADY_SELLING_400", HttpStatus.BAD_REQUEST, "이미 판매 중인 카드입니다."),
     CARD_INVALID_STATUS("CARD_INVALID_STATUS_400", HttpStatus.BAD_REQUEST, "카드 상태가 유효하지 않습니다."),
     CARD_ALREADY_SOLD_OUT("CARD_ALREADY_SOLD_OUT_400", HttpStatus.BAD_REQUEST, "이미 판매 완료된 카드입니다."),
+    NOT_REALTIME_SELL_CARD("NOT_REALTIME_SELL_CARD_400", HttpStatus.BAD_REQUEST, "실시간 판매 카드가 아닙니다."),
 
     // 거래 - 성공
     TRADE_CREATE_SUCCESS("TRADE_CREATE_SUCCESS_201", HttpStatus.CREATED, "거래가 정상적으로 생성되었습니다."),
@@ -185,6 +232,7 @@ public enum BaseCode {
     TRADE_SCROLL_SUCCESS("TRADE_SCROLL_SUCCESS_200", HttpStatus.OK, "거래 내역 조회에 성공하였습니다."),
     TRADE_PROGRESS_COUNT_SUCCESS("TRADE_PROGRESS_COUNT_SUCCESS_200", HttpStatus.OK, "진행 중인 거래 건수를 성공적으로 조회했습니다."),
     TRADE_STATISTICS_READ_SUCCESS("STATISTICS_READ_SUCCESS_200", HttpStatus.OK, "거래 통계 데이터를 성공적으로 조회했습니다."),
+    TRADE_READ_SUCCESS("TRADE_READ_SUCCESS_200", HttpStatus.OK, "거래 정보를 성공적으로 조회했습니다."),
 
     // 거래 - 실패
     TRADE_NOT_FOUND("TRADE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "거래를 찾을 수 없습니다."),
@@ -242,6 +290,7 @@ public enum BaseCode {
 
     // S3
     S3_UPLOAD_FAILED("S3_UPLOAD_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),
+    S3_DELETE_FAILED("S3_DELETE_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 삭제에 실패했습니다"),
     ATTACHMENT_UPLOAD_SUCCESS("ATTACHMENT_UPLOAD_SUCCESS_201", HttpStatus.CREATED, "이미지가 성공적으로 업로드되었습니다."),
     ATTACHMENT_PRESIGNED_URL_ISSUED("ATTACHMENT_PRESIGNED_URL_ISSUED_200", HttpStatus.OK, "첨부 이미지에 대한 접근 URL이 발급되었습니다.");
     private final String code;

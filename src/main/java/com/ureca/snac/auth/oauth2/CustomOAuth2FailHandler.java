@@ -21,14 +21,6 @@ public class CustomOAuth2FailHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        response.setContentType("application/json; charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        ApiResponse<Void> apiResponse = ApiResponse.error(BaseCode.OAUTH_LOGIN_FAILED);
-        String responseBody = objectMapper.writeValueAsString(apiResponse);
-        response.getWriter().print(responseBody);
-
-        response.getWriter().flush();
-        response.getWriter().close();
-
+        response.sendRedirect("https://snac-app.com/certification");
     }
 }

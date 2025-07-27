@@ -3,11 +3,14 @@ package com.ureca.snac.trade.controller;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.CancelTradeRequest;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.TradeFacade;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeIdResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,41 +46,33 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
 
     @PostMapping("/sell")
     public ResponseEntity<ApiResponse<?>> createSellTrade(@RequestBody CreateTradeRequest createTradeRequest,
-                                             @AuthenticationPrincipal UserDetails userDetails) {
+                                                          @AuthenticationPrincipal UserDetails userDetails) {
 
-        tradeFacade.createSellTrade(createTradeRequest, userDetails.getUsername());
+        Long sellTradeId = tradeFacade.createSellTrade(createTradeRequest, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.ok(TRADE_CREATE_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.of(TRADE_CREATE_SUCCESS, new TradeIdResponse(sellTradeId)));
     }
 
     @PostMapping("/buy")
     public ResponseEntity<ApiResponse<?>> createBuyTrade(@RequestBody CreateTradeRequest createTradeRequest,
-                                            @AuthenticationPrincipal UserDetails userDetails) {
-        tradeFacade.createBuyTrade(createTradeRequest, userDetails.getUsername());
+                                                         @AuthenticationPrincipal UserDetails userDetails) {
+        Long buyTradeId = tradeFacade.createBuyTrade(createTradeRequest, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.ok(TRADE_CREATE_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.of(TRADE_CREATE_SUCCESS, new TradeIdResponse(buyTradeId)));
     }
 
     @PostMapping("/buy/accept")
     public ResponseEntity<ApiResponse<?>> acceptBuyRequest(@RequestBody ClaimBuyRequest claimBuyRequest,
-                                                            @AuthenticationPrincipal UserDetails userDetails) {
-        tradeFacade.acceptBuyRequest(claimBuyRequest, userDetails.getUsername());
+                                                           @AuthenticationPrincipal UserDetails userDetails) {
+        Long acceptedTradeId = tradeFacade.acceptBuyRequest(claimBuyRequest, userDetails.getUsername());
         return ResponseEntity
-                .ok(ApiResponse.ok(TRADE_ACCEPT_SUCCESS));
-    }
-
-    @PatchMapping("/{tradeId}/cancel")
-    public ResponseEntity<ApiResponse<?>> cancelTrade(@PathVariable Long tradeId,
-                                         @AuthenticationPrincipal UserDetails userDetails) {
-        tradeFacade.cancelTrade(tradeId, userDetails.getUsername());
-
-        return ResponseEntity.ok(ApiResponse.ok(TRADE_CANCEL_SUCCESS));
+                .ok(ApiResponse.of(TRADE_ACCEPT_SUCCESS, new TradeIdResponse(acceptedTradeId)));
     }
 
     @PatchMapping(value = "/{tradeId}/send-data", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> sendTradeData(@PathVariable Long tradeId,
-                                           @RequestPart("file") MultipartFile file,
-                                           @AuthenticationPrincipal UserDetails userDetails) {
+                                                        @RequestPart("file") MultipartFile file,
+                                                        @AuthenticationPrincipal UserDetails userDetails) {
         tradeFacade.sendTradeData(tradeId, userDetails.getUsername(), file);
 
         return ResponseEntity.ok(ApiResponse.ok(TRADE_DATA_SENT_SUCCESS));
@@ -85,7 +80,7 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
 
     @PatchMapping("/{tradeId}/confirm")
     public ResponseEntity<ApiResponse<?>> confirmTrade(@PathVariable Long tradeId,
-                                          @AuthenticationPrincipal UserDetails userDetails) {
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
         tradeFacade.confirmTrade(tradeId, userDetails.getUsername());
 
         return ResponseEntity.ok(ApiResponse.ok(TRADE_CONFIRM_SUCCESS));
@@ -94,10 +89,19 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     @GetMapping("/scroll")
     public ResponseEntity<ApiResponse<ScrollTradeResponse>> scrollTrades(@RequestParam TradeSide side,
                                                                          @RequestParam(defaultValue = "10") int size,
+                                                                         @RequestParam(required = false) TradeQueryType tradeQueryType,
                                                                          @RequestParam(required = false, name = "cursorId") Long cursorId,
                                                                          @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ApiResponse.of(TRADE_SCROLL_SUCCESS,
-                tradeFacade.scrollTrades(userDetails.getUsername(), side, size, cursorId)));
+                tradeFacade.scrollTrades(userDetails.getUsername(), side, size, tradeQueryType, cursorId)));
+    }
+
+    @GetMapping("/{tradeId}")
+    public ResponseEntity<ApiResponse<TradeResponse>> retrieveTrade(@PathVariable("tradeId") Long tradeId,
+                                                                    @AuthenticationPrincipal UserDetails userDetails) {
+
+        return ResponseEntity.ok(ApiResponse.of(TRADE_READ_SUCCESS,
+                tradeFacade.getTradeById(tradeId, userDetails.getUsername())));
     }
 
     @PatchMapping("/{tradeId}/cancel/request")

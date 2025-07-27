@@ -5,6 +5,7 @@ import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.notification.repository.NotificationRepository;
+import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,12 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendBuyFilterNotification(RetrieveFilterDto dto) {
         log.info("[필터 발행] username={} filterCount={}", dto.getUsername(), dto.getBuyerFilter().size());
         rabbitTemplate.convertAndSend(FILTER_EXCHANGE, FILTER_ROUTING_KEY, dto);
+    }
+
+    @Override
+    public void sendCancelNotification(CancelTradeDto dto) {
+        log.info("[거래 취소 발행] username={} tradeId={}", dto.getUsername(), dto.getTradeDto().getTradeId());
+        rabbitTemplate.convertAndSend(CANCEL_EXCHANGE, CANCEL_ROUTING_KEY, dto);
     }
 
     private Member getMember(String email) {

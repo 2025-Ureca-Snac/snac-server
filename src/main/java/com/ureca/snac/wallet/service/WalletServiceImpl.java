@@ -54,26 +54,26 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createWallet(Member member) {
-        log.info("[지갑생성] createWallet 진입 : memberId={}, email={}",
+        log.info("[지갑생성] createWallet 진입. 회원 ID : {}, 이메일 : {}",
                 member.getId(), member.getEmail());
 
         walletRepository.findByMemberId(member.getId()).ifPresent(
                 wallet -> {
-                    log.error("[지갑생성] 이미 지갑 존재 memberId={}", member.getId());
+                    log.error("[지갑생성] 이미 지갑 존재. 회원 ID : {}", member.getId());
                     throw new WalletAlreadyExistsException();
                 });
 
         Wallet wallet = Wallet.create(member);
 
         walletRepository.save(wallet);
-        log.info("[지갑생성] 생성 완료 : walletId={}, memberId={}",
+        log.info("[지갑 생성] 생성 완료. 지갑 ID : {}, 회원 ID : {}",
                 wallet.getId(), member.getId());
     }
 
     @Override
     @Transactional
     public Long depositMoney(Long memberId, long amount) {
-        log.info("[머니 입금] 시작. 회원 Id : {}, 입금액 : {}", memberId, amount);
+        log.info("[머니 입금] 시작. 회원 ID : {}, 입금액 : {}", memberId, amount);
 
         Long finalBalance = executeWithWallet(memberId, wallet -> {
             wallet.depositMoney(amount);
@@ -87,7 +87,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public Long withdrawMoney(Long memberId, long amount) {
-        log.info("[머니 출금] 시작. 회원 Id : {}, 출금액 : {}", memberId, amount);
+        log.info("[머니 출금] 시작. 회원 ID : {}, 출금액 : {}", memberId, amount);
 
         Long finalBalance = executeWithWallet(memberId, wallet -> {
             wallet.withdrawMoney(amount);
@@ -109,7 +109,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public Long depositPoint(Long memberId, long amount) {
-        log.info("[포인트 적립] 시작. 회원 Id : {}, 적립액 : {}", memberId, amount);
+        log.info("[포인트 적립] 시작. 회원 ID : {}, 적립액 : {}", memberId, amount);
 
         Long finalBalance = executeWithWallet(memberId, wallet -> {
             wallet.depositPoint(amount);
@@ -123,7 +123,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public Long withdrawPoint(Long memberId, long amount) {
-        log.info("[포인트 사용] 시작. 회원 Id : {}, 사용액 : {}", memberId, amount);
+        log.info("[포인트 사용] 시작. 회원 ID : {}, 사용액 : {}", memberId, amount);
 
         Long finalBalance = executeWithWallet(memberId, wallet -> {
             wallet.withdrawPoint(amount);
@@ -148,7 +148,7 @@ public class WalletServiceImpl implements WalletService {
         if (moneyAmount <= 0 && pointAmount <= 0) {
             return;
         }
-        log.info("[복합 출금] 시작 . 회원 ID : {}, 머니 : {}, 포인트 : {}",
+        log.info("[복합 출금] 시작. 회원 ID : {}, 머니 : {}, 포인트 : {}",
                 memberId, moneyAmount, pointAmount);
 
         Wallet wallet = walletRepository.findByMemberIdWithLock(memberId)
@@ -161,7 +161,7 @@ public class WalletServiceImpl implements WalletService {
         if (pointAmount > 0) {
             wallet.withdrawPoint(pointAmount);
         }
-        log.info("[복합 출금] 완료 . 최종 머니 : {}, 최종 포인트 : {}",
+        log.info("[복합 출금] 완료. 최종 머니 : {}, 최종 포인트 : {}",
                 wallet.getMoney(), wallet.getPoint());
     }
 

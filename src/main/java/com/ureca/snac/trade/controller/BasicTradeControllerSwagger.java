@@ -6,9 +6,11 @@ import com.ureca.snac.swagger.annotation.response.ApiCreatedResponse;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
+import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
+import com.ureca.snac.trade.service.response.TradeResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,16 +56,6 @@ public interface BasicTradeControllerSwagger {
     ResponseEntity<ApiResponse<?>> createBuyTrade(@Validated @RequestBody CreateTradeRequest createTradeRequest,
                                                   @AuthenticationPrincipal UserDetails userDetails);
 
-    @Operation(summary = "거래 취소", description = "로그인한 사용자가 진행 중인 거래를 취소합니다.")
-    @ApiSuccessResponse(description = "거래 취소 성공")
-    @ErrorCode400(description = "잘못된 거래 상태로 인해 취소할 수 없습니다.")
-    @ErrorCode401(description = "인증되지 않은 사용자 접근")
-    @ErrorCode403(description = "거래 취소 권한이 없습니다.")
-    @ErrorCode404(description = "거래를 찾을 수 없습니다.")
-    @PatchMapping("/{tradeId}/cancel")
-    ResponseEntity<ApiResponse<?>> cancelTrade(@PathVariable Long tradeId,
-                                               @AuthenticationPrincipal UserDetails userDetails);
-
     @Operation(summary = "거래 데이터 전송", description = "판매자가 파일을 업로드하여 거래 데이터를 전송합니다.")
     @ApiSuccessResponse(description = "거래 데이터 전송 성공")
     @ErrorCode400(description = "잘못된 거래 상태로 인해 전송할 수 없습니다.")
@@ -92,6 +84,7 @@ public interface BasicTradeControllerSwagger {
     @GetMapping("/scroll")
     ResponseEntity<ApiResponse<ScrollTradeResponse>> scrollTrades(@RequestParam TradeSide side,
                                                                   @RequestParam(defaultValue = "10") int size,
+                                                                  @RequestParam(required = false) TradeQueryType tradeQueryType,
                                                                   @RequestParam(required = false, name = "cursorId") Long cursorId,
                                                                   @AuthenticationPrincipal UserDetails userDetails);
 
@@ -103,4 +96,16 @@ public interface BasicTradeControllerSwagger {
     @PostMapping("/buy/accept")
     ResponseEntity<ApiResponse<?>> acceptBuyRequest(@RequestBody ClaimBuyRequest claimBuyRequest,
                                                     @AuthenticationPrincipal UserDetails userDetails);
+
+    @Operation(
+            summary     = "단건 거래 조회",
+            description = "tradeId를 기반으로 단일 거래 정보를 조회합니다."
+    )
+    @ApiSuccessResponse(description = "거래 조회 성공")
+    @ErrorCode400(description = "잘못된 요청 파라미터")
+    @ErrorCode401(description = "인증되지 않은 사용자 접근")
+    @ErrorCode404(description = "거래를 찾을 수 없습니다")
+    @GetMapping("/{tradeId}")
+    ResponseEntity<ApiResponse<TradeResponse>> retrieveTrade(@PathVariable("tradeId") Long tradeId,
+                                                             @AuthenticationPrincipal UserDetails userDetails);
 }

@@ -1,13 +1,11 @@
 package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.board.controller.request.CreateRealTimeCardRequest;
-import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.trade.controller.request.*;
 import com.ureca.snac.trade.service.MatchingServiceFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -18,7 +16,7 @@ import java.security.Principal;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-public class MatchingController {
+public class MatchingController implements MatchingControllerSwagger {
 
     private final MatchingServiceFacade matchingServiceFacade;
     private final StringRedisTemplate redisTemplate;
@@ -72,9 +70,46 @@ public class MatchingController {
         matchingServiceFacade.getBuyerFilters(principal.getName());
     }
 
-    @MessageExceptionHandler(CardAlreadyTradingException.class)
-    @SendToUser("/queue/errors")
-    public String handleCardAlreadyTradingException(CardAlreadyTradingException ex) {
-        return ex.getMessage();
+    // 취소
+    @MessageMapping("/filter/remove")
+    public void removeBuyerFilter(Principal principal) {
+        log.info("[매칭] /filter/remove 호출, 사용자: {}", principal.getName());
+        matchingServiceFacade.removeBuyerFilter(principal.getName());
+    }
+
+    @MessageMapping("/trade/buy-request/cancel/buyer")
+    public void cancelBuyRequestByBuyer(@Payload CancelBuyRequest request, Principal principal) {
+        log.info("[매칭] /trade/buy-request/cancel/buyer 호출, 사용자: {}, 카드ID: {}", principal.getName(), request.getCardId());
+        matchingServiceFacade.cancelBuyRequestByBuyer(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/buy-request/cancel/seller")
+    public void cancelBuyRequestBySeller(@Payload CancelBuyRequest request, Principal principal) {
+        log.info("[매칭] /trade/buy-request/cancel/seller 호출, 사용자: {}, 카드ID: {}", principal.getName(), request.getCardId());
+        matchingServiceFacade.cancelBuyRequestBySeller(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/accepted/cancel/buyer")
+    public void cancelAcceptedTradeByBuyer(@Payload CancelRealTimeTradeRequest request, Principal principal) {
+        log.info("[거래취소] /trade/accepted/cancel/buyer, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
+        matchingServiceFacade.cancelAcceptedTradeByBuyer(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/accepted/cancel/seller")
+    public void cancelAcceptedTradeBySeller(@Payload CancelRealTimeTradeRequest request, Principal principal) {
+        log.info("[거래취소] /trade/accepted/cancel/seller, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
+        matchingServiceFacade.cancelAcceptedTradeBySeller(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/payment/cancel/buyer")
+    public void cancelPaymentTradeByBuyer(@Payload CancelRealTimeTradeRequest request, Principal principal) {
+        log.info("[거래취소] /trade/payment/cancel/buyer, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
+        matchingServiceFacade.cancelPaymentTradeByBuyer(request, principal.getName());
+    }
+
+    @MessageMapping("/trade/payment/cancel/seller")
+    public void cancelPaymentTradeBySeller(@Payload CancelRealTimeTradeRequest request, Principal principal) {
+        log.info("[거래취소] /trade/payment/cancel/seller, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
+        matchingServiceFacade.cancelPaymentTradeBySeller(request, principal.getName());
     }
 }

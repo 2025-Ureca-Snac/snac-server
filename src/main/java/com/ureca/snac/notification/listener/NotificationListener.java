@@ -2,7 +2,9 @@ package com.ureca.snac.notification.listener;
 
 import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.config.RabbitMQConfig;
+import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
+import com.ureca.snac.trade.dto.SocketErrorDto;
 import com.ureca.snac.trade.dto.TradeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,31 @@ public class NotificationListener {
                 username,
                 "/queue/matching",
                 cardDto
+        );
+    }
+
+    // 취소 관련 리스너
+    @RabbitListener(queues = RabbitMQConfig.CANCEL_QUEUE)
+    public void onTradeCancel(CancelTradeDto cancelDto) {
+        log.info("[거래 취소] 사용자: {}, tradeId: {}", cancelDto.getUsername(), cancelDto.getTradeDto().getTradeId());
+
+        // WebSocket으로 /user/queue/cancel로 전송
+        messaging.convertAndSendToUser(
+                cancelDto.getUsername(),       // 대상 사용자
+                "/queue/cancel",               // 목적지
+                cancelDto                      // 보낼 DTO(메시지)
+        );
+    }
+
+
+    // 에러 관련 이벤트 리스너
+    @RabbitListener(queues = RabbitMQConfig.ERROR_QUEUE)
+    public void onSocketError(SocketErrorDto errorDto) {
+        log.warn("[에러 알림] 사용자: {}, error: {}, message: {}", errorDto.getUsername(), errorDto.getBaseCode().name(), errorDto.getBaseCode().getMessage());
+        messaging.convertAndSendToUser(
+                errorDto.getUsername(),
+                "/queue/errors",
+                errorDto.getBaseCode().name()
         );
     }
 

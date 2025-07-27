@@ -62,7 +62,7 @@ public class DevDataSupport {
     }
 
     private Payment createAndSaveFakePayment(Member member, Long amount) {
-        Payment fakePayment = Payment.createFake(member, amount);
+        Payment fakePayment = Payment.createForDev(member, amount);
         return paymentRepository.save(fakePayment);
     }
 

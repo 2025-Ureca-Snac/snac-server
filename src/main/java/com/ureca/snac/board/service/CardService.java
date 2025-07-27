@@ -9,6 +9,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.service.response.CardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 
@@ -46,7 +47,7 @@ public interface CardService {
      * @param lastUpdatedAt 커서: 마지막으로 조회된 카드의 수정 시각 (선택)
      * @return 스크롤 방식으로 응답하는 카드 목록과 다음 페이지 존재 여부
      */
-    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
+    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
                                    Integer size, Long lastCardId, LocalDateTime lastUpdatedAt);
 
     /**
@@ -59,10 +60,22 @@ public interface CardService {
 
     void deleteCardByTrade(Long cardId);
 
+    void deleteCardByRealTime(String username, Long cardId);
+
     CardDto createRealtimeCard(String username, CreateRealTimeCardRequest request);
 
     List<CardDto> findRealtimeCardsByFilter(BuyerFilterRequest filter);
 
-    List<CardDto> findByMemberUsernameAndSellStatusAndCardCategory(String username, SellStatus sellStatus, CardCategory cardCategory);
+    List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory);
+
+    /**
+     * 카드를 PK(id) 기준으로 조회합니다.
+     *
+     * @param cardId PK
+     * @return 카드 정보
+     */
+    CardResponse findCardById(Long cardId);
+    List<CardResponse> getSellingCardsByEmail(String email);
+    List<CardDto> findAllDevCard();
 }
 

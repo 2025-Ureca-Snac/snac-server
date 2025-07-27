@@ -1,6 +1,6 @@
 package com.ureca.snac.favorite.service;
 
-import com.ureca.snac.favorite.dto.CursorResult;
+import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.favorite.entity.Favorite;
 import com.ureca.snac.favorite.exception.AlreadyFavoriteMember;
@@ -13,11 +13,11 @@ import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +33,15 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     @Transactional
-    public void createFavorite(Long fromMemberId, Long toMemberId) {
-        if (fromMemberId.equals(toMemberId)) {
+    public void createFavorite(String fromUserEmail, Long toMemberId) {
+
+        // 사용자 존재 여부
+        Member fromMember = findMemberByEmail(fromUserEmail);
+
+        if (fromMember.getId().equals(toMemberId)) {
             throw new CannotFavoriteSelfException();
         }
 
-        // 사용자 존재 여부
-        Member fromMember = findMemberById(fromMemberId);
         Member toMember = findMemberById(toMemberId);
 
         if (favoriteRepository.existsByFromMemberAndToMember(fromMember, toMember)) {
@@ -51,61 +53,85 @@ public class FavoriteServiceImpl implements FavoriteService {
                 .toMember(toMember)
                 .build();
         favoriteRepository.save(favorite);
-        log.info("[단골 등록] 이사람이 쟤를 : {} -> {}", fromMemberId, toMemberId);
+        log.info("[단골 등록] 이사람이 쟤를 : {} -> {}", fromMember.getId(), toMemberId);
     }
 
     @Override
-    public CursorResult<FavoriteMemberDto> getMyFavorites(Long fromMemberId, Long cursorId, int size) {
+    public CursorResult<FavoriteMemberDto> getMyFavorites(
+            String fromUserEmail, LocalDateTime cursorCreatedAt,
+            Long cursorId, Integer size
+    ) {
+        log.info("[단골 목록 조회] 시작. 누가 : {}, 시간 : {}, 커서 Id : {}, 페이지 크기 : {}",
+                fromUserEmail, cursorCreatedAt, cursorId, size);
+        // size가 null 이거나 0 이하의 예외를 방지
+        int pageSize = (size == null || size <= 0) ? SIZE : size;
 
-        // size가 0이하의 예외를 방지
-        if (size <= 0) {
-            size = SIZE;
-        }
-        Member fromMember = findMemberById(fromMemberId);
-        Long currentCursorId = (cursorId == null || cursorId <= 0) ?
+        Member fromMember = findMemberByEmail(fromUserEmail);
+
+        // 페이지 조회 커서값 초기화
+        LocalDateTime currentCursorCreatedAt = (cursorCreatedAt == null) ?
+                LocalDateTime.now() : cursorCreatedAt;
+
+        Long currentCursorId = (cursorId == null) ?
                 Long.MAX_VALUE : cursorId;
 
-        // 데이터 조회
-        Pageable pageable = PageRequest.of(0, size);
         // 실제 데이터 목록, 다음 페이지 여부 hasNext 포함
-        Slice<Favorite> favoriteSlice = favoriteRepository.findAllWithToMemberByCursor(
-                fromMember, currentCursorId, pageable
-        );
+        Slice<Favorite> favoriteSlice =
+                favoriteRepository.findAllWithToMemberByCursor(
+                        fromMember, currentCursorCreatedAt, currentCursorId,
+                        PageRequest.of(0, pageSize)
+                );
 
         // 데이터 변환
-        List<Favorite> favorites = favoriteSlice.getContent();
-        
-        List<FavoriteMemberDto> favoriteDto = new ArrayList<>();
+        List<FavoriteMemberDto> favoriteDtos = new ArrayList<>();
 
-        for (Favorite favorite : favorites) {
+        for (Favorite favorite : favoriteSlice.getContent()) {
             Member toMember = favorite.getToMember();
             FavoriteMemberDto dto = FavoriteMemberDto.from(toMember);
-            favoriteDto.add(dto);
+            favoriteDtos.add(dto);
         }
 
+        String nextCursor = null;
         // 커서 계산
-        Long nextCursorId = favorites.isEmpty() ?
-                null : favorites.get(favorites.size() - 1).getId();
+        if (favoriteSlice.hasNext() && !favoriteSlice.getContent().isEmpty()) {
+            Favorite lastFavorite =
+                    favoriteSlice.getContent().get(favoriteSlice.getContent().size() - 1);
 
-        return CursorResult.of(favoriteDto, nextCursorId, favoriteSlice.hasNext());
+            nextCursor = lastFavorite.getCreatedAt().toString() + "," + lastFavorite.getId();
+        }
+        log.info("[단골 목록 조회] 완료. 조회된 단골 수 : {}, 다음 페이지 존재 여부 : {}",
+                favoriteDtos.size(), favoriteSlice.hasNext());
+        return new CursorResult<>(favoriteDtos, nextCursor, favoriteSlice.hasNext());
     }
 
     @Override
     @Transactional
-    public void deleteFavorite(Long fromMemberId, Long toMemberId) {
-        Member fromMember = findMemberById(fromMemberId);
+    public void deleteFavorite(String fromUserEmail, Long toMemberId) {
+        Member fromMember = findMemberByEmail(fromUserEmail);
         Member toMember = findMemberById(toMemberId);
-
 
         Favorite favorite = favoriteRepository.findByFromMemberAndToMember(fromMember, toMember)
                 .orElseThrow(FavoriteRelationNotFoundException::new);
 
         favoriteRepository.delete(favorite);
-        log.info("[단골 삭제] 얘가 쟤를 삭제 : {} -> {}", fromMemberId, toMemberId);
+        log.info("[단골 삭제] 얘가 쟤를 삭제 : {} -> {}", fromMember.getId(), toMemberId);
+    }
+
+    @Override
+    public Long getFavoriteCount(String fromUserEmail) {
+        Member fromMember = findMemberByEmail(fromUserEmail);
+        Long count = favoriteRepository.countByFromMember(fromMember);
+        log.info("[단골 수 조회] 회원ID: {}, count: {}", fromMember.getId(), count);
+        return count;
     }
 
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
     }
 }

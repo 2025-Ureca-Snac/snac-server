@@ -31,7 +31,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
     @Override
     public List<Card> scroll(CardCategory cardCategory,
                              Carrier carrier,
-                             List<PriceRange> priceRanges,
+                             PriceRange priceRange,
                              SellStatusFilter sellStatusFilter,
                              Boolean highRatingFirst,
                              Integer size,
@@ -48,7 +48,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                         c.cardCategory.eq(cardCategory),
                         ltCursor(lastCardId, lastUpdatedAt, c),
                         carrierEq(carrier, c),
-                        priceRangeIn(priceRanges, c),
+                        priceRangeEq(priceRange, c),
                         sellStatusCond(sellStatusFilter, c)
                 );
 
@@ -71,11 +71,19 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
         builder.and(card.carrier.eq(filter.getCarrier()));
         builder.and(card.dataAmount.eq(filter.getDataAmount()));
 
-        Integer min = filter.getPriceRange().getMin();
+//        Integer min = filter.getPriceRange().getMin();
+//        Integer max = filter.getPriceRange().getMax();
+//
+//        if (min != null) builder.and(card.price.goe(min));
+//        if (max != null) builder.and(card.price.loe(max));
+
         Integer max = filter.getPriceRange().getMax();
 
-        if (min != null) builder.and(card.price.goe(min));
-        if (max != null) builder.and(card.price.loe(max));
+        // 항상 0원 이상
+        builder.and(card.price.goe(0));
+        if (max != null) {
+            builder.and(card.price.loe(max));
+        }
 
         return query.selectFrom(card)
                 .where(builder)
@@ -93,22 +101,22 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
         };
     }
 
-    private BooleanExpression priceRangeIn(List<PriceRange> prList, QCard c) {
-        if (prList == null || prList.isEmpty() || prList.contains(PriceRange.ALL)) {
-            return null;
-        }
-
-        BooleanExpression combined = null;
-
-        for (PriceRange pr : prList) {
-            BooleanExpression ge = pr.getMin() != null ? c.price.goe(pr.getMin()) : null;
-            BooleanExpression le = pr.getMax() != null ? c.price.loe(pr.getMax()) : null;
-            BooleanExpression expr = ge == null ? le : (le == null ? ge : ge.and(le));
-            combined = combined == null ? expr : combined.or(expr);
-        }
-
-        return combined;
-    }
+//    private BooleanExpression priceRangeIn(List<PriceRange> prList, QCard c) {
+//        if (prList == null || prList.isEmpty() || prList.contains(PriceRange.ALL)) {
+//            return null;
+//        }
+//
+//        BooleanExpression combined = null;
+//
+//        for (PriceRange pr : prList) {
+//            BooleanExpression ge = pr.getMin() != null ? c.price.goe(pr.getMin()) : null;
+//            BooleanExpression le = pr.getMax() != null ? c.price.loe(pr.getMax()) : null;
+//            BooleanExpression expr = ge == null ? le : (le == null ? ge : ge.and(le));
+//            combined = combined == null ? expr : combined.or(expr);
+//        }
+//
+//        return combined;
+//    }
 
     private BooleanExpression ltCursor(Long lastCardId,
                                        LocalDateTime lastUpdatedAt,
@@ -131,8 +139,7 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
         if (pr == null || pr == PriceRange.ALL) {
             return null;
         }
-        BooleanExpression ge = pr.getMin() != null ? c.price.goe(pr.getMin()) : null;
-        BooleanExpression le = pr.getMax() != null ? c.price.loe(pr.getMax()) : null;
-        return ge == null ? le : (le == null ? ge : ge.and(le));
+        // 항상 0원 이상, max만 제한
+        return c.price.goe(0).and(c.price.loe(pr.getMax()));
     }
 }

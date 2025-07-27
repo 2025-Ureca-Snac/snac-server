@@ -5,10 +5,7 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.trade.exception.TradeCancelNotAllowedException;
-import com.ureca.snac.trade.exception.TradeCancelPermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeConfirmPermissionDeniedException;
-import com.ureca.snac.trade.exception.TradeInvalidStatusException;
+import com.ureca.snac.trade.exception.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -59,6 +56,10 @@ public class Trade extends BaseTimeEntity {
     @Column(name = "status", nullable = false)
     private TradeStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trade_type", nullable = false)
+    private TradeType tradeType;
+
     @Column(name = "point")
     private Integer point;
 
@@ -71,7 +72,7 @@ public class Trade extends BaseTimeEntity {
 
     @Builder
     private Trade(Long cardId, Member seller, Member buyer,
-                  Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, String phone, Integer point) {
+                  Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, TradeType tradeType, String phone, Integer point) {
         this.cardId = cardId;
         this.seller = seller;
         this.buyer = buyer;
@@ -81,10 +82,12 @@ public class Trade extends BaseTimeEntity {
         this.status = status;
         this.phone = phone;
         this.point = point;
+        this.tradeType = tradeType;
     }
 
     public static Trade createFake(Card card, Member seller, Member buyer) {
         return Trade.builder()
+                .tradeType(TradeType.NORMAL)
                 .cardId(card.getId())
                 .seller(seller)
                 .buyer(buyer)
@@ -113,6 +116,7 @@ public class Trade extends BaseTimeEntity {
     // === 팩토리 메서드 ===
     public static Trade buildTrade(int point, Member member, String phone, Card card, SellStatus requiredStatus) {
         return Trade.builder().cardId(card.getId())
+                .tradeType(TradeType.NORMAL)
                 .seller(requiredStatus == SELLING ? card.getMember() : null)
                 .buyer(member)
                 .carrier(card.getCarrier())
@@ -126,6 +130,7 @@ public class Trade extends BaseTimeEntity {
 
     public static Trade buildTrade(Member member, String phone, Card card) {
         return Trade.builder().cardId(card.getId())
+                .tradeType(TradeType.REALTIME)
                 .seller(card.getMember())
                 .buyer(member)
                 .carrier(card.getCarrier())
@@ -140,7 +145,7 @@ public class Trade extends BaseTimeEntity {
     public void confirm(Member buyer) {
         // 거래 상태가 데이터 전송 완료 상태가 아니면 확정할 수 없음
         if (this.status != DATA_SENT)
-            throw new TradeInvalidStatusException();
+            throw new TradeStatusMismatchException();
 
         // 요청자가 실제 구매자가 아니면 확정 권한이 없음
         if (this.buyer != buyer) {
@@ -172,10 +177,14 @@ public class Trade extends BaseTimeEntity {
         this.status = CANCELED;
     }
 
+
     public void pauseAutoConfirm()  {
         this.autoConfirmPaused = true;
     }
     public void resumeAutoConfirm() {
         this.autoConfirmPaused = false;
+
+    public void changeCancelReason(CancelReason cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }

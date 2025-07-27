@@ -40,18 +40,19 @@ public class PaymentInternalService {
         log.info("[내부 처리] 결제 취소 DB 상태 변경 시작 paymentId : {}", payment.getId());
 
         Payment managedPayment = paymentRepository.save(payment);
-        log.info("[내부 처리] Payment 객체를 영속성 전환");
+        log.info("[내부 처리] 준영속 상태의 Payment 객체를 영속성 전환");
 
-        // 더티 체킹 시작
+        // 관리 상태가 된 객체 변경
         managedPayment.cancel(cancelResponse.reason());
         log.info("[내부 처리] Payment 엔티티 상태 CANCELED 상태");
 
-        // 머니 잔액을 복구
-        Long balanceAfter = walletService.withdrawMoney(member.getId(), managedPayment.getAmount());
-        log.info("[내부 처리] 지갑 머니 출금 완료 회원 ID : {}, 최종 잔액 : {}",
+        // 머니 잔액을 회수
+        Long balanceAfter = walletService.withdrawMoney(member.getId(),
+                managedPayment.getAmount());
+        log.info("[내부 처리] 지갑 머니 회수(출금) 완료 회원 ID : {}, 최종 잔액 : {}",
                 member.getId(), balanceAfter);
 
-        AssetChangedEvent event = assetChangedEventFactory.createForCancel(
+        AssetChangedEvent event = assetChangedEventFactory.createForRechargeCancel(
                 member.getId(), managedPayment.getId(), managedPayment.getAmount(), balanceAfter
         );
 

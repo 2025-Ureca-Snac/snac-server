@@ -4,10 +4,13 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.board.controller.request.CreateCardRequest;
 import com.ureca.snac.board.controller.request.SellStatusFilter;
 import com.ureca.snac.board.controller.request.UpdateCardRequest;
+import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.service.CardService;
+import com.ureca.snac.board.service.response.CardResponse;
+import com.ureca.snac.board.service.response.CreateCardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,12 +34,12 @@ public class CardController implements CardControllerSwagger{
 
     @Override
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createCard(@Validated @RequestBody CreateCardRequest request,
-                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        cardService.createCard(customUserDetails.getUsername(), request);
+    public ResponseEntity<ApiResponse<CreateCardResponse>> createCard(@Validated @RequestBody CreateCardRequest request,
+                                                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long cardId = cardService.createCard(customUserDetails.getUsername(), request);
 
         return ResponseEntity.status(CARD_CREATE_SUCCESS.getStatus())
-                .body(ApiResponse.ok(CARD_CREATE_SUCCESS));
+                .body(ApiResponse.of(CARD_CREATE_SUCCESS, new CreateCardResponse(cardId)));
     }
 
     @Override
@@ -54,14 +57,14 @@ public class CardController implements CardControllerSwagger{
     @GetMapping("/scroll")
     public ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@RequestParam CardCategory cardCategory,
                                                                        @RequestParam(required = false) Carrier carrier,
-                                                                       @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
+                                                                       @RequestParam(value = "priceRanges") PriceRange priceRange,
                                                                        @RequestParam SellStatusFilter sellStatusFilter,
                                                                        @RequestParam(defaultValue = "true") Boolean highRatingFirst,
                                                                        @RequestParam(defaultValue = "54") Integer size,
                                                                        @RequestParam(required = false) Long lastCardId,
                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt) {
 
-        ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRanges,
+        ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRange,
                 sellStatusFilter, highRatingFirst, size, lastCardId, lastUpdatedAt);
 
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
@@ -74,5 +77,24 @@ public class CardController implements CardControllerSwagger{
         cardService.deleteCard(customUserDetails.getUsername(), cardId);
 
         return ResponseEntity.ok(ApiResponse.ok(CARD_DELETE_SUCCESS));
+    }
+
+    @Override
+    @GetMapping("/dev")
+    public ResponseEntity<ApiResponse<List<CardDto>>> getDevCardList() {
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, cardService.findAllDevCard()));
+    }
+
+    @Override
+    @GetMapping("/{cardId}")
+    public ResponseEntity<ApiResponse<CardResponse>> getCardById(@PathVariable("cardId") Long cardId) {
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, cardService.findCardById(cardId)));
+    }
+
+    @Override
+    @GetMapping("/favorite/{email}")
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getCardsByFavoriteUser(@PathVariable("email") String email) {
+        List<CardResponse> response = cardService.getSellingCardsByEmail(email);
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
     }
 }

@@ -20,7 +20,8 @@ public record FavoriteMemberDto(
      */
     public static FavoriteMemberDto from(Member member) {
         return new FavoriteMemberDto(
-                member.getId(), member.getNickname()
+                member.getId(),
+                member.getNickname()
         );
     }
 }

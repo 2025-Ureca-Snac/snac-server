@@ -2,6 +2,11 @@ spring:
   application:
     name: snac-server
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 30MB
+
   security:
     oauth2:
       client:
@@ -108,6 +113,9 @@ spring:
     port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
+
+kakao:
+  admin-key: ${KAKAO_ADMIN_KEY}
 
 
 # Swagger UI (springdoc) 설정

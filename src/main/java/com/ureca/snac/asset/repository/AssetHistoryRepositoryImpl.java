@@ -9,6 +9,9 @@ import com.ureca.snac.asset.entity.TransactionCategory;
 import com.ureca.snac.asset.entity.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static com.ureca.snac.asset.entity.QAssetHistory.assetHistory;
+import static com.ureca.snac.member.QMember.member;
 
 @Slf4j
 @Repository
@@ -25,10 +29,14 @@ public class AssetHistoryRepositoryImpl implements AssetHistoryRepositoryCustom 
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<AssetHistory> findWithFilters(Long memberId,
-                                              AssetHistoryListRequest request) {
-        return queryFactory
+    public Slice<AssetHistory> findWithFilters(
+            Long memberId, AssetHistoryListRequest request) {
+
+        int pageSize = request.size();
+
+        List<AssetHistory> histories = queryFactory
                 .selectFrom(assetHistory)
+                .join(assetHistory.member, member).fetchJoin()
                 .where(
                         memberIdEq(memberId),
                         assetTypeEq(request.assetType()),
@@ -38,8 +46,16 @@ public class AssetHistoryRepositoryImpl implements AssetHistoryRepositoryCustom 
                         cursorCondition(request.cursor())
                 )
                 .orderBy(assetHistory.createdAt.desc(), assetHistory.id.desc())
-                .limit(request.size())
+                .limit(pageSize + 1) // 다음페이지 확인 위해
                 .fetch();
+
+        boolean hasNext = false;
+        if (histories.size() > pageSize) {
+            histories.remove(pageSize); // 응답 초과분 제거
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(histories, Pageable.unpaged(), hasNext);
     }
 
     // 멤버 조건

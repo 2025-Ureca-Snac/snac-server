@@ -53,8 +53,7 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     public CardDto createRealtimeCard(String username, CreateRealTimeCardRequest request) {
-        Member member = memberRepository.findByEmail(username)
-                .orElseThrow(MemberNotFoundException::new);
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
         Card card = Card.builder()
                 .member(member)
@@ -111,10 +110,10 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
+    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
                                           Integer size, Long lastCardId, LocalDateTime lastUpdatedAt) {
 
-        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, sellStatusFilter, highRatingFirst,
+        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRange, sellStatusFilter, highRatingFirst,
                 size + 1, lastCardId, lastUpdatedAt);
 
         boolean hasNext = raw.size() > size;
@@ -147,11 +146,49 @@ public class CardServiceImpl implements CardService {
         cardRepository.delete(card);
     }
 
+    @Override
     @Transactional
-    public List<CardDto> findByMemberUsernameAndSellStatusAndCardCategory(String username, SellStatus sellStatus, CardCategory cardCategory) {
+    public void deleteCardByRealTime(String username, Long cardId) {
+        Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
+        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+
+        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
+            throw new CardAlreadySoldOutException();
+        }
+
+        cardRepository.delete(card);
+    }
+
+    @Transactional
+    public List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
-        return cardRepository.findLockedByMemberAndSellStatusAndCardCategory(member, sellStatus, cardCategory)
+        return cardRepository.findLockedByMemberAndSellStatusInAndCardCategory(member, sellStatuses, cardCategory)
+                .stream()
+                .map(CardDto::from)
+                .toList();
+    }
+
+    @Override
+    public CardResponse findCardById(Long cardId) {
+        return cardRepository.findById(cardId)
+                .map(CardResponse::from)
+                .orElseThrow(CardNotFoundException::new);
+    }
+
+    @Override
+    public List<CardResponse> getSellingCardsByEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+
+        return cardRepository.findByMemberAndSellStatusOrderByUpdatedAtDesc(member, SellStatus.SELLING)
+                .stream()
+                .map(CardResponse::from)
+                .toList();
+    }
+
+    @Override
+    public List<CardDto> findAllDevCard() {
+        return cardRepository.findAll()
                 .stream()
                 .map(CardDto::from)
                 .toList();
