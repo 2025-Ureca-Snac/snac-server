@@ -3,6 +3,7 @@ package com.ureca.snac.favorite.controller;
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.CursorResult;
+import com.ureca.snac.favorite.dto.FavoriteCheckResponse;
 import com.ureca.snac.favorite.dto.FavoriteCreateRequest;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.favorite.service.FavoriteService;
@@ -60,5 +61,19 @@ public class FavoriteController implements FavoriteSwagger {
         favoriteService.deleteFavorite(currentUserEmail, toMemberId);
 
         return ResponseEntity.ok(ApiResponse.ok(FAVORITE_DELETE_SUCCESS));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<FavoriteCheckResponse>> checkFavoriteStatus(
+            @RequestParam Long toMemberId,
+            @UserInfo CustomUserDetails userDetails) {
+        String currentUserEmail = userDetails.getUsername();
+
+        boolean isFavorite =
+                favoriteService.checkFavoriteStatus(currentUserEmail, toMemberId);
+
+        FavoriteCheckResponse response = new FavoriteCheckResponse(isFavorite);
+
+        return ResponseEntity.ok(ApiResponse.of(FAVORITE_CHECK_SUCCESS, response));
     }
 }

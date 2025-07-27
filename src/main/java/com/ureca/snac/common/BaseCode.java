@@ -166,6 +166,7 @@ public enum BaseCode {
     // 단골 - 성공
     FAVORITE_CREATE_SUCCESS("FAVORITE_CREATE_SUCCESS_201", HttpStatus.CREATED, "단골 등록에 성공했습니다."),
     FAVORITE_LIST_SUCCESS("FAVORITE_LIST_SUCCESS_200", HttpStatus.OK, "단골 목록 조회에 성공했습니다."),
+    FAVORITE_CHECK_SUCCESS("FAVORITE_CHECK_SUCCESS_200", HttpStatus.OK, "단골 여부 조회에 성공했습니다."),
     FAVORITE_DELETE_SUCCESS("FAVORITE_DELETE_SUCCESS_200", HttpStatus.OK, "단골 삭제에 성공했습니다."),
 
     // 단골 - 예외
