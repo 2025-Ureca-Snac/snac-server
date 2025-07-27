@@ -85,6 +85,8 @@ public class MatchingServiceFacade {
     public void createRealtimeCardAndNotifyBuyers(String username, CreateRealTimeCardRequest request) {
         CardDto realtimeCard = cardService.createRealtimeCard(username, request);
 
+        notificationService.sendMatchingNotification(username, realtimeCard);
+
         //  Redis에서 전체 구매자 필터 key 조회 (예: buyer_filter:{username})
         Set<String> keys = redisTemplate.keys(BUYER_FILTER_PREFIX + "*");
         if (keys.isEmpty()) return;
