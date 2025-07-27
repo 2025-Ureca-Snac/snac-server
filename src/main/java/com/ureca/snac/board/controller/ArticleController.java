@@ -37,7 +37,7 @@ public class ArticleController implements ArticleControllerSwagger {
     }
 
     @PutMapping(value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<?>> editArticle(@PathVariable("articleId") Long articleId,
+    public ResponseEntity<ApiResponse<UpdateArticleResponse>> editArticle(@PathVariable("articleId") Long articleId,
                                                       @RequestParam String title,
                                                       @RequestPart MultipartFile file,
                                                       @RequestPart MultipartFile image,
