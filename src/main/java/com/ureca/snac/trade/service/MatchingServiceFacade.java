@@ -230,9 +230,8 @@ public class MatchingServiceFacade {
     }
 
     private boolean isPriceInRange(Integer price, PriceRange priceRange) {
-        Integer min = priceRange.getMin();
         Integer max = priceRange.getMax();
-        if (min != null && price < min) return false;
-        return max == null || price <= max;
+        // 0원 이상만 허용, max가 null이면 전체 허용
+        return price >= 0 && (max == null || price <= max);
     }
 }

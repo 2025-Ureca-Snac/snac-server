@@ -7,13 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PriceRange {
 
-    ALL        (null,   null),
-    P0_999     (0,      999),
-    P1000_1499 (1000,   1499),
-    P1500_1999 (1500,   1999),
-    P2000_2499 (2000,   2499),
-    P2500_PLUS (2500,   null);
+    ALL     (null),
+    P0_1000 (1000),
+    P0_1500 (1500),
+    P0_2000 (2000),
+    P0_2500 (2500);
 
-    private final Integer min;
     private final Integer max;
 }

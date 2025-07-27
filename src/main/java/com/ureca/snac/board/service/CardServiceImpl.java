@@ -110,10 +110,10 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRanges, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
+    public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
                                           Integer size, Long lastCardId, LocalDateTime lastUpdatedAt) {
 
-        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRanges, sellStatusFilter, highRatingFirst,
+        List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRange, sellStatusFilter, highRatingFirst,
                 size + 1, lastCardId, lastUpdatedAt);
 
         boolean hasNext = raw.size() > size;

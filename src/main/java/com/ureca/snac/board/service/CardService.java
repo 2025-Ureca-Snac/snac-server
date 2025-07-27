@@ -47,7 +47,7 @@ public interface CardService {
      * @param lastUpdatedAt 커서: 마지막으로 조회된 카드의 수정 시각 (선택)
      * @return 스크롤 방식으로 응답하는 카드 목록과 다음 페이지 존재 여부
      */
-    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, List<PriceRange> priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
+    ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
                                    Integer size, Long lastCardId, LocalDateTime lastUpdatedAt);
 
     /**
