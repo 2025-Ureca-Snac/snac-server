@@ -83,7 +83,7 @@ public interface CardControllerSwagger {
                                                                         description = "카드 카테고리",
                                                                         schema = @Schema(type = "string", allowableValues = {"BUY", "SELL"}))@RequestParam CardCategory cardCategory,
                                                                 @RequestParam(required = false) Carrier carrier,
-                                                                @RequestParam(value = "priceRanges") List<PriceRange> priceRanges,
+                                                                @RequestParam(value = "priceRanges") PriceRange priceRange,
                                                                 @RequestParam SellStatusFilter sellStatusFilter,
                                                                 @RequestParam(defaultValue = "true") Boolean highRatingFirst,
                                                                 @RequestParam(defaultValue = "54") Integer size,

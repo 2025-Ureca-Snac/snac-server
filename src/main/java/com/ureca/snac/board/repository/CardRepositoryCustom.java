@@ -13,7 +13,7 @@ import java.util.List;
 public interface CardRepositoryCustom {
     List<Card> scroll(CardCategory cardCategory,
                       Carrier carrier,
-                      List<PriceRange> priceRanges,
+                      PriceRange priceRange,
                       SellStatusFilter sellStatusFilter,
                       Boolean highRatingFirst,
                       Integer size,
