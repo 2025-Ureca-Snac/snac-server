@@ -264,6 +264,47 @@ public class RabbitMQConfig {
                 .with(ERROR_ROUTING_KEY);
     }
 
+    // 공통 비즈니스 익스체인지
+    public static final String BUSINESS_EXCHANGE       = "business_exchange";
+
+    // 1) 회원가입 처리 전용 큐/라우팅키
+    public static final String MEMBER_JOIN_QUEUE       = "business.member.join.queue";
+    public static final String MEMBER_JOIN_ROUTING_KEY = "business.member.join";
+
+    // 2) 자산 변경 처리 전용 큐/라우팅키
+    public static final String ASSET_CHANGED_QUEUE       = "business.asset.changed.queue";
+    public static final String ASSET_CHANGED_ROUTING_KEY = "business.asset.changed";
+
+    @Bean
+    public DirectExchange businessExchange() {
+        return new DirectExchange(BUSINESS_EXCHANGE);
+    }
+
+    // 회원가입 전용 큐
+    @Bean
+    public Queue memberJoinQueue() {
+        return new Queue(MEMBER_JOIN_QUEUE, false);
+    }
+    @Bean
+    public Binding memberJoinBinding(DirectExchange businessExchange, Queue memberJoinQueue) {
+        return BindingBuilder
+                .bind(memberJoinQueue)
+                .to(businessExchange)
+                .with(MEMBER_JOIN_ROUTING_KEY);
+    }
+
+    // 자산 변경 전용 큐
+    @Bean
+    public Queue assetChangedQueue() {
+        return new Queue(ASSET_CHANGED_QUEUE, false);
+    }
+    @Bean
+    public Binding assetChangedBinding(DirectExchange businessExchange, Queue assetChangedQueue) {
+        return BindingBuilder
+                .bind(assetChangedQueue)
+                .to(businessExchange)
+                .with(ASSET_CHANGED_ROUTING_KEY);
+    }
 
     /* ------------------- 공통 설정 ------------------- */
     @Bean
