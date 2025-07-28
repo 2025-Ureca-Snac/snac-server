@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -122,4 +123,24 @@ public interface CardControllerSwagger {
     @ApiSuccessResponse(description = "조회 성공")
     @ErrorCode404(description = "사용자가 존재하지 않음")
     ResponseEntity<ApiResponse<List<CardResponse>>> getCardsByFavoriteUser(@PathVariable("email") String email);
+
+    @Operation(
+            summary = "본인 작성 판매글 또는 구매글 목록 조회 (스크롤)",
+            description = """
+        본인이 등록한 판매글(SELL) 또는 구매글(BUY)을 스크롤 방식으로 조회합니다.
+        - `cardCategory`는 필수이며, SELL 또는 BUY 중 하나입니다.
+        - 커서 페이징 방식 사용:
+          - 초기 조회 시 `lastCardId`, `lastUpdatedAt` 없이 호출 가능합니다.
+          - 이후 추가 조회(더보기) 시 두 값을 모두 전달해야 합니다.
+    """
+    )
+    @ApiSuccessResponse(description = "목록 조회 성공")
+    @ErrorCode400(description = "조회 실패 - 잘못된 요청 파라미터")
+    @ErrorCode401(description = "인증되지 않은 사용자 접근")
+    @GetMapping
+    ResponseEntity<ApiResponse<ScrollCardResponse>> getCardByOwner(@RequestParam CardCategory cardCategory,
+                                                                   @RequestParam(defaultValue = "54") Integer size,
+                                                                   @RequestParam(required = false) Long lastCardId,
+                                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt,
+                                                                   @AuthenticationPrincipal UserDetails userDetails);
 }
