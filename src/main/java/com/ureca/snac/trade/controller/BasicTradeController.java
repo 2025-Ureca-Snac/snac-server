@@ -5,6 +5,7 @@ import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.CancelTradeRequest;
+import com.ureca.snac.trade.dto.TradeConfirmResponse;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.TradeFacade;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -79,11 +80,11 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     }
 
     @PatchMapping("/{tradeId}/confirm")
-    public ResponseEntity<ApiResponse<?>> confirmTrade(@PathVariable Long tradeId,
-                                                       @AuthenticationPrincipal UserDetails userDetails) {
-        tradeFacade.confirmTrade(tradeId, userDetails.getUsername());
+    public ResponseEntity<ApiResponse<TradeConfirmResponse>> confirmTrade(@PathVariable Long tradeId,
+                                                                          @AuthenticationPrincipal UserDetails userDetails) {
+        TradeConfirmResponse response = tradeFacade.confirmTrade(tradeId, userDetails.getUsername());
 
-        return ResponseEntity.ok(ApiResponse.ok(TRADE_CONFIRM_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.of(TRADE_CONFIRM_SUCCESS, response));
     }
 
     @GetMapping("/scroll")

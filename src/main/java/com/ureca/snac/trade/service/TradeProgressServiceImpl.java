@@ -6,6 +6,7 @@ import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeStatusMismatchException;
@@ -61,7 +62,7 @@ public class TradeProgressServiceImpl implements TradeProgressService {
     // 일반 매칭 hasCard == true, 실시간 매칭 == false
     @Override
     @Transactional
-    public Long confirmTrade(Long tradeId, String username, Boolean hasCard) {
+    public TradeDto confirmTrade(Long tradeId, String username, Boolean hasCard) {
         Trade trade = tradeSupport.findLockedTrade(tradeId);
         Member buyer = tradeSupport.findMember(username);
 //        Wallet wallet = tradeSupport.findLockedWallet(trade.getSeller().getId());
@@ -90,7 +91,7 @@ public class TradeProgressServiceImpl implements TradeProgressService {
 
         assetHistoryEventPublisher.publish(event);
 
-        return trade.getId();
+        return TradeDto.from(trade);
     }
 
     // 선택받지 못한 트레이드 자동 취소
