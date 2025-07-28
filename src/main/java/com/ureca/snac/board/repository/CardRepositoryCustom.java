@@ -5,6 +5,7 @@ import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
+import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 
 import java.time.LocalDateTime;
@@ -21,4 +22,7 @@ public interface CardRepositoryCustom {
                       LocalDateTime lastUpdatedAt);
 
     List<Card> findRealtimeCardsByFilter(BuyerFilterRequest filter);
+
+    List<Card> scrollByOwnerAndCategory(Member member, CardCategory category, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
+
 }

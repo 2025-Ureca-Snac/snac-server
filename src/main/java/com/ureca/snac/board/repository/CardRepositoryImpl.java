@@ -12,6 +12,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.member.Member;
 import com.ureca.snac.member.QMember;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,21 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
         }
 
         return q.limit(size).fetch();
+    }
+
+    public List<Card> scrollByOwnerAndCategory(Member member, CardCategory category, int size, Long lastCardId, LocalDateTime lastUpdatedAt) {
+        QCard c = QCard.card;
+
+        return query
+                .selectFrom(c)
+                .where(
+                        c.member.eq(member),
+                        c.cardCategory.eq(category),
+                        ltCursor(lastCardId, lastUpdatedAt, c)
+                )
+                .orderBy(c.updatedAt.desc(), c.id.desc())
+                .limit(size)
+                .fetch();
     }
 
     @Override

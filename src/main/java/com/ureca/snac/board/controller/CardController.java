@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,6 +67,18 @@ public class CardController implements CardControllerSwagger{
 
         ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRange,
                 sellStatusFilter, highRatingFirst, size, lastCardId, lastUpdatedAt);
+
+        return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
+    }
+
+    @Override
+    @GetMapping
+    public ResponseEntity<ApiResponse<ScrollCardResponse>> getCardByOwner(@RequestParam CardCategory cardCategory,
+                                                                          @RequestParam(defaultValue = "54") Integer size,
+                                                                          @RequestParam(required = false) Long lastCardId,
+                                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt,
+                                                                          @AuthenticationPrincipal UserDetails userDetails) {
+        ScrollCardResponse response = cardService.getCardsByOwner(userDetails.getUsername(), cardCategory, size, lastCardId, lastUpdatedAt);
 
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
     }

@@ -77,5 +77,7 @@ public interface CardService {
     CardResponse findCardById(Long cardId);
     List<CardResponse> getSellingCardsByEmail(String email);
     List<CardDto> findAllDevCard();
+
+    ScrollCardResponse getCardsByOwner(String username, CardCategory cardCategory, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
 }
 

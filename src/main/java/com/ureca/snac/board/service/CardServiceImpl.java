@@ -195,6 +195,35 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    public ScrollCardResponse getCardsByOwner(String username, CardCategory cardCategory, int size, Long lastCardId, LocalDateTime lastUpdatedAt) {
+        // 1) 로그인 사용자 조회
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(MemberNotFoundException::new);
+
+        // 2) 페이징을 위해 요청 사이즈 + 1 로 한 건 더 가져오기
+        List<Card> cards = cardRepository.scrollByOwnerAndCategory(
+                member,
+                cardCategory,
+                size + 1,
+                lastCardId,
+                lastUpdatedAt
+        );
+
+        // 3) 다음 페이지 존재 여부 판단
+        boolean hasNext = cards.size() > size;
+
+
+        // 4) DTO 변환
+        List<CardResponse> dtos = cards.stream()
+                .limit(size)
+                .map(CardResponse::from)
+                .toList();
+
+        // 5) 응답 생성
+        return new ScrollCardResponse(dtos, hasNext);
+    }
+
+    @Override
     @Transactional
     public void deleteCardByTrade(Long cardId) {
         cardRepository.deleteById(cardId);
