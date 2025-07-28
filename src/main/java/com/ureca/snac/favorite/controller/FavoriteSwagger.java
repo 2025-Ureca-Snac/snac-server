@@ -5,6 +5,7 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.favorite.dto.FavoriteCheckResponse;
 import com.ureca.snac.favorite.dto.FavoriteCreateRequest;
+import com.ureca.snac.favorite.dto.FavoriteListRequest;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.swagger.annotation.UserInfo;
 import com.ureca.snac.swagger.annotation.error.ErrorCode400;
@@ -18,11 +19,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @Tag(name = "단골 관리",
         description = "단골 등록, 조회, 삭제와 관련된 API")
@@ -50,16 +49,8 @@ public interface FavoriteSwagger {
     @ErrorCode404(description = "사용자를 찾을 수 없습니다")
     @GetMapping
     ResponseEntity<ApiResponse<CursorResult<FavoriteMemberDto>>> getMyFavorites(
-            @Parameter(description = "이전 페이지의 마지막 항목의 생성 시간")
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime cursorCreatedAt,
 
-            @Parameter(description = "이전 페이지의 마지막 항목의 ID")
-            @RequestParam(required = false) Long cursorId,
-
-            @Parameter(description = "페이지에 보여줄 항목 수")
-            @RequestParam(required = false, defaultValue = "10") Integer size,
+            @ParameterObject @Valid FavoriteListRequest request,
             @UserInfo CustomUserDetails userDetails
     );
 
