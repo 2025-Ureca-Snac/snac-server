@@ -10,5 +10,4 @@ public interface DisputeAdminService {
     void answer(Long id, DisputeAnswerRequest dto, String adminEmail);
 
     Page<DisputeDetailResponse> list(DisputeSearchCond cond, Pageable page);
-    DisputeDetailResponse detail(Long id);
 }

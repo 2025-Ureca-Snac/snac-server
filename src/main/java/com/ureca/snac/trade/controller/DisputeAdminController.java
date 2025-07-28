@@ -7,6 +7,7 @@ import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
+import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import static com.ureca.snac.common.BaseCode.*;
 public class DisputeAdminController {
 
     private final DisputeAdminService disputeAdminService;
+    private final DisputeService disputeService;
 
 
     // 처리
@@ -72,9 +74,12 @@ public class DisputeAdminController {
 
     // 상세
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> detail(@PathVariable Long id){
-        return ResponseEntity.ok(ApiResponse.of(
-                BaseCode.STATUS_OK, disputeAdminService.detail(id)));
+    public ResponseEntity<ApiResponse<?>> detailDispute(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String email = userDetails.getUsername();
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS,disputeService.getDispute(id, email)));
     }
 
 }

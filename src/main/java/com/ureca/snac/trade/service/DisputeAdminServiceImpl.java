@@ -71,11 +71,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
         }
     }
 
-    private void assertAdmin(String email) {
-        Member admin = tradeSupport.findMember(email);
-        if (!admin.getRole().equals(Role.ADMIN))
-            throw new DisputeAdminPermissionDeniedException();
-    }
+
 
     // 목록 조회
     public Page<DisputeDetailResponse> list(DisputeSearchCond cond, Pageable page) {
@@ -85,12 +81,6 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 .map(this::toDto);
     }
 
-    // 상세 조회
-    public DisputeDetailResponse detail(Long id) {
-        Dispute d = disputeRepository.findById(id)
-                .orElseThrow(DisputeNotFoundException::new);
-        return toDto(d);
-    }
 
     // 엔티티 → DTO 변환 + 첨부 Presigned URL 생성
     private DisputeDetailResponse toDto(Dispute d) {
@@ -103,5 +93,11 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 d.getId(), d.getStatus(), d.getType(),
                 d.getDescription(), d.getAnswer(),
                 urls, d.getCreatedAt(), d.getAnswerAt());
+    }
+
+    private void assertAdmin(String email) {
+        Member admin = tradeSupport.findMember(email);
+        if (!admin.getRole().equals(Role.ADMIN))
+            throw new DisputeAdminPermissionDeniedException();
     }
 }
