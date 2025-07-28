@@ -50,7 +50,6 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     public void requestCancel(Long tradeId, String userEmail, CancelReason reason) {
 
         Member requester = tradeSupport.findMember(userEmail);
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
 
         Trade trade = tradeSupport.findLockedTrade(tradeId);
 
