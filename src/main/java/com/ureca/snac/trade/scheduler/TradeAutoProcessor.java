@@ -114,7 +114,7 @@ public class TradeAutoProcessor {
         LocalDateTime limit = LocalDateTime.now().minus(48, ChronoUnit.HOURS);
 
         List<Trade> trades = tradeRepo
-                .findByStatusAndUpdatedAtBefore(TradeStatus.DATA_SENT, limit);
+                .findByStatusAndUpdatedAtBeforeAndAutoConfirmPausedFalse(TradeStatus.DATA_SENT, limit);
 
         trades.forEach(trade -> {
             Card card = tradeSupport.findLockedCard(trade.getCardId());

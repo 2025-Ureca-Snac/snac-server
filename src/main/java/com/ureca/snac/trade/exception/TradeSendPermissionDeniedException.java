@@ -9,3 +9,4 @@ public class TradeSendPermissionDeniedException extends BusinessException {
         super(TRADE_SEND_PERMISSION_DENIED);
     }
 }
+

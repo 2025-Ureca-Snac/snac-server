@@ -66,6 +66,10 @@ public class Trade extends BaseTimeEntity {
     @Column(name = "phone", nullable = false, length = 11)
     private String phone;
 
+    // 문의접수 된 거래면 자동확정 x
+    @Column(name = "auto_confirm_paused", nullable = false)
+    private boolean autoConfirmPaused = false;
+
     @Builder
     private Trade(Long cardId, Member seller, Member buyer,
                   Carrier carrier, Integer priceGb, Integer dataAmount, TradeStatus status, TradeType tradeType, String phone, Integer point) {
@@ -171,6 +175,14 @@ public class Trade extends BaseTimeEntity {
 
         // 거래 상태를 '취소됨'으로 변경
         this.status = CANCELED;
+    }
+
+
+    public void pauseAutoConfirm()  {
+        this.autoConfirmPaused = true;
+    }
+    public void resumeAutoConfirm() {
+        this.autoConfirmPaused = false;
     }
 
     public void changeCancelReason(CancelReason cancelReason) {

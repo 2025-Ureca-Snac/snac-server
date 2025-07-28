@@ -1,5 +1,7 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.board.entity.constants.CardCategory;
+import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
@@ -62,8 +64,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             throw new TradeInvalidStatusException();
 
         // 이미 요청이 있으면 중복 차단
-        if (cancelRepo.findByTradeId(tradeId).isPresent())
-            throw new TradeAlreadyCancelRequestedException();
+        if (cancelRepo.existsByTradeIdAndStatus(tradeId, CancelStatus.REQUESTED)
+        ) throw new TradeAlreadyCancelRequestedException();
 
         boolean isSeller = requester.equals(trade.getSeller());
 
@@ -78,6 +80,14 @@ public class TradeCancelServiceImpl implements TradeCancelService {
                     .resolvedAt(LocalDateTime.now())
                     .build();
             cancelRepo.save(cancel);
+
+            // 카드 상태 처리
+            // 지금 판매자가 취소 요청 상태인데 판매글이면 삭제 처리 / 구매글이면 다시 구매중으로
+            if(card.getCardCategory() == CardCategory.SELL){
+                card.changeSellStatus(SellStatus.CANCEL);
+            } else if (card.getCardCategory() == CardCategory.BUY){
+                card.changeSellStatus(SellStatus.SELLING);
+            }
 
             // 거래 취소 및 환불
             trade.cancel(requester);
@@ -112,6 +122,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         }
     }
 
+    // 허락하는건 판매자, 즉 취소 요청이 구매자
     @Override
     public void acceptCancel(Long tradeId, String username) {
         TradeCancel cancel = cancelRepo.findByTradeId(tradeId)
@@ -135,10 +146,17 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         if (cancel.getStatus() != CancelStatus.REQUESTED)
             throw new TradeInvalidStatusException();
 
+        // 카드 상태 처리
+        // 지금 구매자가 취소 요청 상태인데 구매글이면 삭제 처리 / 판매글이면 다시 판매중으로
+        if(card.getCardCategory() == CardCategory.BUY){
+            card.changeSellStatus(SellStatus.CANCEL);
+        } else if (card.getCardCategory() == CardCategory.SELL){
+            card.changeSellStatus(SellStatus.SELLING);
+        }
+
         // 취소 처리
         cancel.accept();
-        trade.cancel(seller); // 상태변경까지
-
+        trade.cancel(seller); //상태변경까지
 
 //        위와 마찬가지 이유
         refundToBuyerAndPublishEvent(trade, card, buyer);
