@@ -35,7 +35,7 @@ public class DisputeController {
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_CREATE_SUCCESS, id));
     }
 
-    @GetMapping("/{tradeId}/disputes/{id}")
+    @GetMapping("/disputes/{id}")
     public ResponseEntity<ApiResponse<?>> detailDispute(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
