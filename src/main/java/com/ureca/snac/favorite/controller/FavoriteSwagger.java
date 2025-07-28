@@ -3,6 +3,7 @@ package com.ureca.snac.favorite.controller;
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.CursorResult;
+import com.ureca.snac.favorite.dto.FavoriteCheckResponse;
 import com.ureca.snac.favorite.dto.FavoriteCreateRequest;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.swagger.annotation.UserInfo;
@@ -71,6 +72,15 @@ public interface FavoriteSwagger {
     @DeleteMapping("/{toMemberId}")
     ResponseEntity<ApiResponse<Void>> deleteFavorite(
             @PathVariable Long toMemberId,
+            @UserInfo CustomUserDetails userDetails
+    );
+
+    @Operation(summary = "단골 여부",
+            description = "특정 사용자가 나의 단골인지 여부 확인")
+    @GetMapping("/check")
+    ResponseEntity<ApiResponse<FavoriteCheckResponse>> checkFavoriteStatus(
+            @Parameter(description = "확인할 대상의 회원 ID", required = true)
+            @RequestParam Long toMemberId,
             @UserInfo CustomUserDetails userDetails
     );
 }

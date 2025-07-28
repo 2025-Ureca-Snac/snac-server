@@ -42,8 +42,6 @@ public interface FavoriteService {
      */
     void deleteFavorite(String fromUserEmail, Long toMemberId);
 
-
-
     /**
      * 내가 등록한 단골의 총 개수를 조회.
      *
@@ -51,4 +49,13 @@ public interface FavoriteService {
      * @return 등록된 단골 수
      */
     Long getFavoriteCount(String fromUserEmail);
+
+    /**
+     * 단골 등록했는지에 대한 여부
+     *
+     * @param fromUserEmail 검색할 주체 회원 이메일
+     * @param toMemberId    상대방 ID
+     * @return 단골 여부
+     */
+    boolean checkFavoriteStatus(String fromUserEmail, Long toMemberId);
 }

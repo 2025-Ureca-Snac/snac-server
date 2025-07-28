@@ -1,6 +1,8 @@
 package com.ureca.snac.trade.service.interfaces;
 
 
+import com.ureca.snac.trade.dto.TradeDto;
+
 public interface TradeProgressService {
 
     /**
@@ -17,7 +19,8 @@ public interface TradeProgressService {
      * @param tradeId  거래 ID
      * @param username 요청 판매자 이메일
      */
-    Long confirmTrade(Long tradeId, String username, Boolean hasCard);
+//    Long confirmTrade(Long tradeId, String username, Boolean hasCard);
+    TradeDto confirmTrade(Long tradeId, String username, Boolean hasCard);
 
 //    List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId);
 //

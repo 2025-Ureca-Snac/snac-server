@@ -121,8 +121,21 @@ public class FavoriteServiceImpl implements FavoriteService {
     public Long getFavoriteCount(String fromUserEmail) {
         Member fromMember = findMemberByEmail(fromUserEmail);
         Long count = favoriteRepository.countByFromMember(fromMember);
-        log.info("[단골 수 조회] 회원ID: {}, count: {}", fromMember.getId(), count);
+        log.info("[단골 수 조회] 회원 ID: {}, count: {}", fromMember.getId(), count);
         return count;
+    }
+
+    @Override
+    public boolean checkFavoriteStatus(String fromUserEmail, Long toMemberId) {
+        Member fromMember = findMemberByEmail(fromUserEmail);
+        Member toMember = findMemberById(toMemberId);
+
+        boolean isFavorite = favoriteRepository.existsByFromMemberAndToMember(fromMember, toMember);
+
+        log.info("[단골 여부 확인] 요청자 : {}, 상대방 : {}, 여부 : {}",
+                fromUserEmail, toMemberId, isFavorite);
+
+        return isFavorite;
     }
 
     private Member findMemberById(Long memberId) {
