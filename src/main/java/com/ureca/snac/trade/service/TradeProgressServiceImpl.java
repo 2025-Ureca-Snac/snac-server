@@ -4,15 +4,18 @@ import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.exception.TradeSendPermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeStatusMismatchException;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeProgressService;
-import com.ureca.snac.trade.support.TradeSupport;
 import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +33,7 @@ import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 public class TradeProgressServiceImpl implements TradeProgressService {
     private final TradeRepository tradeRepository;
     private final CardRepository cardRepository;
-
-    private final TradeSupport tradeSupport;
+    private final MemberRepository memberRepository;
 
     private final WalletService walletService;
     private final AssetHistoryEventPublisher assetHistoryEventPublisher;
@@ -40,9 +42,9 @@ public class TradeProgressServiceImpl implements TradeProgressService {
     @Override
     @Transactional
     public Long sendTradeData(Long tradeId, String username) {
-        Member seller = tradeSupport.findMember(username);
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
+        Member seller = findMember(username);
+        Trade trade = findLockedTrade(tradeId);
+        Card card = findLockedCard(trade.getCardId());
 
         if (trade.getStatus() != PAYMENT_CONFIRMED) { // 결제가 완료되지 않은 상태에서는 판매자가 데이터를 전송할 수 없음
             throw new TradeStatusMismatchException();
@@ -63,15 +65,15 @@ public class TradeProgressServiceImpl implements TradeProgressService {
     @Override
     @Transactional
     public TradeDto confirmTrade(Long tradeId, String username, Boolean hasCard) {
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Member buyer = tradeSupport.findMember(username);
+        Trade trade = findLockedTrade(tradeId);
+        Member buyer = findMember(username);
 //        Wallet wallet = tradeSupport.findLockedWallet(trade.getSeller().getId());
         Member seller = trade.getSeller();
 
         trade.confirm(buyer); // 거래 상태를 확정으로 변경
 
         if (hasCard) {
-            Card card = tradeSupport.findLockedCard(trade.getCardId());
+            Card card = findLockedCard(trade.getCardId());
             card.changeSellStatus(SOLD_OUT); // 카드 상태를 판매 완료로 변경
         } else {
             // 실시간 매칭에서는 거래가 끝난 경우 카드는 필요 없으므로 삭제
@@ -92,6 +94,18 @@ public class TradeProgressServiceImpl implements TradeProgressService {
         assetHistoryEventPublisher.publish(event);
 
         return TradeDto.from(trade);
+    }
+
+    private Member findMember(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Card findLockedCard(Long cardId) {
+        return cardRepository.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
+    }
+
+    private Trade findLockedTrade(Long tradeId) {
+        return tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
     }
 
     // 선택받지 못한 트레이드 자동 취소

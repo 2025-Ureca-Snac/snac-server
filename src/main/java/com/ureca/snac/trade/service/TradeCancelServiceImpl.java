@@ -1,13 +1,16 @@
 package com.ureca.snac.trade.service;
 
-import com.ureca.snac.board.entity.constants.CardCategory;
-import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.entity.constants.CardCategory;
+import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.*;
@@ -16,7 +19,6 @@ import com.ureca.snac.trade.repository.TradeCancelRepository;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
 import com.ureca.snac.trade.service.interfaces.TradeCancelService;
-import com.ureca.snac.trade.support.TradeSupport;
 import com.ureca.snac.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     private final TradeCancelRepository cancelRepo;
     private final CardRepository cardRepo;
     private final TradeRepository tradeRepo;
-    private final TradeSupport tradeSupport;
+    private final MemberRepository memberRepo;
     private final PenaltyService penaltyService;
 
     private final WalletService walletService;
@@ -49,12 +51,12 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     @Override
     public void requestCancel(Long tradeId, String userEmail, CancelReason reason) {
 
-        Member requester = tradeSupport.findMember(userEmail);
+        Member requester = findMember(userEmail);
 
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
+        Trade trade = findLockedTrade(tradeId);
 
         // 제목 생성위해서 만들었음.. 리팩토링 시 변경 가능
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
+        Card card = findLockedCard(trade.getCardId());
 
         // 구매자 따로 뺏음
         Member buyer = trade.getBuyer();
@@ -131,9 +133,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         Trade trade = cancel.getTrade();
 
         // 제목 때문에 필요
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
+        Card card = findLockedCard(trade.getCardId());
 
-        Member seller = tradeSupport.findMember(username);
+        Member seller = findMember(username);
         Member buyer = trade.getBuyer();
 
         // 이거도 그냥 의존관계 주입 받음 굳이 외부 컴포넌트의 엔티티 접근을 유도안하고 DI
@@ -211,7 +213,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
                 .orElseThrow(TradeCancelNotFoundException::new);
 
         Trade trade = cancel.getTrade();
-        Member seller = tradeSupport.findMember(username);
+        Member seller = findMember(username);
 
         if (!trade.getSeller().equals(seller))
             throw new TradeCancelPermissionDeniedException();
@@ -268,7 +270,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     @Override
     @Transactional
     public TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username) {
-        Member member = tradeSupport.findMember(username);
+        Member member = findMember(username);
 
         Trade trade = tradeRepo.findLockedByCardIdAndBuyer(request.getCardId(), member)
                 .orElseThrow(TradeNotFoundException::new);
@@ -285,9 +287,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     public TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason) {
         log.info("[거래취소] 실시간 거래 취소 요청 - tradeId: {}, username: {}, reason: {}", tradeId, username, reason);
 
-        Member member = tradeSupport.findMember(username);
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
+        Member member = findMember(username);
+        Trade trade = findLockedTrade(tradeId);
+        Card card = findLockedCard(trade.getCardId());
 
         if (trade.getStatus() == TradeStatus.PAYMENT_CONFIRMED) {
             refundToBuyerAndPublishEvent(trade, card, trade.getBuyer());
@@ -302,6 +304,18 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         trade.changeCancelReason(reason);
 
         return TradeDto.from(trade);
+    }
+
+    private Member findMember(String email) {
+        return memberRepo.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Card findLockedCard(Long cardId) {
+        return cardRepo.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
+    }
+
+    private Trade findLockedTrade(Long tradeId) {
+        return tradeRepo.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
     }
 
 //    @Override
