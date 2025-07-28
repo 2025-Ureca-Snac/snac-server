@@ -1,11 +1,15 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.Role;
+import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
+import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
 import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.DisputeAdminPermissionDeniedException;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
+import com.ureca.snac.trade.repository.DisputeAttachmentRepository;
 import com.ureca.snac.trade.repository.DisputeRepository;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
@@ -13,7 +17,11 @@ import com.ureca.snac.trade.support.TradeSupport;
 import com.ureca.snac.wallet.entity.Wallet;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +29,10 @@ import org.springframework.stereotype.Service;
 public class DisputeAdminServiceImpl implements DisputeAdminService {
 
     private final DisputeRepository disputeRepository;
+    private final DisputeAttachmentRepository disputeAttachmentRepository;
     private final PenaltyService penaltyService;
     private final TradeSupport tradeSupport;
+    private final S3Uploader s3;   // presigned URL 변환용
 
     @Override
     public void answer(Long id, DisputeAnswerRequest dto, String adminEmail) {
@@ -65,5 +75,33 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
         Member admin = tradeSupport.findMember(email);
         if (!admin.getRole().equals(Role.ADMIN))
             throw new DisputeAdminPermissionDeniedException();
+    }
+
+    // 목록 조회
+    public Page<DisputeDetailResponse> list(DisputeSearchCond cond, Pageable page) {
+        /* repository.search(...) 가 Page<Dispute> 를 주면
+           map(this::toDto) 로 DTO 변환, 페이징 정보는 그대로 유지 */
+        return disputeRepository.search(cond, page)
+                .map(this::toDto);
+    }
+
+    // 상세 조회
+    public DisputeDetailResponse detail(Long id) {
+        Dispute d = disputeRepository.findById(id)
+                .orElseThrow(DisputeNotFoundException::new);
+        return toDto(d);
+    }
+
+    // 엔티티 → DTO 변환 + 첨부 Presigned URL 생성
+    private DisputeDetailResponse toDto(Dispute d) {
+        List<String> urls = disputeAttachmentRepository.findByDispute(d)
+                .stream()
+                .map(a -> s3.generatePresignedUrl(a.getS3Key()))
+                .toList();
+
+        return new DisputeDetailResponse(
+                d.getId(), d.getStatus(), d.getType(),
+                d.getDescription(), d.getAnswer(),
+                urls, d.getCreatedAt(), d.getAnswerAt());
     }
 }
