@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.service;
+package com.ureca.snac.auth.listener;
 
 import com.ureca.snac.auth.exception.SmsSendFailedException;
 import com.ureca.snac.config.RabbitMQConfig;

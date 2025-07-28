@@ -2,12 +2,15 @@ package com.ureca.snac.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @EnableRabbit
 @Configuration
@@ -170,6 +173,30 @@ public class RabbitMQConfig {
                 .with(SMS_AUTH_ROUTING_KEY);
     }
 
+
+    // 이메일 전송용 Direct Exchange
+    public static final String EMAIL_EXCHANGE = "email_exchange";
+    public static final String EMAIL_QUEUE    = "email_queue";
+    public static final String EMAIL_ROUTING_KEY = "email.send";
+
+    @Bean
+    public DirectExchange emailExchange() {
+        return new DirectExchange(EMAIL_EXCHANGE);
+    }
+
+    @Bean
+    public Queue emailQueue() {
+        return new Queue(EMAIL_QUEUE, false);
+    }
+
+    @Bean
+    public Binding emailBinding(DirectExchange emailExchange, Queue emailQueue) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(emailExchange)
+                .with(EMAIL_ROUTING_KEY);
+    }
+
     /* ------------------- Direct : 카드 목록 조회용 ------------------- */
     public static final String CARD_LIST_EXCHANGE = "card_list_exchange";
     public static final String CARD_LIST_QUEUE = "card_list_queue";
@@ -256,6 +283,19 @@ public class RabbitMQConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(converter);
+
+        RetryOperationsInterceptor retryInterceptor = RetryInterceptorBuilder.stateless()
+                .maxAttempts(3)
+                .backOffOptions(
+                        1000,   // 초기 대기시간 1초
+                        2.0,    // multiplier
+                        10000   // 최대 대기시간 10초
+                )
+                .recoverer(new RejectAndDontRequeueRecoverer())  // 마지막엔 requeue 하지 않고 버림
+                .build();
+
+        factory.setAdviceChain(retryInterceptor);
+
         return factory;
     }
 }
