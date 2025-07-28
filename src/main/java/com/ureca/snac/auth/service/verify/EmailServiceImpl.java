@@ -28,35 +28,35 @@ class EmailServiceImpl implements EmailService {
     private static final Duration VERIFICATION_CODE_TTL = Duration.ofMinutes(3);
     private static final Duration VERIFIED_FLAG_TTL = Duration.ofMinutes(10);
 
-    @Override
-    public void sendVerificationCode(String email) {
-        String verificationCode = generateRandomCode();
-        String title = "[SNAC] 이메일 인증 코드";
-        String message = String.format("""
-            안녕하세요, SNAC입니다.
-            요청하신 이메일 인증번호는 다음과 같습니다.
-            
-            인증번호: %s
-            
-            SNAC 앱으로 돌아가 화면에 이 인증번호를 입력해주세요.
-            인증번호는 5분간 유효합니다.
-            
-            본인이 요청하지 않으셨다면 이 메일을 무시하셔도 됩니다.
-            
-            감사합니다.
-            SNAC 팀 드림
-            """, verificationCode);
-
-        try {
-            emailTool.sendEmail(email, title, message);
-            // 이메일 전송 성공 했을때 인증 코드를 Redis에 저장
-            redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + email, verificationCode, VERIFICATION_CODE_TTL);
-            log.info("Sent verification email to {}", email);
-        } catch (Exception e) {
-            log.error("Error sending email to {}: {}", email, e.getMessage(), e);
-            throw new EmailSendFailedException();
-        }
-    }
+//    @Override
+//    public void sendVerificationCode(String email) {
+//        String verificationCode = generateRandomCode();
+//        String title = "[SNAC] 이메일 인증 코드";
+//        String message = String.format("""
+//            안녕하세요, SNAC입니다.
+//            요청하신 이메일 인증번호는 다음과 같습니다.
+//
+//            인증번호: %s
+//
+//            SNAC 앱으로 돌아가 화면에 이 인증번호를 입력해주세요.
+//            인증번호는 5분간 유효합니다.
+//
+//            본인이 요청하지 않으셨다면 이 메일을 무시하셔도 됩니다.
+//
+//            감사합니다.
+//            SNAC 팀 드림
+//            """, verificationCode);
+//
+//        try {
+//            emailTool.sendEmail(email, title, message);
+//            // 이메일 전송 성공 했을때 인증 코드를 Redis에 저장
+//            redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + email, verificationCode, VERIFICATION_CODE_TTL);
+//            log.info("Sent verification email to {}", email);
+//        } catch (Exception e) {
+//            log.error("Error sending email to {}: {}", email, e.getMessage(), e);
+//            throw new EmailSendFailedException();
+//        }
+//    }
 
     @Override
     public void verifyCode(String email, String code) {

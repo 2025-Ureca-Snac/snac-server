@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.service;
+package com.ureca.snac.auth.listener;
 
 import com.ureca.snac.trade.dto.TradeMessageDto;
 

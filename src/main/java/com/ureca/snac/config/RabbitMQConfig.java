@@ -2,12 +2,15 @@ package com.ureca.snac.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @EnableRabbit
 @Configuration
@@ -170,6 +173,30 @@ public class RabbitMQConfig {
                 .with(SMS_AUTH_ROUTING_KEY);
     }
 
+
+    // 이메일 전송용 Direct Exchange
+    public static final String EMAIL_EXCHANGE = "email_exchange";
+    public static final String EMAIL_QUEUE    = "email_queue";
+    public static final String EMAIL_ROUTING_KEY = "email.send";
+
+    @Bean
+    public DirectExchange emailExchange() {
+        return new DirectExchange(EMAIL_EXCHANGE);
+    }
+
+    @Bean
+    public Queue emailQueue() {
+        return new Queue(EMAIL_QUEUE, false);
+    }
+
+    @Bean
+    public Binding emailBinding(DirectExchange emailExchange, Queue emailQueue) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(emailExchange)
+                .with(EMAIL_ROUTING_KEY);
+    }
+
     /* ------------------- Direct : 카드 목록 조회용 ------------------- */
     public static final String CARD_LIST_EXCHANGE = "card_list_exchange";
     public static final String CARD_LIST_QUEUE = "card_list_queue";
@@ -237,6 +264,47 @@ public class RabbitMQConfig {
                 .with(ERROR_ROUTING_KEY);
     }
 
+    // 공통 비즈니스 익스체인지
+    public static final String BUSINESS_EXCHANGE       = "business_exchange";
+
+    // 1) 회원가입 처리 전용 큐/라우팅키
+    public static final String MEMBER_JOIN_QUEUE       = "business.member.join.queue";
+    public static final String MEMBER_JOIN_ROUTING_KEY = "business.member.join";
+
+    // 2) 자산 변경 처리 전용 큐/라우팅키
+    public static final String ASSET_CHANGED_QUEUE       = "business.asset.changed.queue";
+    public static final String ASSET_CHANGED_ROUTING_KEY = "business.asset.changed";
+
+    @Bean
+    public DirectExchange businessExchange() {
+        return new DirectExchange(BUSINESS_EXCHANGE);
+    }
+
+    // 회원가입 전용 큐
+    @Bean
+    public Queue memberJoinQueue() {
+        return new Queue(MEMBER_JOIN_QUEUE, false);
+    }
+    @Bean
+    public Binding memberJoinBinding(DirectExchange businessExchange, Queue memberJoinQueue) {
+        return BindingBuilder
+                .bind(memberJoinQueue)
+                .to(businessExchange)
+                .with(MEMBER_JOIN_ROUTING_KEY);
+    }
+
+    // 자산 변경 전용 큐
+    @Bean
+    public Queue assetChangedQueue() {
+        return new Queue(ASSET_CHANGED_QUEUE, false);
+    }
+    @Bean
+    public Binding assetChangedBinding(DirectExchange businessExchange, Queue assetChangedQueue) {
+        return BindingBuilder
+                .bind(assetChangedQueue)
+                .to(businessExchange)
+                .with(ASSET_CHANGED_ROUTING_KEY);
+    }
 
     /* ------------------- 공통 설정 ------------------- */
     @Bean
@@ -256,6 +324,19 @@ public class RabbitMQConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(converter);
+
+        RetryOperationsInterceptor retryInterceptor = RetryInterceptorBuilder.stateless()
+                .maxAttempts(3)
+                .backOffOptions(
+                        1000,   // 초기 대기시간 1초
+                        2.0,    // multiplier
+                        10000   // 최대 대기시간 10초
+                )
+                .recoverer(new RejectAndDontRequeueRecoverer())  // 마지막엔 requeue 하지 않고 버림
+                .build();
+
+        factory.setAdviceChain(retryInterceptor);
+
         return factory;
     }
 }

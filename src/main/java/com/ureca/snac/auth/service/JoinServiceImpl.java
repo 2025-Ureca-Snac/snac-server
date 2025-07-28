@@ -7,12 +7,14 @@ import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.service.verify.EmailService;
 import com.ureca.snac.auth.service.verify.SnsService;
+import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,7 +34,7 @@ public class JoinServiceImpl implements JoinService {
     private final SnsService snsService;
     private final EmailService emailService;
     private final ApplicationEventPublisher eventPublisher;
-
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
@@ -78,6 +80,6 @@ public class JoinServiceImpl implements JoinService {
     }
 
     private void publishMemberJoinEvent(Member member) {
-        eventPublisher.publishEvent(new MemberJoinEvent(member.getId()));
+        eventPublisher.publishEvent(new MemberJoinEvent(member.getId())); // rabbitMQ 비동기 처리
     }
 }
