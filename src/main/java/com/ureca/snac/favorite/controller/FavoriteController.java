@@ -5,16 +5,18 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.CursorResult;
 import com.ureca.snac.favorite.dto.FavoriteCheckResponse;
 import com.ureca.snac.favorite.dto.FavoriteCreateRequest;
+import com.ureca.snac.favorite.dto.FavoriteListRequest;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.favorite.service.FavoriteService;
 import com.ureca.snac.swagger.annotation.UserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.ureca.snac.common.BaseCode.*;
 
@@ -37,18 +39,14 @@ public class FavoriteController implements FavoriteSwagger {
 
     @Override
     public ResponseEntity<ApiResponse<CursorResult<FavoriteMemberDto>>> getMyFavorites(
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime cursorCreatedAt,
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false, defaultValue = "10")
-            Integer size,
+            @ParameterObject @Valid FavoriteListRequest request,
             @UserInfo CustomUserDetails userDetails) {
 
         String currentUserEmail = userDetails.getUsername();
+
         CursorResult<FavoriteMemberDto> result =
                 favoriteService.getMyFavorites(
-                        currentUserEmail, cursorCreatedAt, cursorId, size);
+                        currentUserEmail, request);
 
         return ResponseEntity.ok(ApiResponse.of(FAVORITE_LIST_SUCCESS, result));
     }

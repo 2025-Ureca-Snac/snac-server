@@ -1,6 +1,7 @@
 package com.ureca.snac.favorite.service;
 
 import com.ureca.snac.common.CursorResult;
+import com.ureca.snac.favorite.dto.FavoriteListRequest;
 import com.ureca.snac.favorite.dto.FavoriteMemberDto;
 import com.ureca.snac.favorite.entity.Favorite;
 import com.ureca.snac.favorite.exception.AlreadyFavoriteMember;
@@ -12,12 +13,10 @@ import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,6 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
     private final MemberRepository memberRepository;
-    private static final int SIZE = 10;
 
     @Override
     @Transactional
@@ -58,29 +56,16 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public CursorResult<FavoriteMemberDto> getMyFavorites(
-            String fromUserEmail, LocalDateTime cursorCreatedAt,
-            Long cursorId, Integer size
+            String fromUserEmail, FavoriteListRequest request
     ) {
-        log.info("[단골 목록 조회] 시작. 누가 : {}, 시간 : {}, 커서 Id : {}, 페이지 크기 : {}",
-                fromUserEmail, cursorCreatedAt, cursorId, size);
-        // size가 null 이거나 0 이하의 예외를 방지
-        int pageSize = (size == null || size <= 0) ? SIZE : size;
+        log.info("[단골 목록 조회] 시작. 누가 : {}", fromUserEmail);
 
         Member fromMember = findMemberByEmail(fromUserEmail);
 
-        // 페이지 조회 커서값 초기화
-        LocalDateTime currentCursorCreatedAt = (cursorCreatedAt == null) ?
-                LocalDateTime.now() : cursorCreatedAt;
-
-        Long currentCursorId = (cursorId == null) ?
-                Long.MAX_VALUE : cursorId;
-
         // 실제 데이터 목록, 다음 페이지 여부 hasNext 포함
         Slice<Favorite> favoriteSlice =
-                favoriteRepository.findAllWithToMemberByCursor(
-                        fromMember, currentCursorCreatedAt, currentCursorId,
-                        PageRequest.of(0, pageSize)
-                );
+                favoriteRepository.findFavoritesByFromMember(
+                        fromMember, request);
 
         // 데이터 변환
         List<FavoriteMemberDto> favoriteDtos = new ArrayList<>();
@@ -91,14 +76,8 @@ public class FavoriteServiceImpl implements FavoriteService {
             favoriteDtos.add(dto);
         }
 
-        String nextCursor = null;
-        // 커서 계산
-        if (favoriteSlice.hasNext() && !favoriteSlice.getContent().isEmpty()) {
-            Favorite lastFavorite =
-                    favoriteSlice.getContent().get(favoriteSlice.getContent().size() - 1);
+        String nextCursor = calculateNextCursor(favoriteSlice);
 
-            nextCursor = lastFavorite.getCreatedAt().toString() + "," + lastFavorite.getId();
-        }
         log.info("[단골 목록 조회] 완료. 조회된 단골 수 : {}, 다음 페이지 존재 여부 : {}",
                 favoriteDtos.size(), favoriteSlice.hasNext());
         return new CursorResult<>(favoriteDtos, nextCursor, favoriteSlice.hasNext());
@@ -146,5 +125,14 @@ public class FavoriteServiceImpl implements FavoriteService {
     private Member findMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
+    }
+
+    private String calculateNextCursor(Slice<Favorite> slice) {
+        if (!slice.hasNext() || slice.getContent().isEmpty()) {
+            return null;
+        }
+        Favorite lastFavorite = slice.getContent().get(slice.getContent().size() - 1);
+
+        return lastFavorite.getCreatedAt().toString() + "," + lastFavorite.getId();
     }
 }
