@@ -27,26 +27,26 @@ public class SnsServiceImpl implements SnsService {
     private static final Duration VERIFICATION_CODE_TTL = Duration.ofMinutes(3);
     private static final Duration VERIFIED_FLAG_TTL = Duration.ofMinutes(10);
 
-    @Override
-    public void sendVerificationCode(String phoneNumber) {
-        String verificationCode = generateRandomCode();
-        String message = String.format("[SNAC] 인증번호[%s]를 입력해주세요.", verificationCode);
-        String formatPhoneNumber = formatToE164(phoneNumber);
-
-        try {
-            PublishResponse response = snsClient.publish(PublishRequest.builder()
-                    .message(message)
-                    .phoneNumber(formatPhoneNumber)
-                    .build());
-
-            redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + phoneNumber, verificationCode, VERIFICATION_CODE_TTL);
-
-            log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
-        } catch (Exception e) {
-            log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
-            throw new SmsSendFailedException();
-        }
-    }
+//    @Override
+//    public void sendVerificationCode(String phoneNumber) {
+//        String verificationCode = generateRandomCode();
+//        String message = String.format("[SNAC] 인증번호[%s]를 입력해주세요.", verificationCode);
+//        String formatPhoneNumber = formatToE164(phoneNumber);
+//
+//        try {
+//            PublishResponse response = snsClient.publish(PublishRequest.builder()
+//                    .message(message)
+//                    .phoneNumber(formatPhoneNumber)
+//                    .build());
+//
+//            redisTemplate.opsForValue().set(VERIFICATION_CODE_PREFIX + phoneNumber, verificationCode, VERIFICATION_CODE_TTL);
+//
+//            log.info("Sent message {} to {} with messageId {}", message, phoneNumber, response.messageId());
+//        } catch (Exception e) {
+//            log.error("Error sending SMS to {}: {}", formatPhoneNumber, e.getMessage(), e);
+//            throw new SmsSendFailedException();
+//        }
+//    }
 
     @Override
     public void verifyCode(String phoneNumber, String code) {

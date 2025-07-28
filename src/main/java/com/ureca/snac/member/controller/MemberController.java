@@ -5,9 +5,11 @@ import com.ureca.snac.auth.service.verify.EmailService;
 import com.ureca.snac.auth.service.verify.SnsService;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
+import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +20,7 @@ public class MemberController implements MemberControllerSwagger {
     private final MemberService memberService;
     private final SnsService snsService;
     private final EmailService emailService;
+    private final RabbitTemplate rabbitTemplate;
 
     //TODO 비밀번호 변경(완료, 검증완료)
     // 사용자 인증 추가 해야 할듯? -> 안하기로 함. 로그아웃 시켜버리는 방식으로
@@ -46,7 +49,8 @@ public class MemberController implements MemberControllerSwagger {
 
         memberService.checkPassword(userDetails.getUsername(), phoneChangeRequest);
 
-        snsService.sendVerificationCode(phoneChangeRequest.getNewPhone());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_AUTH_ROUTING_KEY, phoneChangeRequest.getNewPhone());
+//        snsService.sendVerificationCode(phoneChangeRequest.getNewPhone()); // 기존 코드를 rabbitMQ 비동기로 변경했습니다.
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PHONE_EXIST_SUCCESS));
     }
 
