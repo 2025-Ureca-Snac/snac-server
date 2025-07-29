@@ -6,11 +6,11 @@ import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.SellStatus;
-import com.ureca.snac.board.exception.CardAlreadySoldOutException;
-import com.ureca.snac.board.exception.CardAlreadyTradingException;
-import com.ureca.snac.board.exception.CardInvalidStatusException;
-import com.ureca.snac.board.exception.NotRealTimeSellCardException;
+import com.ureca.snac.board.exception.*;
+import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradeRequest;
@@ -19,8 +19,9 @@ import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.*;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeInitiationService;
-import com.ureca.snac.trade.support.TradeSupport;
+import com.ureca.snac.wallet.Repository.WalletRepository;
 import com.ureca.snac.wallet.entity.Wallet;
+import com.ureca.snac.wallet.exception.WalletNotFoundException;
 import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,9 @@ import static com.ureca.snac.trade.entity.TradeStatus.*;
 @RequiredArgsConstructor
 public class TradeInitiationServiceImpl implements TradeInitiationService {
     private final TradeRepository tradeRepository;
-    private final TradeSupport tradeSupport;
+    private final MemberRepository memberRepository;
+    private final WalletRepository walletRepository;
+    private final CardRepository cardRepository;
 
     private final WalletService walletService;
     // 이벤트 기록 저장
@@ -46,9 +49,9 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Override
     @Transactional
     public Long acceptRealTimeTrade(Long tradeId, String username) {
-        Member member = tradeSupport.findMember(username);
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
+        Member member = findMember(username);
+        Trade trade = findLockedTrade(tradeId);
+        Card card = findLockedCard(trade.getCardId());
 
         // 카드는 판매 상태이여야 함
         if (card.getSellStatus() != SELLING) {
@@ -75,10 +78,10 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Transactional
     public Long payRealTimeTrade(CreateRealTimeTradePaymentRequest createRealTimeTradePaymentRequest, String username) {
         // 1. 거래 조회 (락 걸어서)
-        Member member = tradeSupport.findMember(username);
-        Trade trade = tradeSupport.findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
-        Card card = tradeSupport.findLockedCard(trade.getCardId());
-        Wallet wallet = tradeSupport.findLockedWallet(member.getId());
+        Member member = findMember(username);
+        Trade trade = findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
+        Card card = findLockedCard(trade.getCardId());
+        Wallet wallet = findLockedWallet(member.getId());
 
         // 카드는 거래 상태이어야 함
         if (card.getSellStatus() != TRADING) {
@@ -149,8 +152,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Override
     @Transactional
     public Long createRealTimeTrade(CreateRealTimeTradeRequest request, String username) {
-        Member member = tradeSupport.findMember(username);
-        Card card = tradeSupport.findLockedCard(request.getCardId());
+        Member member = findMember(username);
+        Card card = findLockedCard(request.getCardId());
 
         // 실시간 판매 카드가 아닌 경우
         if (card.getCardCategory() != CardCategory.REALTIME_SELL) {
@@ -204,11 +207,11 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Override
     @Transactional
     public Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
-        Member seller = tradeSupport.findMember(username);
+        Member seller = findMember(username);
         Trade trade = tradeRepository
                 .findLockedByCardId(claimBuyRequest.getCardId())
                 .orElseThrow(TradeNotFoundException::new);
-        Card card = tradeSupport.findLockedCard(claimBuyRequest.getCardId());
+        Card card = findLockedCard(claimBuyRequest.getCardId());
 
         // 판매 가능 상태가 아니라면 이미 거래 중으로 간주
         if (card.getSellStatus() != SELLING) {
@@ -237,8 +240,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
      * @param requiredStatus     거래 유형 (SELLING: 판매글, PENDING: 구매글)
      */
     private Long buildTrade(CreateTradeRequest createTradeRequest, String username, SellStatus requiredStatus) {
-        Member member = tradeSupport.findMember(username);
-        Card card = tradeSupport.findLockedCard(createTradeRequest.getCardId());
+        Member member = findMember(username);
+        Card card = findLockedCard(createTradeRequest.getCardId());
 
         // 카드 상태가 판매 중이 아닌데 판매 거래 요청이 들어오면 예외
         if (requiredStatus == SELLING && card.getSellStatus() != SELLING) {
@@ -334,5 +337,21 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         if (requiredStatus == PENDING && !isOwner) {
             throw new TradePermissionDeniedException();
         }
+    }
+
+    private Member findMember(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Wallet findLockedWallet(Long memberId) {
+        return walletRepository.findByMemberIdWithLock(memberId).orElseThrow(WalletNotFoundException::new);
+    }
+
+    private Card findLockedCard(Long cardId) {
+        return cardRepository.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
+    }
+
+    private Trade findLockedTrade(Long tradeId) {
+        return tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
     }
 }

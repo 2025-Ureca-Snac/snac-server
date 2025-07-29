@@ -2,19 +2,25 @@ package com.ureca.snac.trade.service;
 
 import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.Role;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
-import com.ureca.snac.trade.entity.*;
+import com.ureca.snac.trade.entity.Dispute;
+import com.ureca.snac.trade.entity.PenaltyReason;
+import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.exception.DisputeAdminPermissionDeniedException;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
 import com.ureca.snac.trade.repository.DisputeAttachmentRepository;
 import com.ureca.snac.trade.repository.DisputeRepository;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
-import com.ureca.snac.trade.support.TradeSupport;
+import com.ureca.snac.wallet.Repository.WalletRepository;
 import com.ureca.snac.wallet.entity.Wallet;
+import com.ureca.snac.wallet.exception.WalletNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,9 +35,10 @@ import java.util.List;
 public class DisputeAdminServiceImpl implements DisputeAdminService {
 
     private final DisputeRepository disputeRepository;
+    private final MemberRepository memberRepository;
+    private final WalletRepository walletRepository;
     private final DisputeAttachmentRepository disputeAttachmentRepository;
     private final PenaltyService penaltyService;
-    private final TradeSupport tradeSupport;
     private final S3Uploader s3;   // presigned URL 변환용
 
     @Override
@@ -58,7 +65,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
 
                 // 최종처리, 환불 등
                 // 환불
-                Wallet buyerWallet = tradeSupport.findLockedWallet(trade.getBuyer().getId());
+                Wallet buyerWallet = findLockedWallet(trade.getBuyer().getId());
                 long refundMoney = trade.getPriceGb() - trade.getPoint();
                 if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
                 if (trade.getPoint() > 0) buyerWallet.depositPoint(trade.getPoint());
@@ -96,8 +103,16 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
     }
 
     private void assertAdmin(String email) {
-        Member admin = tradeSupport.findMember(email);
+        Member admin = findMember(email);
         if (!admin.getRole().equals(Role.ADMIN))
             throw new DisputeAdminPermissionDeniedException();
+    }
+
+    private Member findMember(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Wallet findLockedWallet(Long memberId) {
+        return walletRepository.findByMemberIdWithLock(memberId).orElseThrow(WalletNotFoundException::new);
     }
 }

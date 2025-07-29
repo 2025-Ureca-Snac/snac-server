@@ -2,7 +2,9 @@ package com.ureca.snac.trade.service;
 
 import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.Role;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
 import com.ureca.snac.trade.entity.Dispute;
 import com.ureca.snac.trade.entity.DisputeAttachment;
@@ -10,10 +12,11 @@ import com.ureca.snac.trade.entity.DisputeType;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
 import com.ureca.snac.trade.exception.DisputePermissionDeniedException;
+import com.ureca.snac.trade.exception.TradeNotFoundException;
 import com.ureca.snac.trade.repository.DisputeAttachmentRepository;
 import com.ureca.snac.trade.repository.DisputeRepository;
+import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
-import com.ureca.snac.trade.support.TradeSupport;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,8 +29,9 @@ import java.util.List;
 public class DisputeServiceImpl implements DisputeService {
 
     private final DisputeRepository disputeRepository;
+    private final MemberRepository memberRepository;
     private final DisputeAttachmentRepository disputeAttachmentRepository;
-    private final TradeSupport tradeSupport;
+    private final TradeRepository tradeRepository;
     private final S3Uploader s3Uploader;
 
     @Override
@@ -35,8 +39,8 @@ public class DisputeServiceImpl implements DisputeService {
                               DisputeType type, String description,
                               List<String> attachmentKeys) {
 
-        Trade trade = tradeSupport.findLockedTrade(tradeId);
-        Member reporter = tradeSupport.findMember(email);
+        Trade trade = findLockedTrade(tradeId);
+        Member reporter = findMember(email);
 
         // 거래 당사자 확인
         if (!reporter.equals(trade.getBuyer()) && !reporter.equals(trade.getSeller()))
@@ -66,7 +70,7 @@ public class DisputeServiceImpl implements DisputeService {
                 .orElseThrow(DisputeNotFoundException::new);
 
         // 신고자 또는 관리자인지
-        Member reporter = tradeSupport.findMember(email);
+        Member reporter = findMember(email);
         if (!reporter.equals(dispute.getReporter()) && !reporter.getRole().equals(Role.ADMIN))
             throw new DisputePermissionDeniedException();
 
@@ -83,5 +87,13 @@ public class DisputeServiceImpl implements DisputeService {
                 urls,
                 dispute.getCreatedAt(),
                 dispute.getAnswerAt());
+    }
+
+    private Member findMember(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Trade findLockedTrade(Long tradeId) {
+        return tradeRepository.findLockedById(tradeId).orElseThrow(TradeNotFoundException::new);
     }
 }
