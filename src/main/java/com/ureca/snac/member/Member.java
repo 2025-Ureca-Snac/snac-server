@@ -128,4 +128,16 @@ public class Member extends BaseTimeEntity {
         this.activated = Activated.NORMAL;
         this.suspendUntil = null;
     }
+
+    public boolean isNaverConnected() {
+        return naverId != null && !naverId.isEmpty();
+    }
+
+    public boolean isGoogleConnected() {
+        return googleId != null && !googleId.isEmpty();
+    }
+
+    public boolean isKakaoConnected() {
+        return kakaoId != null && !kakaoId.isEmpty();
+    }
 }

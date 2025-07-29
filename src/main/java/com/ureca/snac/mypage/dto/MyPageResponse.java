@@ -29,9 +29,9 @@ public class MyPageResponse {
                 .score(member.getRatingScore())
                 .nickname(member.getNickname())
                 .nicknameUpdatedAt(member.getNicknameUpdatedAt())
-                .isNaverConnected(member.getNaverId() != null && !member.getNaverId().isEmpty())
-                .isGoogleConnected(member.getGoogleId() != null && !member.getGoogleId().isEmpty())
-                .isKakaoConnected(member.getKakaoId() != null && !member.getKakaoId().isEmpty())
+                .isNaverConnected(member.isNaverConnected())
+                .isGoogleConnected(member.isGoogleConnected())
+                .isKakaoConnected(member.isKakaoConnected())
                 .build();
     }
 }
