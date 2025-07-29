@@ -1,6 +1,8 @@
 package com.ureca.snac.trade.service;
 
 import com.ureca.snac.member.Member;
+import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.TradeQueryType;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeSide;
@@ -12,7 +14,6 @@ import com.ureca.snac.trade.service.interfaces.TradeQueryService;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
 import com.ureca.snac.trade.service.response.TradeResponse;
-import com.ureca.snac.trade.support.TradeSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,14 +30,14 @@ import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 @RequiredArgsConstructor
 public class TradeQueryServiceImpl implements TradeQueryService {
     private final TradeRepository tradeRepository;
-    private final TradeSupport tradeSupport;
+    private final MemberRepository memberRepository;
 
     // 판매 또는 구매에 대한 거래내역을 가져옵니다.
     // TradeSide를 기준으로 BUY, SELL을 구분합니다.
     // 요청한 사이즈보다 1개 더 조회하여 다음페이지가 있는지 체크합니다.
     @Override
     public ScrollTradeResponse scrollTrades(String username, TradeSide side, int size, TradeQueryType tradeQueryType, Long lastTradeId) {
-        Member member = tradeSupport.findMember(username);
+        Member member = findMember(username);
 
         List<Trade> trades = (side == TradeSide.BUY)
                 ? tradeRepository.findTradesByBuyerInfinite(member.getId(), lastTradeId, tradeQueryType,  size + 1)
@@ -54,7 +55,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
 
     @Override
     public ProgressTradeCountResponse countSellingProgress(String username) {
-        Member seller = tradeSupport.findMember(username);
+        Member seller = findMember(username);
 
         return new ProgressTradeCountResponse(tradeRepository.countBySellerAndStatusIn(seller,
                 List.of(DATA_SENT, PAYMENT_CONFIRMED)));
@@ -62,7 +63,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
 
     @Override
     public ProgressTradeCountResponse countBuyingProgress(String username) {
-        Member buyer = tradeSupport.findMember(username);
+        Member buyer = findMember(username);
 
         return new ProgressTradeCountResponse(tradeRepository.countByBuyerAndStatusIn(buyer,
                 List.of(DATA_SENT, PAYMENT_CONFIRMED)));
@@ -79,7 +80,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     // 일반 거래에 사용하는 trade 반환 메서드
     @Override
     public TradeResponse getTradeById(Long tradeId, String username) {
-        Member member = tradeSupport.findMember(username);
+        Member member = findMember(username);
 
         return tradeRepository.findByIdAndParticipant(tradeId, member)
                 .map(t -> TradeResponse.from(t, member.getEmail()))
@@ -89,7 +90,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     @Override
     @Transactional
     public List<TradeDto> findBuyerRealTimeTrade(String buyerUsername) {
-        Member member = tradeSupport.findMember(buyerUsername);
+        Member member = findMember(buyerUsername);
 
         return tradeRepository
                 .findAllByBuyerAndTradeType(member, TradeType.REALTIME)
@@ -100,11 +101,15 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     @Override
     @Transactional
     public List<TradeDto> findSellerRealTimeTrade(String sellerUsername) {
-        Member member = tradeSupport.findMember(sellerUsername);
+        Member member = findMember(sellerUsername);
 
         return tradeRepository
                 .findAllBySellerAndTradeType(member, TradeType.REALTIME)
                 .stream().map(TradeDto::from)
                 .toList();
+    }
+
+    private Member findMember(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
 }
