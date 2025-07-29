@@ -53,11 +53,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Trade trade = findLockedTrade(tradeId);
         Card card = findLockedCard(trade.getCardId());
 
-        // 카드는 판매 상태이여야 함
-        card.markTrading();
-
-        // 거래요청 상태이여야 함, 구매 요청 상태이어야 함
-        trade.accept(member);
+        card.markTrading();  // 카드는 판매 상태이여야 함
+        trade.accept(member); // 거래요청 상태이여야 함, 구매 요청 상태이어야 함
 
         return trade.getId();
     }
@@ -143,30 +140,11 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Member member = findMember(username);
         Card card = findLockedCard(request.getCardId());
 
-        // 실시간 판매 카드가 아닌 경우
-        if (card.getCardCategory() != CardCategory.REALTIME_SELL) {
-            throw new NotRealTimeSellCardException();
-        }
+        card.ensureRealTimeSellCategory();
+        card.ensureSellStatus(SELLING); // 카드는 판매 상태이여야 함
+        card.ensureCreatableBy(member, SELLING); // 카드 등록자와 달라야 함
 
-        // 카드는 판매 상태이여야 함
-        if (card.getSellStatus() == TRADING) {
-            throw new CardAlreadyTradingException();
-        }
-        if (card.getSellStatus() == SOLD_OUT) {
-            throw new CardAlreadySoldOutException();
-        }
-
-        // 카드 등록자와 달라야 함
-        if (card.getMember() == member) {
-            throw new TradeSelfRequestException();
-        }
-
-        // 거래 엔티티 생성 및 저장
-        Trade trade = Trade.buildTrade(member, member.getPhone(), card);
-        tradeRepository.save(trade);
-
-        // 카드 상태 변경 (Trading)
-//        card.changeSellStatus(TRADING);
+        Trade trade = tradeRepository.save(Trade.buildTrade(member, member.getPhone(), card)); // 거래 엔티티 생성 및 저장
 
         return trade.getId();
     }
@@ -199,14 +177,9 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Trade trade = tradeRepository.findLockedByCardId(claimBuyRequest.getCardId()).orElseThrow(TradeNotFoundException::new);
         Card card = findLockedCard(claimBuyRequest.getCardId());
 
-        // 판매 가능 상태가 아니라면 수락할 수 없음
-        card.ensureSellStatus(SELLING);
-
-        // 본인이 판매를 수락하는 것은 허용하지 않음, 거래에 판매자 등록 및 카드 상태 변경
-        trade.assignSeller(seller);
-
-        // 카드 상태를 TRADING으로 전환
-        card.markTrading();
+        card.ensureSellStatus(SELLING); // 판매 가능 상태가 아니라면 수락할 수 없음
+        trade.assignSeller(seller);  // 본인이 판매를 수락하는 것은 허용하지 않음, 거래에 판매자 등록 및 카드 상태 변경
+        card.markTrading(); // 카드 상태를 TRADING으로 전환
 
         return trade.getId();
     }
@@ -222,11 +195,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Member member = findMember(username);
         Card card = findLockedCard(createTradeRequest.getCardId());
 
-        // 카드 상태가 판매 중이 아니거나 펜딩 상태가 아니라면 예외
-        card.ensureSellStatus(requiredStatus);
-
-        // 거래 생성 소유자 조건 확인: 판매글 -> 타인, 구매글 -> 본인
-        card.ensureCreatableBy(member, requiredStatus);
+        card.ensureSellStatus(requiredStatus); // 카드 상태가 판매 중이 아니거나 펜딩 상태가 아니라면 예외
+        card.ensureCreatableBy(member, requiredStatus); // 거래 생성 소유자 조건 확인: 판매글 -> 타인, 구매글 -> 본인
 
         // 결제 금액 검증 (금액 + 포인트 == 카드 가격)
         long moneyToUse = createTradeRequest.getMoney();

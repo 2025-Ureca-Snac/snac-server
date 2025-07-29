@@ -4,6 +4,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
+import com.ureca.snac.board.exception.NotRealTimeSellCardException;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.trade.exception.TradePermissionDeniedException;
@@ -14,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.ureca.snac.board.entity.constants.CardCategory.REALTIME_SELL;
 import static com.ureca.snac.board.entity.constants.SellStatus.*;
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -96,11 +98,18 @@ public class Card extends BaseTimeEntity {
     public void ensureCreatableBy(Member m, SellStatus requiredStatus) {
         boolean isOwner = this.member.equals(m);
 
-        if (requiredStatus == SellStatus.SELLING && isOwner) {
+        if (requiredStatus == SELLING && isOwner) {
             throw new TradeSelfRequestException();
         }
-        if (requiredStatus == SellStatus.PENDING && !isOwner) {
+        if (requiredStatus == PENDING && !isOwner) {
             throw new TradePermissionDeniedException();
+        }
+    }
+
+    /** 실시간 판매 카드인지 검증 */
+    public void ensureRealTimeSellCategory() {
+        if (this.cardCategory != REALTIME_SELL) {
+            throw new NotRealTimeSellCardException();
         }
     }
 
