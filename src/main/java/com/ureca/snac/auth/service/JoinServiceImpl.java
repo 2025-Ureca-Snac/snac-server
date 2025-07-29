@@ -34,7 +34,6 @@ public class JoinServiceImpl implements JoinService {
     private final SnsService snsService;
     private final EmailService emailService;
     private final ApplicationEventPublisher eventPublisher;
-    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional

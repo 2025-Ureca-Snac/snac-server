@@ -148,8 +148,5 @@ public class MemberController implements MemberControllerSwagger {
         memberService.resetPasswordByEmail(email, req.getNewPwd());
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PASSWORD_CHANGED));
     }
-
-    //TODO
-    // 마이페이지 가져오기
 }
 
