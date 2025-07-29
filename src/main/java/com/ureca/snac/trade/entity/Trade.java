@@ -105,14 +105,6 @@ public class Trade extends BaseTimeEntity {
         this.status = status;
     }
 
-    public void changeSeller(Member member) {
-        this.seller = member;
-    }
-
-    public void changePoint(int point) {
-        this.point = point;
-    }
-
     // === 팩토리 메서드 ===
     public static Trade buildTrade(int point, Member member, String phone, Card card, SellStatus requiredStatus) {
         return Trade.builder().cardId(card.getId())
@@ -187,5 +179,64 @@ public class Trade extends BaseTimeEntity {
 
     public void changeCancelReason(CancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    // 리팩토링
+    // 현재 status가 expected가 아니면 예외
+    public void ensureStatus(TradeStatus expected) {
+        if (this.status != expected) {
+            throw new TradeStatusMismatchException();
+        }
+    }
+
+    // BUY_REQUESTED → ACCEPTED 전환
+    public void accept(Member member) {
+        ensureStatus(BUY_REQUESTED);
+        ensureSeller(member);
+        this.status = ACCEPTED;
+    }
+
+    // 현재 seller가 아니라면 예외
+    public void ensureSeller(Member member) {
+        if (this.seller == null || !this.seller.equals(member)) {
+            throw new TradePermissionDeniedException();
+        }
+    }
+
+    //요청자가 실제 거래의 구매자인지 검증, 아니라면 TradePermissionDeniedException을 던진다.
+    public void ensureBuyer(Member member) {
+        if (this.buyer == null || !this.buyer.equals(member)) {
+            throw new TradePermissionDeniedException();
+        }
+    }
+
+    // ACCEPTED -> PAYMENT_CONFIRMED 전환
+    public void markPaymentConfirmed(int point) {
+        ensureStatus(ACCEPTED);
+        this.point = point;
+        this.status = PAYMENT_CONFIRMED;
+    }
+
+    /**
+     * seller 로직 검증 및 할당만 담당
+     * - 본인이 요청자(구매자)와 같으면 예외
+     */
+    public void assignSeller(Member seller) {
+        if (seller.equals(this.buyer)) {
+            throw new TradeSelfRequestException();
+        }
+        this.seller = seller;
+    }
+
+    /**
+     * 결제 금액(머니 + 포인트)이 주문 금액(priceGb)과 일치하는지 검증.
+     * 일치하지 않으면 TradePaymentMismatchException을 던진다.
+     */
+    public void ensurePaymentMatches(long money, long point) {
+        long expected = this.priceGb.longValue();
+        long actual   = money + point;
+        if (expected != actual) {
+            throw new TradePaymentMismatchException();
+        }
     }
 }
