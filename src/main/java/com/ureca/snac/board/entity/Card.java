@@ -137,4 +137,10 @@ public class Card extends BaseTimeEntity {
             throw new TradePaymentMismatchException();
         }
     }
+
+    public void ensureDeletable() {
+        if (this.sellStatus == SellStatus.TRADING || this.sellStatus == SellStatus.SOLD_OUT) {
+            throw new CardInvalidStatusException();
+        }
+    }
 }
