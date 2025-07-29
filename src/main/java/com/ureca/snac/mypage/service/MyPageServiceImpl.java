@@ -21,9 +21,4 @@ public class MyPageServiceImpl implements MyPageService {
                 .orElseThrow(MemberNotFoundException::new);
         return MyPageResponse.from(member);
     }
-
-
-
-
-
 }
