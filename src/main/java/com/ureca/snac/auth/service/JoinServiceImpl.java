@@ -68,8 +68,6 @@ public class JoinServiceImpl implements JoinService {
         }
         log.info("Nickname < {} > 은 중복이 아님.", nickname);
 
-
-
         Member member = Member.builder()
                 .email(email)
                 .password(passwordEncoder.encode(joinRequest.getPassword()))
