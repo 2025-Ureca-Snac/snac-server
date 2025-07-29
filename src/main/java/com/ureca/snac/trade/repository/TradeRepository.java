@@ -72,4 +72,7 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Trade> findAllBySellerAndTradeType(Member member, TradeType tradeType);
 
+    @Lock(PESSIMISTIC_WRITE)
+    Optional<Trade> findByBuyerAndStatus(Member member, TradeStatus status);
+
 }
