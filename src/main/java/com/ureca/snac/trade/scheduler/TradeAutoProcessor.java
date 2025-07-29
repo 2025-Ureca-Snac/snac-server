@@ -4,6 +4,8 @@ import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.exception.CardNotFoundException;
+import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Activated;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
@@ -13,7 +15,6 @@ import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.repository.TradeCancelRepository;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
-import com.ureca.snac.trade.support.TradeSupport;
 import com.ureca.snac.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ import java.util.List;
 public class TradeAutoProcessor {
 
     private final TradeRepository tradeRepo;
-    private final TradeSupport tradeSupport;
+    private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
     private final PenaltyService penaltyService;
 
@@ -55,7 +56,7 @@ public class TradeAutoProcessor {
                 .findByStatusAndUpdatedAtBefore(TradeStatus.PAYMENT_CONFIRMED, limit);
 
         trades.forEach(trade -> {
-            Card card = tradeSupport.findLockedCard(trade.getCardId());
+            Card card = findLockedCard(trade.getCardId());
             Member buyer = trade.getBuyer();
 
             long moneyToRefund = trade.getPriceGb() - trade.getPoint();
@@ -117,7 +118,7 @@ public class TradeAutoProcessor {
                 .findByStatusAndUpdatedAtBeforeAndAutoConfirmPausedFalse(TradeStatus.DATA_SENT, limit);
 
         trades.forEach(trade -> {
-            Card card = tradeSupport.findLockedCard(trade.getCardId());
+            Card card = findLockedCard(trade.getCardId());
             Member seller = trade.getSeller();
 
             // 1. 판매 대금 정상
@@ -151,5 +152,9 @@ public class TradeAutoProcessor {
         List<Member> members = memberRepository.findByActivatedAndSuspendUntilBefore(
                 Activated.TEMP_SUSPEND, LocalDateTime.now());
         members.forEach(Member::activate);
+    }
+
+    private Card findLockedCard(Long cardId) {
+        return cardRepository.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
     }
 }
