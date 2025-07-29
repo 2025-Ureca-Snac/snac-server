@@ -71,7 +71,6 @@ public class WebSocketTradeEventListener {
 
     // 소켓 해제시 호출
     @EventListener
-    @Transactional
     public void handleSessionDisconnect(SessionDisconnectEvent event) {
         String username = extractUsername(event);
         if (username == null) return;
@@ -132,10 +131,6 @@ public class WebSocketTradeEventListener {
         List<TradeDto> buyerTrades = tradeQueryService.findBuyerRealTimeTrade(username);
         for (TradeDto trade : buyerTrades) {
             if (isCancellable(trade.getStatus())) {
-//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-//                }
-
                 TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
                         trade.getTradeId(),
                         username,
@@ -154,10 +149,6 @@ public class WebSocketTradeEventListener {
         List<TradeDto> sellerTrades = tradeQueryService.findSellerRealTimeTrade(username);
         for (TradeDto trade : sellerTrades) {
             if (isCancellable(trade.getStatus())) {
-//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-//                }
-
                 TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
                         trade.getTradeId(),
                         username,
