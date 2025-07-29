@@ -210,11 +210,28 @@ public class Trade extends BaseTimeEntity {
         }
     }
 
+    /**
+     * 판매자만, 그리고 구매자는 아닌 사용자만 데이터 전송할 수 있는지 검증.
+     * 조건에 맞지 않으면 TradeSendPermissionDeniedException을 던진다.
+     */
+    public void ensureSendPermission(Member seller) {
+        // 1) 구매자는 당연히 보낼 수 없어야 하고
+        // 2) 그리고 반드시 이 거래의 실제 seller 여야 함
+        if (seller.equals(this.buyer) || !this.seller.equals(seller)) {
+            throw new TradeSendPermissionDeniedException();
+        }
+    }
+
     // ACCEPTED -> PAYMENT_CONFIRMED 전환
     public void markPaymentConfirmed(int point) {
         ensureStatus(ACCEPTED);
         this.point = point;
         this.status = PAYMENT_CONFIRMED;
+    }
+
+    public void markDataSent() {
+        ensureStatus(PAYMENT_CONFIRMED);
+        this.status = DATA_SENT;
     }
 
     /**
