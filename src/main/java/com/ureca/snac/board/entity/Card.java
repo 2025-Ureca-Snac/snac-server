@@ -3,6 +3,7 @@ package com.ureca.snac.board.entity;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
 import jakarta.persistence.*;
@@ -80,5 +81,17 @@ public class Card extends BaseTimeEntity {
 
     public void changeSellStatus(SellStatus sellStatus) {
         this.sellStatus = sellStatus;
+    }
+
+    // 리팩토링 코드
+    public void ensureSellStatus(SellStatus expected) {
+        if (this.sellStatus != expected) {
+            throw new CardInvalidStatusException();
+        }
+    }
+
+    public void markTrading() {
+        ensureSellStatus(SellStatus.SELLING);
+        this.sellStatus = SellStatus.TRADING;
     }
 }

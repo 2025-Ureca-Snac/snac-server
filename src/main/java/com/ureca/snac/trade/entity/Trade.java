@@ -188,4 +188,26 @@ public class Trade extends BaseTimeEntity {
     public void changeCancelReason(CancelReason cancelReason) {
         this.cancelReason = cancelReason;
     }
+
+    // 리팩 토링
+    // 현재 status가 expected가 아니면 예외
+    public void ensureStatus(TradeStatus expected) {
+        if (this.status != expected) {
+            throw new TradeStatusMismatchException();
+        }
+    }
+
+    // BUY_REQUESTED → ACCEPTED 전환
+    public void accept(Member member) {
+        ensureStatus(TradeStatus.BUY_REQUESTED);
+        ensureSeller(member);
+        this.status = TradeStatus.ACCEPTED;
+    }
+
+    // 현재 seller가 아니라면 예외
+    public void ensureSeller(Member member) {
+        if (this.seller == null || !this.seller.equals(member)) {
+            throw new TradePermissionDeniedException();
+        }
+    }
 }

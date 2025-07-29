@@ -54,22 +54,10 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Card card = findLockedCard(trade.getCardId());
 
         // 카드는 판매 상태이여야 함
-        if (card.getSellStatus() != SELLING) {
-            throw new CardInvalidStatusException();
-        }
+        card.markTrading();
 
-        // 거래요청 상태이여야 함
-        if (trade.getStatus() != BUY_REQUESTED) {
-            throw new TradeStatusMismatchException();
-        }
-
-        // 판매자만 수락할 수 있어야 함
-        if (trade.getSeller() != member) {
-            throw new TradePermissionDeniedException();
-        }
-
-        trade.changeStatus(ACCEPTED);
-        card.changeSellStatus(TRADING);
+        // 거래요청 상태이여야 함, 구매 요청 상태이어야 함
+        trade.accept(member);
 
         return trade.getId();
     }
