@@ -68,47 +68,30 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Card card = findLockedCard(trade.getCardId());
         Wallet wallet = findLockedWallet(member.getId());
 
-        // 카드는 거래 상태이어야 함
-        if (card.getSellStatus() != TRADING) {
-            throw new CardInvalidStatusException();
-        }
-
-        // 거래는 수락 상태이여야 함
-        if (trade.getStatus() != ACCEPTED) {
-            throw new TradeStatusMismatchException();
-        }
-
-        // 구매자만 결제할 수 있어야 함
-        if (trade.getBuyer() != member) {
-            throw new TradePermissionDeniedException();
-        }
-
         long moneyToUse = createRealTimeTradePaymentRequest.getMoney();
         long pointToUse = createRealTimeTradePaymentRequest.getPoint();
-        long totalPay = moneyToUse + pointToUse;
 
-        if (trade.getPriceGb() != totalPay)
-            throw new TradePaymentMismatchException();
+        card.ensureSellStatus(TRADING); // 카드는 거래 상태이어야 함
+        trade.ensureStatus(ACCEPTED); // 거래는 수락 상태이여야 함
+        trade.ensureBuyer(member); // 구매자만 결제할 수 있어야 함
+        trade.ensurePaymentMatches(moneyToUse, pointToUse);
 
         // 1.결제 먼저
         long moneyBalanceAfter = -1L;
 
         // 금액 및 포인트 차감
         if (moneyToUse > 0) {
-            moneyBalanceAfter =
-                    walletService.withdrawMoney(member.getId(), moneyToUse);
+            moneyBalanceAfter = walletService.withdrawMoney(member.getId(), moneyToUse);
             // wallet.withdrawMoney(createTradeRequest.getMoney());
         }
 
         long pointBalanceAfter = -1L;
         if (pointToUse > 0) {
-            pointBalanceAfter =
-                    walletService.withdrawPoint(member.getId(), pointToUse);
+            pointBalanceAfter = walletService.withdrawPoint(member.getId(), pointToUse);
 //            wallet.withdrawPoint(createTradeRequest.getPoint());
         }
 
-        trade.changePoint(createRealTimeTradePaymentRequest.getPoint());
-        trade.changeStatus(PAYMENT_CONFIRMED);
+        trade.markPaymentConfirmed(createRealTimeTradePaymentRequest.getPoint()); // Accepted -> Confirmed
 
         // 3 기록
         if (moneyToUse > 0) {
@@ -195,16 +178,12 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         Member member = findMember(username);
         Card card = findLockedCard(createTradeRequest.getCardId());
 
-        card.ensureSellStatus(requiredStatus); // 카드 상태가 판매 중이 아니거나 펜딩 상태가 아니라면 예외
-        card.ensureCreatableBy(member, requiredStatus); // 거래 생성 소유자 조건 확인: 판매글 -> 타인, 구매글 -> 본인
-
-        // 결제 금액 검증 (금액 + 포인트 == 카드 가격)
         long moneyToUse = createTradeRequest.getMoney();
         long pointToUse = createTradeRequest.getPoint();
 
-        if (card.getPrice() != moneyToUse + pointToUse) { // totalPayAmount
-            throw new TradePaymentMismatchException();
-        }
+        card.ensureSellStatus(requiredStatus); // 카드 상태가 판매 중이 아니거나 펜딩 상태가 아니라면 예외
+        card.ensureCreatableBy(member, requiredStatus); // 거래 생성 소유자 조건 확인: 판매글 -> 타인, 구매글 -> 본인
+        card.ensurePaymentMatches(moneyToUse, pointToUse); // 결제 금액 검증 (금액 + 포인트 == 카드 가격)
 
         // 1.결제 먼저
         long moneyBalanceAfter = -1L;

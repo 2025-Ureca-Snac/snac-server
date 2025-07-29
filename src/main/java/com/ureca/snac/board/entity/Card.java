@@ -7,6 +7,7 @@ import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.board.exception.NotRealTimeSellCardException;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.exception.TradePaymentMismatchException;
 import com.ureca.snac.trade.exception.TradePermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeSelfRequestException;
 import jakarta.persistence.*;
@@ -128,5 +129,12 @@ public class Card extends BaseTimeEntity {
     public void markSelling() {
         ensureSellStatus(PENDING);
         this.sellStatus = SELLING;
+    }
+
+    public void ensurePaymentMatches(long money, long point) {
+        long total = money + point;
+        if (this.price.longValue() != total) {
+            throw new TradePaymentMismatchException();
+        }
     }
 }
