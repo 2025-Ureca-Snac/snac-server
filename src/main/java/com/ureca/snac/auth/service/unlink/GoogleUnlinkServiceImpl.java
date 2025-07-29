@@ -5,6 +5,7 @@ import com.ureca.snac.auth.exception.SocialUnlinkException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,7 @@ public class GoogleUnlinkServiceImpl implements GoogleUnlinkService {
             throw new SocialUnlinkApiException(BaseCode.GOOGLE_UNLINK_FAILED, "구글 API 호출 실패: " + e.getMessage());
         }
 
-        member.updateSocialId("google", null);
+        member.updateSocialId(SocialProvider.GOOGLE, null);
         stringRedisTemplate.delete(redisKey);
         log.info("구글 연동 해제 완료: {}", email);
     }

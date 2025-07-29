@@ -8,14 +8,15 @@ import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.ureca.snac.auth.oauth2.SocialProvider;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SocialLoginServiceImpl implements SocialLoginService {
 
     private final JWTUtil jwtUtil;
@@ -24,15 +25,18 @@ public class SocialLoginServiceImpl implements SocialLoginService {
 
     @Override
     public TokenDto socialLogin(String socialToken) {
+        log.info("소셜 로그인 요청 시작");
         if (socialToken == null) {
             // 소셜 토큰이 없는 경우
+            log.warn("소셜 토큰 누락으로 로그인 실패");
             throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
         }
 
         try {
             jwtUtil.isExpired(socialToken);
-        } catch (ExpiredJwtException e) {
+        } catch (JwtException e) {
             // 토큰이 만료된 경우
+            log.warn("소셜 토큰 만료: {}", e.getMessage());
             throw new SocialLoginException(BaseCode.TOKEN_EXPIRED);
         }
 
@@ -40,39 +44,36 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         String category = jwtUtil.getCategory(socialToken);
         if (!"social".equals(category)) {
             // 유효하지 않은 토큰인 경우
+            log.warn("잘못된 토큰 카테고리: {}", category);
             throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
         }
 
-        String provider = jwtUtil.getProvider(socialToken);
+        SocialProvider provider = SocialProvider.fromValue(jwtUtil.getProvider(socialToken));
         String providerId = jwtUtil.getProviderId(socialToken);
+        log.info("프로바이더={}, providerId={} 로 멤버 조회 시도", provider, providerId);
 
-        Member validateMember = validateMember(provider, providerId);
-
-        if(!validateMember.getEmail().equals(jwtUtil.getUsername(socialToken))){
-            throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
-        }
+        Member member = authRepository
+                .findBySocialProviderId(provider, providerId)
+                .orElseThrow(() ->{
+                    log.warn("DB에 일치하는 소셜 계정 없음: provider={}, providerId={}", provider, providerId);
+                    return new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
+                });
 
         String username = jwtUtil.getUsername(socialToken);
+        if(!member.getEmail().equals(username)){
+            log.warn("토큰 사용자 불일치: 토큰 username={}, member.email={}", username, member.getEmail());
+            throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
+        }
+
         String role = jwtUtil.getRole(socialToken);
+        log.info("소셜 로그인 검증 완료: email={}, role={}", username, role);
 
         String newAccess = jwtUtil.createJwt("access", username, role, 43200000L);
         String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
 
         refreshRepository.save(new Refresh(username, newRefresh));
 
+        log.info("토큰 재발급 완료: email={}", username);
         return new TokenDto(newAccess, newRefresh);
-    }
-
-    private Member validateMember(String provider, String providerId) {
-        Member member;
-        if (Objects.equals(provider, "google")) {
-            member = authRepository.findByGoogleId(providerId);
-        } else if (Objects.equals(provider, "naver")) {
-            member = authRepository.findByNaverId(providerId);
-        } else if (Objects.equals(provider, "kakao")) {
-            member = authRepository.findByKakaoId(providerId);
-        } else throw new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
-
-        return member;
     }
 }

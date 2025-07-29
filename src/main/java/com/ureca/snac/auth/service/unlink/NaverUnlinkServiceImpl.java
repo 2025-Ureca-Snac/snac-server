@@ -6,6 +6,7 @@ import com.ureca.snac.auth.exception.SocialUnlinkException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +73,7 @@ public class NaverUnlinkServiceImpl implements NaverUnlinkService {
                     .retrieve()
                     .body(NaverUnlinkResponse.class);
 
-            member.updateSocialId("naver", null);
+            member.updateSocialId(SocialProvider.NAVER, null);
             stringRedisTemplate.delete(redisKey);
             log.info("네이버 연동 해제 완료: {}", email);
 

@@ -81,6 +81,7 @@ public class JoinServiceImpl implements JoinService {
                 .build();
 
         authRepository.save(member);
+        log.info("회원가입 완료됨! : 이메일 : {}, 이름 : {}", member.getEmail(),member.getName());
 
         // 여기서 이벤트 발행 서비스 동작
         publishMemberJoinEvent(member);
