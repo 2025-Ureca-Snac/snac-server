@@ -72,6 +72,14 @@ public class MemberController implements MemberControllerSwagger {
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PHONE_CHANGED));
     }
 
+    //TODO 닉네임 변경 가능 여부(완료, 검증완료)
+    @Override
+    public ResponseEntity<ApiResponse<Void>> checkNicknameDuplicate(NicknameCheckRequest request) {
+        memberService.validateNicknameAvailable(request.getNickname());
+        return ResponseEntity.ok(ApiResponse.ok(BaseCode.NICKNAME_AVAILABLE));
+    }
+
+
     //TODO 닉네임 변경(완료, 검증완료)
 
     @Override

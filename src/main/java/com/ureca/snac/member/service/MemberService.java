@@ -12,6 +12,8 @@ public interface MemberService {
 
     void changePhone(String email, String changePhone);
 
+    void validateNicknameAvailable(String nickname);
+
     String changeNickname(String email, NicknameChangeRequest changeNickname);
 
     void resetPasswordByPhone(String phone, String newPwd);

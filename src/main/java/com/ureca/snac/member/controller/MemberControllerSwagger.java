@@ -4,11 +4,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.swagger.annotation.UserInfo;
-import com.ureca.snac.swagger.annotation.error.ErrorCode400;
-import com.ureca.snac.swagger.annotation.error.ErrorCode401;
-import com.ureca.snac.swagger.annotation.error.ErrorCode403;
-import com.ureca.snac.swagger.annotation.error.ErrorCode404;
-import com.ureca.snac.swagger.annotation.error.ErrorCode500;
+import com.ureca.snac.swagger.annotation.error.*;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -60,6 +56,15 @@ public interface MemberControllerSwagger {
             @UserInfo CustomUserDetails userDetails,
             @Valid @RequestBody PhoneRequest phoneRequest
     );
+
+    @Operation(summary = "닉네임 중복 확인", description = "입력한 닉네임이 사용 가능한지 확인합니다.")
+    @ApiSuccessResponse(description = "사용 가능한 닉네임입니다.")
+    @ErrorCode400(description = "요청 파라미터가 유효하지 않습니다.")
+    @ErrorCode409(description = "이미 사용 중인 닉네임입니다.")
+    @ErrorCode500
+    @PostMapping("/check-nickname")
+    ResponseEntity<ApiResponse<Void>> checkNicknameDuplicate(@Valid @RequestBody NicknameCheckRequest request);
+
 
     @Operation(summary = "닉네임 변경", description = "닉네임을 변경합니다. 마지막 변경일로부터 1일이 지나야 변경 가능합니다.")
     @SecurityRequirement(name = "Authorization")

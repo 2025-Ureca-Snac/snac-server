@@ -1,5 +1,7 @@
 package com.ureca.snac.member.service;
 
+import com.ureca.snac.auth.exception.NicknameDuplicateException;
+import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.MemberRepository;
@@ -24,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
 
@@ -58,6 +61,12 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
         member.changePhoneTo(changePhone);
+    }
+
+    public void validateNicknameAvailable(String nickname) {
+        if (authRepository.existsByNickname(nickname)) {
+            throw new NicknameDuplicateException();
+        }
     }
 
     @Override

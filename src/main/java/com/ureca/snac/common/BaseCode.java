@@ -17,6 +17,7 @@ public enum BaseCode {
 
     // 회원가입 - 예외
     EMAIL_DUPLICATE("EMAIL_DUPLICATE_409", HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
+    NICKNAME_DUPLICATE("NICKNAME_DUPLICATE_409", HttpStatus.CONFLICT, "이미 사용중인 닉네임입니다."),
 
     // 로그인 시도 - 성공
     LOGIN_SUCCESS("LOGIN_SUCCESS_200", HttpStatus.OK, "로그인에 성공했습니다."),
@@ -98,6 +99,9 @@ public enum BaseCode {
 
     // 휴대폰번호 검증 - 실패
     PHONE_NOT_VERIFIED("PHONE_NOT_VERIFIED_422", HttpStatus.UNPROCESSABLE_ENTITY, "휴대폰 인증이 완료되지 않았습니다."),
+
+    // 닉네임 사용 가능
+    NICKNAME_AVAILABLE("NICKNAME_AVAILABLE_200", HttpStatus.OK, "사용 가능한 닉네임입니다."),
 
     // 닉네임 변경 - 성공
     NICKNAME_CHANGED("NICKNAME_CHANGED_200", HttpStatus.OK, "닉네임 변경이 성공하였습니다."),

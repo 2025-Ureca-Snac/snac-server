@@ -3,6 +3,7 @@ package com.ureca.snac.auth.service;
 import com.ureca.snac.auth.dto.request.JoinRequest;
 import com.ureca.snac.auth.exception.EmailDuplicateException;
 import com.ureca.snac.auth.exception.EmailNotVerifiedException;
+import com.ureca.snac.auth.exception.NicknameDuplicateException;
 import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.service.verify.EmailService;
@@ -59,6 +60,15 @@ public class JoinServiceImpl implements JoinService {
             throw new EmailDuplicateException();
         }
         log.info("Email < {} > 은 중복이 아님.", email);
+
+        String nickname = joinRequest.getNickname();
+        // 닉네임 중복 체크
+        if (authRepository.existsByNickname(nickname)) {
+            throw new NicknameDuplicateException();
+        }
+        log.info("Nickname < {} > 은 중복이 아님.", nickname);
+
+
 
         Member member = Member.builder()
                 .email(email)
