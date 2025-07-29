@@ -120,6 +120,14 @@ public class WebSocketTradeEventListener {
 
     /** RealTime 거래 중 Buyer/Seller 관점에서 active trades 강제 종료 */
     private void forceCancelRealTimeTrades(String username) {
+
+        TradeDto dataSentTradeDto = tradeQueryService.onBuyerDataSentRealTime(username);
+
+        if (dataSentTradeDto != null) {
+            TradeDto confrimTradeDto = tradeProgressService.confirmTrade(dataSentTradeDto.getTradeId(), username, false);
+            notificationService.notify(confrimTradeDto.getSeller(), confrimTradeDto);
+        }
+
         // 구매자 관점 거래
         List<TradeDto> buyerTrades = tradeQueryService.findBuyerRealTimeTrade(username);
         for (TradeDto trade : buyerTrades) {
