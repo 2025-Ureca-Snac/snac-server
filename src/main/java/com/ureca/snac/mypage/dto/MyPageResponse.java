@@ -14,6 +14,7 @@ public class MyPageResponse {
     private String phone;
     private LocalDate birthDate;
     private int score;
+    private String nickname;
     private LocalDateTime nicknameUpdatedAt;
     private boolean isNaverConnected;
     private boolean isGoogleConnected;
@@ -26,6 +27,7 @@ public class MyPageResponse {
                 .phone(member.getPhone())
                 .birthDate(member.getBirthDate())
                 .score(member.getRatingScore())
+                .nickname(member.getNickname())
                 .nicknameUpdatedAt(member.getNicknameUpdatedAt())
                 .isNaverConnected(member.getNaverId() != null && !member.getNaverId().isEmpty())
                 .isGoogleConnected(member.getGoogleId() != null && !member.getGoogleId().isEmpty())
