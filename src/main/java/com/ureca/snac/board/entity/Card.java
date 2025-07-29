@@ -6,12 +6,15 @@ import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.trade.exception.TradePermissionDeniedException;
+import com.ureca.snac.trade.exception.TradeSelfRequestException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.ureca.snac.board.entity.constants.SellStatus.*;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
@@ -64,7 +67,7 @@ public class Card extends BaseTimeEntity {
                                   Long price, CardCategory category) {
         return Card.builder()
                 .member(owner)
-                .sellStatus(SellStatus.SOLD_OUT)
+                .sellStatus(SOLD_OUT)
                 .cardCategory(category)
                 .carrier(carrier)
                 .dataAmount(dataAmount)
@@ -84,14 +87,37 @@ public class Card extends BaseTimeEntity {
     }
 
     // 리팩토링 코드
+    /**
+     * requiredStatus가 SELLING(판매글)일 땐
+     *   본인 소유 불가(TradeSelfRequestException)
+     * requiredStatus가 PENDING(구매글)일 땐
+     *   반드시 본인 소유여야 함(TradePermissionDeniedException)
+     */
+    public void ensureCreatableBy(Member m, SellStatus requiredStatus) {
+        boolean isOwner = this.member.equals(m);
+
+        if (requiredStatus == SellStatus.SELLING && isOwner) {
+            throw new TradeSelfRequestException();
+        }
+        if (requiredStatus == SellStatus.PENDING && !isOwner) {
+            throw new TradePermissionDeniedException();
+        }
+    }
+
     public void ensureSellStatus(SellStatus expected) {
         if (this.sellStatus != expected) {
             throw new CardInvalidStatusException();
         }
     }
 
+    // SellStatus 변경
     public void markTrading() {
-        ensureSellStatus(SellStatus.SELLING);
-        this.sellStatus = SellStatus.TRADING;
+        ensureSellStatus(SELLING);
+        this.sellStatus = TRADING;
+    }
+
+    public void markSelling() {
+        ensureSellStatus(PENDING);
+        this.sellStatus = SELLING;
     }
 }
