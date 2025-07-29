@@ -6,6 +6,7 @@ import com.ureca.snac.auth.exception.SocialUnlinkApiException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
+import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +63,7 @@ public class KakaoUnlinkServiceImpl implements KakaoUnlinkService {
                 throw new SocialUnlinkApiException(BaseCode.KAKAO_API_CALL_ERROR);
             }
 
-            member.updateSocialId("kakao", null);
+            member.updateSocialId(SocialProvider.KAKAO, null);
 
             log.info("카카오 연동 해제 완료.");
             return response.id();

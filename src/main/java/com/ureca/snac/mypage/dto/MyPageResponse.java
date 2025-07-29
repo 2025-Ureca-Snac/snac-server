@@ -7,6 +7,8 @@ import lombok.Getter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.ureca.snac.auth.oauth2.SocialProvider.*;
+
 @Getter
 @Builder(toBuilder = true)
 public class MyPageResponse {
@@ -29,9 +31,9 @@ public class MyPageResponse {
                 .score(member.getRatingScore())
                 .nickname(member.getNickname())
                 .nicknameUpdatedAt(member.getNicknameUpdatedAt())
-                .isNaverConnected(member.isNaverConnected())
-                .isGoogleConnected(member.isGoogleConnected())
-                .isKakaoConnected(member.isKakaoConnected())
+                .isNaverConnected(member.isConnected(NAVER))
+                .isGoogleConnected(member.isConnected(GOOGLE))
+                .isKakaoConnected(member.isConnected(KAKAO))
                 .build();
     }
 }

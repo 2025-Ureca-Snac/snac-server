@@ -31,6 +31,7 @@ public enum BaseCode {
 
     // 소셜 로그인 시도 - 실패
     OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
+    UNSUPPORTED_SOCIAL_PROVIDER("UNSUPPORTED_SOCIAL_PROVIDER_400", HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 프로바이더입니다."),
 
     // 카카오 연동 해제 관련
     KAKAO_UNLINK_SUCCESS("KAKAO_UNLINK_SUCCESS_200", HttpStatus.OK, "카카오 연결 끊기에 성공했습니다."),

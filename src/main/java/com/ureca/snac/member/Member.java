@@ -1,5 +1,6 @@
 package com.ureca.snac.member;
 
+import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -84,18 +85,21 @@ public class Member extends BaseTimeEntity {
     }
 
     // 소셜 아이디 업데이트 용
-    public void updateSocialId(String provider, String providerId) {
+    public void updateSocialId(SocialProvider provider, String providerId) {
         switch (provider) {
-            case "naver":
-                this.naverId = providerId;
-                break;
-            case "google":
-                this.googleId = providerId;
-                break;
-            case "kakao":
-                this.kakaoId = providerId;
-                break;
+            case NAVER -> this.naverId = providerId;
+            case GOOGLE -> this.googleId = providerId;
+            case KAKAO -> this.kakaoId = providerId;
         }
+    }
+
+    // 연결됐는지 확인
+    public boolean isConnected(SocialProvider provider) {
+        return switch (provider) {
+            case NAVER -> naverId != null && !naverId.isEmpty();
+            case GOOGLE -> googleId != null && !googleId.isEmpty();
+            case KAKAO -> kakaoId != null && !kakaoId.isEmpty();
+        };
     }
 
     public void changePasswordTo(String encodedPassword) {
@@ -127,17 +131,5 @@ public class Member extends BaseTimeEntity {
     public void activate() {
         this.activated = Activated.NORMAL;
         this.suspendUntil = null;
-    }
-
-    public boolean isNaverConnected() {
-        return naverId != null && !naverId.isEmpty();
-    }
-
-    public boolean isGoogleConnected() {
-        return googleId != null && !googleId.isEmpty();
-    }
-
-    public boolean isKakaoConnected() {
-        return kakaoId != null && !kakaoId.isEmpty();
     }
 }
