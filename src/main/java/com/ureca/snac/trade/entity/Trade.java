@@ -189,7 +189,7 @@ public class Trade extends BaseTimeEntity {
         this.cancelReason = cancelReason;
     }
 
-    // 리팩 토링
+    // 리팩토링
     // 현재 status가 expected가 아니면 예외
     public void ensureStatus(TradeStatus expected) {
         if (this.status != expected) {
@@ -209,5 +209,16 @@ public class Trade extends BaseTimeEntity {
         if (this.seller == null || !this.seller.equals(member)) {
             throw new TradePermissionDeniedException();
         }
+    }
+
+    /**
+     * seller 로직 검증 및 할당만 담당
+     * - 본인이 요청자(구매자)와 같으면 예외
+     */
+    public void assignSeller(Member seller) {
+        if (seller.equals(this.buyer)) {
+            throw new TradeSelfRequestException();
+        }
+        this.seller = seller;
     }
 }

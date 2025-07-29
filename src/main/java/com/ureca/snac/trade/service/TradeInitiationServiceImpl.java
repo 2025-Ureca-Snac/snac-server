@@ -196,29 +196,20 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     @Transactional
     public Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
         Member seller = findMember(username);
-        Trade trade = tradeRepository
-                .findLockedByCardId(claimBuyRequest.getCardId())
-                .orElseThrow(TradeNotFoundException::new);
+        Trade trade = tradeRepository.findLockedByCardId(claimBuyRequest.getCardId()).orElseThrow(TradeNotFoundException::new);
         Card card = findLockedCard(claimBuyRequest.getCardId());
 
-        // 판매 가능 상태가 아니라면 이미 거래 중으로 간주
-        if (card.getSellStatus() != SELLING) {
-            throw new CardAlreadyTradingException();
-        }
+        // 판매 가능 상태가 아니라면 수락할 수 없음
+        card.ensureSellStatus(SELLING);
 
-        // 본인이 판매를 수락하는 것은 허용하지 않음
-        if (trade.getBuyer() == seller) {
-            throw new TradeSelfRequestException();
-        }
+        // 본인이 판매를 수락하는 것은 허용하지 않음, 거래에 판매자 등록 및 카드 상태 변경
+        trade.assignSeller(seller);
 
-        // 거래에 판매자 등록 및 카드 상태 변경
-        trade.changeSeller(seller);
-        card.changeSellStatus(TRADING);
+        // 카드 상태를 TRADING으로 전환
+        card.markTrading();
 
         return trade.getId();
     }
-
-    // === private helper === //
 
     /**
      * 거래 객체를 생성하고, 결제 금액을 차감한 후 저장합니다.
