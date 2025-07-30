@@ -229,9 +229,21 @@ public class Trade extends BaseTimeEntity {
         this.status = PAYMENT_CONFIRMED;
     }
 
-    public void markDataSent() {
+    public void markPaymentConfirmedAccepted() {
         ensureStatus(PAYMENT_CONFIRMED);
+        this.status = PAYMENT_CONFIRMED_ACCEPTED;
+    }
+
+    public void markDataSent() {
+//        ensureStatus(PAYMENT_CONFIRMED);
+        ensureSendable();
         this.status = DATA_SENT;
+    }
+
+    private void ensureSendable() {
+        if (this.status != TradeStatus.PAYMENT_CONFIRMED && this.status != TradeStatus.PAYMENT_CONFIRMED_ACCEPTED) {
+            throw new TradeStatusMismatchException();
+        }
     }
 
     /**
