@@ -163,6 +163,7 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         card.ensureSellStatus(SELLING); // 판매 가능 상태가 아니라면 수락할 수 없음
         trade.assignSeller(seller);  // 본인이 판매를 수락하는 것은 허용하지 않음, 거래에 판매자 등록 및 카드 상태 변경
         card.markTrading(); // 카드 상태를 TRADING으로 전환
+        trade.markPaymentConfirmedAccepted();
 
         return trade.getId();
     }
