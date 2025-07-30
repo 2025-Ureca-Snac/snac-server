@@ -6,10 +6,7 @@ import com.ureca.snac.member.MemberRepository;
 import com.ureca.snac.member.Role;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
-import com.ureca.snac.trade.entity.Dispute;
-import com.ureca.snac.trade.entity.DisputeAttachment;
-import com.ureca.snac.trade.entity.DisputeType;
-import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
 import com.ureca.snac.trade.exception.DisputePermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
@@ -48,12 +45,24 @@ public class DisputeServiceImpl implements DisputeService {
 
         trade.pauseAutoConfirm();
 
+        // 거래 최초 신고인지 확인
+        boolean applied = false;
+        TradeStatus prev = null;
+        if (trade.getStatus() != TradeStatus.REPORTED) {
+            prev = trade.getStatus(); // 백업
+            trade.changeStatus(TradeStatus.REPORTED);
+            applied = true; // 내가 상태 전환을 적용했다
+        }
+
+
         Dispute dispute = disputeRepository.save(
                 Dispute.builder()
                         .trade(trade)
                         .reporter(reporter)
                         .type(type)
                         .description(description)
+                        .prevTradeStatus(prev)
+                        .reportedApplied(applied)
                         .build()
         );
 

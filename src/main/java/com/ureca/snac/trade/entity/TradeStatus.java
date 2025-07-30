@@ -10,7 +10,9 @@ public enum TradeStatus {
     CANCELED, // 거래 취소
 
     AUTO_REFUND, // 자동 환불
-    AUTO_PAYOUT // 자동 정산
+    AUTO_PAYOUT, // 자동 정산
+
+    REPORTED // 신고 된 거래
 
 
 }
