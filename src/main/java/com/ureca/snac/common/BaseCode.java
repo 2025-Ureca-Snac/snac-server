@@ -279,6 +279,13 @@ public enum BaseCode {
     DISPUTE_REJECTED_SUCCESS("DISPUTE_REJECTED_SUCCESS_200", HttpStatus.OK,"신고 기각 처리되었습니다."),
     DISPUTE_COMMENT_READ_SUCCESS ("DISPUTE_COMMENT_READ_SUCCESS_200",HttpStatus.OK,"신고 답변 조회 성공"),
 
+    DISPUTE_REFUND_AND_CANCEL_SUCCESS ("DISPUTE_REFUND_AND_CANCEL_SUCCESS_200", HttpStatus.OK, "환불 및 거래 취소가 완료되었습니다."),
+    DISPUTE_PENALTY_GIVEN("DISPUTE_PENALTY_GIVEN_200",HttpStatus.OK, "판매자에게 패널티를 부여했습니다."),
+    DISPUTE_FINALIZE_RESTORED("DISPUTE_FINALIZE_RESTORED_200",HttpStatus.OK, "활성 신고가 없어 거래 상태를 복구했습니다."),
+    DISPUTE_FINALIZE_SKIPPED("DISPUTE_FINALIZE_SKIPPED_200",HttpStatus.OK, "활성 신고가 남아 있어 복구를 건너뜁니다."),
+    TRADE_ALREADY_CANCELED("TRADE_ALREADY_CANCELED_409",HttpStatus.CONFLICT, "이미 취소된 거래입니다."),
+    DISPUTE_STATE_NOT_ANSWERED("DISPUTE_STATE_NOT_ANSWERED_409",HttpStatus.CONFLICT, "답변 완료 상태가 아니므로 수행할 수 없습니다."),
+
     // 계좌 - 성공
     ACCOUNT_CREATE_SUCCESS("ACCOUNT_CREATE_SUCCESS_201", HttpStatus.CREATED, "계좌가 성공적으로 생성되었습니다."),
     ACCOUNT_READ_SUCCESS("ACCOUNT_READ_SUCCESS_200", HttpStatus.OK, "계좌 정보를 성공적으로 조회했습니다."),

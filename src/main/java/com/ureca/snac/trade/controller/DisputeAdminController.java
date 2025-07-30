@@ -82,4 +82,38 @@ public class DisputeAdminController {
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS,disputeService.getDispute(id, email)));
     }
 
+    /** 1) 환불 + 거래 취소 */
+    @PostMapping("/{id}/refund-and-cancel")
+    public ResponseEntity<ApiResponse<Void>> refundAndCancel(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails admin) {
+
+        disputeAdminService.refundAndCancel(id, admin.getUsername());
+        return ResponseEntity.ok(ApiResponse.ok(BaseCode.DISPUTE_REFUND_AND_CANCEL_SUCCESS));
+    }
+
+    /** 2) 판매자 패널티 */
+    @PostMapping("/{id}/penalty-seller")
+    public ResponseEntity<ApiResponse<Void>> penaltySeller(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails admin) {
+
+        disputeAdminService.givePenaltyToSeller(id, admin.getUsername());
+        return ResponseEntity.ok(ApiResponse.ok(BaseCode.DISPUTE_PENALTY_GIVEN));
+    }
+
+    /** 3) 복구 시도: 활성 신고 0개면 원상복구
+     * 답변만하고 처리 스킵할때 사용
+     * */
+    @PostMapping("/{id}/finalize")
+    public ResponseEntity<ApiResponse<Void>> finalizeIfNoActive(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails admin) {
+
+        boolean restored = disputeAdminService.finalizeIfNoActive(id, admin.getUsername());
+        BaseCode code = restored ? BaseCode.DISPUTE_FINALIZE_RESTORED
+                : BaseCode.DISPUTE_FINALIZE_SKIPPED;
+        return ResponseEntity.ok(ApiResponse.ok(code));
+    }
+
 }
