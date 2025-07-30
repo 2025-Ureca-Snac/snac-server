@@ -1,10 +1,7 @@
 package com.ureca.snac.board.controller;
 
 import com.ureca.snac.board.service.ArticleService;
-import com.ureca.snac.board.service.response.ArticleResponse;
-import com.ureca.snac.board.service.response.CreateArticleResponse;
-import com.ureca.snac.board.service.response.ListArticleResponse;
-import com.ureca.snac.board.service.response.UpdateArticleResponse;
+import com.ureca.snac.board.service.response.*;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,5 +67,11 @@ public class ArticleController implements ArticleControllerSwagger {
 
         return ResponseEntity
                 .ok(ApiResponse.of(ACCOUNT_LIST_SUCCESS, articleService.getArticles(lastArticleId, size)));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<CountArticleResponse>> countArticles(@AuthenticationPrincipal UserDetails userDetails) {
+        CountArticleResponse count = articleService.countArticle();
+        return ResponseEntity.ok(ApiResponse.of(ARTICLE_COUNT_SUCCESS, count));
     }
 }

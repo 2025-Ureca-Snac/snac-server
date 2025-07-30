@@ -4,6 +4,7 @@ import com.ureca.snac.board.entity.Article;
 import com.ureca.snac.board.exception.ArticleNotFoundException;
 import com.ureca.snac.board.repository.ArticleRepository;
 import com.ureca.snac.board.service.response.ArticleResponse;
+import com.ureca.snac.board.service.response.CountArticleResponse;
 import com.ureca.snac.board.service.response.ListArticleResponse;
 import com.ureca.snac.common.s3.S3Path;
 import com.ureca.snac.common.s3.S3Uploader;
@@ -110,5 +111,10 @@ public class ArticleServiceImpl implements ArticleService {
         s3Uploader.delete(article.getImageUrl());
 
         articleRepository.delete(article);
+    }
+
+    @Override
+    public CountArticleResponse countArticle() {
+        return new CountArticleResponse(articleRepository.count());
     }
 }

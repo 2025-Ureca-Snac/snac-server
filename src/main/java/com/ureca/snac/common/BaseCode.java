@@ -116,6 +116,8 @@ public enum BaseCode {
     ARTICLE_LIST_SUCCESS("ARTICLE_LIST_SUCCESS_200", HttpStatus.OK, "게시글 목록을 성공적으로 조회했습니다."),
     ARTICLE_UPDATE_SUCCESS("ARTICLE_UPDATE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 수정되었습니다."),
     ARTICLE_DELETE_SUCCESS("ARTICLE_DELETE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 삭제되었습니다."),
+    ARTICLE_COUNT_SUCCESS("ARTICLE_COUNT_SUCCESS_200", HttpStatus.OK, "전체 게시글 수를 성공적으로 조회했습니다."),
+
 
     // 게시글 - 실패
     ARTICLE_NOT_FOUND("ARTICLE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),

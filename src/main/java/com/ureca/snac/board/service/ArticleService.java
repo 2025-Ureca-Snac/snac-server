@@ -1,6 +1,7 @@
 package com.ureca.snac.board.service;
 
 import com.ureca.snac.board.service.response.ArticleResponse;
+import com.ureca.snac.board.service.response.CountArticleResponse;
 import com.ureca.snac.board.service.response.ListArticleResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,4 +15,6 @@ public interface ArticleService {
     Long updateArticle(Long articleId, String title, MultipartFile file, MultipartFile image, String username);
 
     void deleteArticle(Long articleId, String username);
+
+    CountArticleResponse countArticle();
 }
