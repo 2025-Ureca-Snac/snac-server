@@ -8,7 +8,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;

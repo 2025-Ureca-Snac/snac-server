@@ -1,7 +1,7 @@
 package com.ureca.snac.board.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

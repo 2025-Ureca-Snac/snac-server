@@ -1,6 +1,6 @@
 package com.ureca.snac.mypage.dto;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
 

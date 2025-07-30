@@ -9,7 +9,7 @@ import com.ureca.snac.finance.exception.BankNotFoundException;
 import com.ureca.snac.finance.repository.AccountRepository;
 import com.ureca.snac.finance.repository.BankRepository;
 import com.ureca.snac.finance.service.response.AccountResponse;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;

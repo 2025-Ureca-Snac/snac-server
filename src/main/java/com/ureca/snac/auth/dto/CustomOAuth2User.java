@@ -1,6 +1,6 @@
 package com.ureca.snac.auth.dto;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

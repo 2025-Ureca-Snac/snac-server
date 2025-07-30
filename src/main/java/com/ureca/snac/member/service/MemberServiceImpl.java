@@ -1,7 +1,7 @@
 package com.ureca.snac.member.service;
 
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.dto.request.NicknameChangeRequest;
 import com.ureca.snac.member.dto.request.PasswordChangeRequest;
 import com.ureca.snac.member.dto.request.PhoneChangeRequest;

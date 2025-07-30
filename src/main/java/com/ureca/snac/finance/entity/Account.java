@@ -2,7 +2,7 @@ package com.ureca.snac.finance.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.finance.service.AccountNumberConverter;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

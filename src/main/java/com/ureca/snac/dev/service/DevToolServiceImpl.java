@@ -11,7 +11,7 @@ import com.ureca.snac.dev.dto.DevForceTradeCompleteRequest;
 import com.ureca.snac.dev.dto.DevPointGrantRequest;
 import com.ureca.snac.dev.dto.DevRechargeRequest;
 import com.ureca.snac.dev.support.DevDataSupport;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;

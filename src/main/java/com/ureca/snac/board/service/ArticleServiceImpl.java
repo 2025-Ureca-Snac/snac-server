@@ -8,7 +8,7 @@ import com.ureca.snac.board.service.response.CountArticleResponse;
 import com.ureca.snac.board.service.response.ListArticleResponse;
 import com.ureca.snac.common.s3.S3Path;
 import com.ureca.snac.common.s3.S3Uploader;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.ureca.snac.wallet.service;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.wallet.dto.WalletSummaryResponse;
 
 public interface WalletService {

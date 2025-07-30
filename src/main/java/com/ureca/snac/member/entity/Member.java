@@ -1,7 +1,9 @@
-package com.ureca.snac.member;
+package com.ureca.snac.member.entity;
 
 import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.common.BaseTimeEntity;
+import com.ureca.snac.member.Activated;
+import com.ureca.snac.member.Role;
 import com.ureca.snac.member.exception.NicknameChangeTooEarlyException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,6 +13,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -58,17 +63,14 @@ public class Member extends BaseTimeEntity {
 
     @Column(name = "suspend_until")
     private LocalDateTime suspendUntil; // 임시 정지 만료일
-  
-    private String naverId;
 
-    private String googleId;
-
-    private String kakaoId;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SocialLink> socialLinks = new HashSet<>();
 
 
     @Builder
     private Member(String email, String password, String name, String nickname, LocalDateTime nicknameUpdatedAt, String phone, LocalDate birthDate,
-                   Integer ratingScore, Role role, Activated activated, String naverId, String googleId, String kakaoId) {
+                   Integer ratingScore, Role role, Activated activated) {
 
         this.email = email;
         this.password = password;
@@ -80,27 +82,29 @@ public class Member extends BaseTimeEntity {
         this.ratingScore = ratingScore;
         this.role = role;
         this.activated = activated;
-        this.naverId = naverId;
-        this.googleId = googleId;
-        this.kakaoId = kakaoId;
     }
 
-    // 소셜 아이디 업데이트 용
-    public void updateSocialId(SocialProvider provider, String providerId) {
-        switch (provider) {
-            case NAVER -> this.naverId = providerId;
-            case GOOGLE -> this.googleId = providerId;
-            case KAKAO -> this.kakaoId = providerId;
-        }
+    public void addSocialLink(SocialProvider provider, String providerId) {
+        SocialLink socialLink = SocialLink.builder()
+                .member(this)
+                .provider(provider)
+                .providerId(providerId)
+                .build();
+        this.socialLinks.add(socialLink);
     }
 
-    // 연결됐는지 확인
+    public void removeSocialLink(SocialProvider provider) {
+        this.socialLinks.removeIf(link -> link.getProvider() == provider);
+    }
+
+    public Optional<SocialLink> getSocialLink(SocialProvider provider) {
+        return this.socialLinks.stream()
+                .filter(link -> link.getProvider() == provider)
+                .findFirst();
+    }
+
     public boolean isConnected(SocialProvider provider) {
-        return switch (provider) {
-            case NAVER -> naverId != null && !naverId.isEmpty();
-            case GOOGLE -> googleId != null && !googleId.isEmpty();
-            case KAKAO -> kakaoId != null && !kakaoId.isEmpty();
-        };
+        return this.socialLinks.stream().anyMatch(link -> link.getProvider() == provider);
     }
 
     public void changePasswordTo(String encodedPassword) {

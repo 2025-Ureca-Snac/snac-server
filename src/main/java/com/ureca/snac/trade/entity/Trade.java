@@ -4,7 +4,7 @@ import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.exception.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

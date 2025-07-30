@@ -5,7 +5,7 @@ import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.Role;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

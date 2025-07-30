@@ -5,7 +5,7 @@ import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 
 import java.time.LocalDateTime;
