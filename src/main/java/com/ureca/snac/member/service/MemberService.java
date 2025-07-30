@@ -1,6 +1,7 @@
 package com.ureca.snac.member.service;
 
 import com.ureca.snac.member.dto.request.*;
+import com.ureca.snac.member.dto.response.CountMemberResponse;
 
 public interface MemberService {
 
@@ -19,4 +20,6 @@ public interface MemberService {
     void resetPasswordByPhone(String phone, String newPwd);
 
     void resetPasswordByEmail(String email, String newPwd);
+
+    CountMemberResponse countMember();
 }

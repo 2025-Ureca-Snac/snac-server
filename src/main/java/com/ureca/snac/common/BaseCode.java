@@ -116,6 +116,8 @@ public enum BaseCode {
     ARTICLE_LIST_SUCCESS("ARTICLE_LIST_SUCCESS_200", HttpStatus.OK, "게시글 목록을 성공적으로 조회했습니다."),
     ARTICLE_UPDATE_SUCCESS("ARTICLE_UPDATE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 수정되었습니다."),
     ARTICLE_DELETE_SUCCESS("ARTICLE_DELETE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 삭제되었습니다."),
+    ARTICLE_COUNT_SUCCESS("ARTICLE_COUNT_SUCCESS_200", HttpStatus.OK, "전체 게시글 수를 성공적으로 조회했습니다."),
+
 
     // 게시글 - 실패
     ARTICLE_NOT_FOUND("ARTICLE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
@@ -191,6 +193,9 @@ public enum BaseCode {
     INVALID_ASSET_SOURCE("INVALID_ASSET_SOURCE_400", HttpStatus.BAD_REQUEST, "거래 출처 정보가 유효하지 않습니다"),
     INCONSISTENT_TRANSACTION_TYPE("INCONSISTENT_TRANSACTION_TYPE_409", HttpStatus.CONFLICT, "거래 타입과 카테고리가 일치하지 않습니다"),
     INVALID_ASSET_CATEGORY_COMBINATION("INVALID_ASSET_CATEGORY_COMBINATION_409", HttpStatus.CONFLICT, "자산 타입과 카테고리의 조합이 유효하지 않습니다"),
+
+    // 회원 - 성공
+    MEMBER_COUNT_SUCCESS("MEMBER_COUNT_SUCCESS_200", HttpStatus.OK, "전체 회원 수를 성공적으로 조회했습니다."),
 
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
