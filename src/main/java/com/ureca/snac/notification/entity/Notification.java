@@ -1,6 +1,6 @@
 package com.ureca.snac.notification.entity;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.entity.Trade;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

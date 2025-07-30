@@ -4,7 +4,7 @@ import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.exception.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -105,14 +105,6 @@ public class Trade extends BaseTimeEntity {
         this.status = status;
     }
 
-    public void changeSeller(Member member) {
-        this.seller = member;
-    }
-
-    public void changePoint(int point) {
-        this.point = point;
-    }
-
     // === 팩토리 메서드 ===
     public static Trade buildTrade(int point, Member member, String phone, Card card, SellStatus requiredStatus) {
         return Trade.builder().cardId(card.getId())
@@ -187,5 +179,93 @@ public class Trade extends BaseTimeEntity {
 
     public void changeCancelReason(CancelReason cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    // 리팩토링
+    // 현재 status가 expected가 아니면 예외
+    public void ensureStatus(TradeStatus expected) {
+        if (this.status != expected) {
+            throw new TradeStatusMismatchException();
+        }
+    }
+
+    // BUY_REQUESTED → ACCEPTED 전환
+    public void accept(Member member) {
+        ensureStatus(BUY_REQUESTED);
+        ensureSeller(member);
+        this.status = ACCEPTED;
+    }
+
+    // 현재 seller가 아니라면 예외
+    public void ensureSeller(Member member) {
+        if (this.seller == null || !this.seller.equals(member)) {
+            throw new TradePermissionDeniedException();
+        }
+    }
+
+    //요청자가 실제 거래의 구매자인지 검증, 아니라면 TradePermissionDeniedException을 던진다.
+    public void ensureBuyer(Member member) {
+        if (this.buyer == null || !this.buyer.equals(member)) {
+            throw new TradePermissionDeniedException();
+        }
+    }
+
+    /**
+     * 판매자만, 그리고 구매자는 아닌 사용자만 데이터 전송할 수 있는지 검증.
+     * 조건에 맞지 않으면 TradeSendPermissionDeniedException을 던진다.
+     */
+    public void ensureSendPermission(Member seller) {
+        // 1) 구매자는 당연히 보낼 수 없어야 하고
+        // 2) 그리고 반드시 이 거래의 실제 seller 여야 함
+        if (seller.equals(this.buyer) || !this.seller.equals(seller)) {
+            throw new TradeSendPermissionDeniedException();
+        }
+    }
+
+    // ACCEPTED -> PAYMENT_CONFIRMED 전환
+    public void markPaymentConfirmed(int point) {
+        ensureStatus(ACCEPTED);
+        this.point = point;
+        this.status = PAYMENT_CONFIRMED;
+    }
+
+    public void markPaymentConfirmedAccepted() {
+        ensureStatus(PAYMENT_CONFIRMED);
+        this.status = PAYMENT_CONFIRMED_ACCEPTED;
+    }
+
+    public void markDataSent() {
+//        ensureStatus(PAYMENT_CONFIRMED);
+        ensureSendable();
+        this.status = DATA_SENT;
+    }
+
+    private void ensureSendable() {
+        if (this.status != TradeStatus.PAYMENT_CONFIRMED && this.status != TradeStatus.PAYMENT_CONFIRMED_ACCEPTED) {
+            throw new TradeStatusMismatchException();
+        }
+    }
+
+    /**
+     * seller 로직 검증 및 할당만 담당
+     * - 본인이 요청자(구매자)와 같으면 예외
+     */
+    public void assignSeller(Member seller) {
+        if (seller.equals(this.buyer)) {
+            throw new TradeSelfRequestException();
+        }
+        this.seller = seller;
+    }
+
+    /**
+     * 결제 금액(머니 + 포인트)이 주문 금액(priceGb)과 일치하는지 검증.
+     * 일치하지 않으면 TradePaymentMismatchException을 던진다.
+     */
+    public void ensurePaymentMatches(long money, long point) {
+        long expected = this.priceGb.longValue();
+        long actual   = money + point;
+        if (expected != actual) {
+            throw new TradePaymentMismatchException();
+        }
     }
 }

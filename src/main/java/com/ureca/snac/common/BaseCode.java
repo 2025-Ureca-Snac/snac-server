@@ -31,6 +31,7 @@ public enum BaseCode {
 
     // 소셜 로그인 시도 - 실패
     OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
+    UNSUPPORTED_SOCIAL_PROVIDER("UNSUPPORTED_SOCIAL_PROVIDER_400", HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 프로바이더입니다."),
 
     // 카카오 연동 해제 관련
     KAKAO_UNLINK_SUCCESS("KAKAO_UNLINK_SUCCESS_200", HttpStatus.OK, "카카오 연결 끊기에 성공했습니다."),
@@ -115,6 +116,8 @@ public enum BaseCode {
     ARTICLE_LIST_SUCCESS("ARTICLE_LIST_SUCCESS_200", HttpStatus.OK, "게시글 목록을 성공적으로 조회했습니다."),
     ARTICLE_UPDATE_SUCCESS("ARTICLE_UPDATE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 수정되었습니다."),
     ARTICLE_DELETE_SUCCESS("ARTICLE_DELETE_SUCCESS_200", HttpStatus.OK, "게시글이 성공적으로 삭제되었습니다."),
+    ARTICLE_COUNT_SUCCESS("ARTICLE_COUNT_SUCCESS_200", HttpStatus.OK, "전체 게시글 수를 성공적으로 조회했습니다."),
+
 
     // 게시글 - 실패
     ARTICLE_NOT_FOUND("ARTICLE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
@@ -191,6 +194,9 @@ public enum BaseCode {
     INCONSISTENT_TRANSACTION_TYPE("INCONSISTENT_TRANSACTION_TYPE_409", HttpStatus.CONFLICT, "거래 타입과 카테고리가 일치하지 않습니다"),
     INVALID_ASSET_CATEGORY_COMBINATION("INVALID_ASSET_CATEGORY_COMBINATION_409", HttpStatus.CONFLICT, "자산 타입과 카테고리의 조합이 유효하지 않습니다"),
 
+    // 회원 - 성공
+    MEMBER_COUNT_SUCCESS("MEMBER_COUNT_SUCCESS_200", HttpStatus.OK, "전체 회원 수를 성공적으로 조회했습니다."),
+
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 
@@ -264,6 +270,12 @@ public enum BaseCode {
     // 스케줄러 자동 처리
     AUTO_REFUND_SUCCESS("AUTO_REFUND_SUCCESS_200", HttpStatus.OK, "판매자 지연으로 자동 환불되었습니다."),
     AUTO_PAYOUT_SUCCESS("AUTO_PAYOUT_SUCCESS_200", HttpStatus.OK, "구매자 미확정으로 자동 정산되었습니다."),
+
+    // 거래 소요 시간 통계 - 성공
+    TRADE_DURATION_STATISTIC_READ_SUCCESS("TRADE_DURATION_STATISTIC_READ_SUCCESS_200", HttpStatus.OK, "거래 소요 시간 통계 데이터를 성공적으로 조회했습니다."),
+
+    // 거래 소요 시간 통계 - 실패
+    TRADE_DURATION_STATISTIC_NOT_FOUND("TRADE_DURATION_STATISTIC_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 거래 소요 시간 통계 데이터를 찾을 수 없습니다."),
 
     // 신고 예외
     DISPUTE_PERMISSION_DENIED("DISPUTE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래 당사자만 신고할 수 있습니다."),

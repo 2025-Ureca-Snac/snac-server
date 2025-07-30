@@ -1,7 +1,7 @@
 package com.ureca.snac.wallet.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.wallet.exception.InsufficientBalanceException;
 import com.ureca.snac.wallet.exception.InvalidAMountException;
 import jakarta.persistence.*;

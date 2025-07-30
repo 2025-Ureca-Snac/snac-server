@@ -3,7 +3,7 @@ package com.ureca.snac.payment.service;
 import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.repository.PaymentRepository;

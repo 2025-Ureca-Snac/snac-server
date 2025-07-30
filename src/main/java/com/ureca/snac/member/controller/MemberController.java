@@ -7,10 +7,13 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.member.dto.request.*;
+import com.ureca.snac.member.dto.response.CountMemberResponse;
 import com.ureca.snac.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -155,6 +158,12 @@ public class MemberController implements MemberControllerSwagger {
         }
         memberService.resetPasswordByEmail(email, req.getNewPwd());
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PASSWORD_CHANGED));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<CountMemberResponse>> countMembers(@AuthenticationPrincipal UserDetails userDetails) {
+        CountMemberResponse count = memberService.countMember();
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.MEMBER_COUNT_SUCCESS, count));
     }
 }
 

@@ -1,7 +1,7 @@
-package com.ureca.snac.auth.controller;
+package com.ureca.snac.member.controller;
 
-import com.ureca.snac.auth.dto.request.JoinRequest;
-import com.ureca.snac.auth.service.JoinServiceImpl;
+import com.ureca.snac.member.dto.request.JoinRequest;
+import com.ureca.snac.member.service.JoinServiceImpl;
 import com.ureca.snac.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

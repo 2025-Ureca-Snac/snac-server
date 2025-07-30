@@ -67,9 +67,9 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
     open-in-view: false
-    show-sql: true
+    show-sql: false
 
   # Redis 설정
   data:
@@ -161,3 +161,5 @@ custom:
     system-login: ${STOMP_SYSTEM_LOGIN}
     system-passcode: ${STOMP_SYSTEM_PASS}
 
+shedlock:
+  namespace: ${SHEDLOCK_NAMESPACE}

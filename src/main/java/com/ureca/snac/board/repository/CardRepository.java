@@ -3,7 +3,7 @@ package com.ureca.snac.board.repository;
 import com.ureca.snac.board.entity.Card;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.SellStatus;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

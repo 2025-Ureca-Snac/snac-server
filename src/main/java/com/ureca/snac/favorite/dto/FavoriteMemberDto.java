@@ -1,6 +1,6 @@
 package com.ureca.snac.favorite.dto;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "단골 목록의 개별 회원 정보 DTO")

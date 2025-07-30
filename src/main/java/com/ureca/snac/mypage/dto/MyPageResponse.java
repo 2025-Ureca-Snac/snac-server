@@ -1,11 +1,13 @@
 package com.ureca.snac.mypage.dto;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import static com.ureca.snac.auth.oauth2.SocialProvider.*;
 
 @Getter
 @Builder(toBuilder = true)
@@ -29,9 +31,9 @@ public class MyPageResponse {
                 .score(member.getRatingScore())
                 .nickname(member.getNickname())
                 .nicknameUpdatedAt(member.getNicknameUpdatedAt())
-                .isNaverConnected(member.getNaverId() != null && !member.getNaverId().isEmpty())
-                .isGoogleConnected(member.getGoogleId() != null && !member.getGoogleId().isEmpty())
-                .isKakaoConnected(member.getKakaoId() != null && !member.getKakaoId().isEmpty())
+                .isNaverConnected(member.isConnected(NAVER))
+                .isGoogleConnected(member.isConnected(GOOGLE))
+                .isKakaoConnected(member.isConnected(KAKAO))
                 .build();
     }
 }

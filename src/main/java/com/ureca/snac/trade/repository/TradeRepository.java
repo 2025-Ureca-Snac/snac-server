@@ -1,7 +1,7 @@
 package com.ureca.snac.trade.repository;
 
 import com.ureca.snac.board.entity.constants.Carrier;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.entity.TradeType;
@@ -75,4 +75,5 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     @Lock(PESSIMISTIC_WRITE)
     Optional<Trade> findByBuyerAndStatus(Member member, TradeStatus status);
 
+    List<Trade> findByTradeTypeAndStatusAndUpdatedAtBetween(TradeType tradeType, TradeStatus status, LocalDateTime from, LocalDateTime to);
 }

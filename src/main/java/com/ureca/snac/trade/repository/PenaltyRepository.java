@@ -1,6 +1,6 @@
 package com.ureca.snac.trade.repository;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.entity.Penalty;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -3,6 +3,8 @@ package com.ureca.snac.config;
 import com.ureca.snac.auth.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -19,6 +21,9 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static com.ureca.snac.common.RedisKeyConstants.WS_CONNECTED_PREFIX;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -27,6 +32,7 @@ public class WebConfigRabbitMQ implements WebSocketMessageBrokerConfigurer {
 
     private final JWTUtil jwtUtil;
     private final StompRelayProperties stompProps;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -65,6 +71,16 @@ public class WebConfigRabbitMQ implements WebSocketMessageBrokerConfigurer {
                     if (authHeader != null && authHeader.startsWith("Bearer ")) {
                         String token = authHeader.substring(7);
                         String email = jwtUtil.getUsername(token);
+
+                        // [중복 접속 체크 & 등록]
+                        String redisKey = WS_CONNECTED_PREFIX + email;
+                        Boolean already = redisTemplate.opsForValue().setIfAbsent(redisKey, "1", 1, TimeUnit.DAYS); // 1일 TTL
+
+                        // 이미 소켓 연결 중인 상태 (중복)
+                        if (Boolean.FALSE.equals(already)) {
+                            throw new IllegalStateException("이미 소켓 연결 중입니다.");
+                        }
+
                         Authentication user = new UsernamePasswordAuthenticationToken(
                                 email, null,
                                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
@@ -76,6 +92,4 @@ public class WebConfigRabbitMQ implements WebSocketMessageBrokerConfigurer {
             }
         });
     }
-
-
 }

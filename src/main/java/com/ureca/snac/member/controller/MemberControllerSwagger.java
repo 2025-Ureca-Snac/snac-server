@@ -3,6 +3,7 @@ package com.ureca.snac.member.controller;
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.member.dto.request.*;
+import com.ureca.snac.member.dto.response.CountMemberResponse;
 import com.ureca.snac.swagger.annotation.UserInfo;
 import com.ureca.snac.swagger.annotation.error.*;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
@@ -11,6 +12,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -103,4 +107,10 @@ public interface MemberControllerSwagger {
     @PostMapping("/find-pwd/email")
     ResponseEntity<ApiResponse<Void>> resetPwdByEmail(
             @Valid @RequestBody PasswordResetByEmailRequest req);
+
+    @Operation(summary = "회원 수 조회", description = "전체 회원 수를 조회합니다.")
+    @ApiSuccessResponse(description = "전체 회원 수 조회 성공")
+    @SecurityRequirement(name = "Authorization")
+    @GetMapping("/count")
+    ResponseEntity<ApiResponse<CountMemberResponse>> countMembers(@AuthenticationPrincipal UserDetails userDetails);
 }

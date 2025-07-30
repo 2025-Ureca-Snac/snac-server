@@ -3,14 +3,21 @@ package com.ureca.snac.board.entity;
 import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.board.exception.CardInvalidStatusException;
+import com.ureca.snac.board.exception.NotRealTimeSellCardException;
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
+import com.ureca.snac.trade.exception.TradePaymentMismatchException;
+import com.ureca.snac.trade.exception.TradePermissionDeniedException;
+import com.ureca.snac.trade.exception.TradeSelfRequestException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.ureca.snac.board.entity.constants.CardCategory.REALTIME_SELL;
+import static com.ureca.snac.board.entity.constants.SellStatus.*;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
@@ -63,7 +70,7 @@ public class Card extends BaseTimeEntity {
                                   Long price, CardCategory category) {
         return Card.builder()
                 .member(owner)
-                .sellStatus(SellStatus.SOLD_OUT)
+                .sellStatus(SOLD_OUT)
                 .cardCategory(category)
                 .carrier(carrier)
                 .dataAmount(dataAmount)
@@ -80,5 +87,65 @@ public class Card extends BaseTimeEntity {
 
     public void changeSellStatus(SellStatus sellStatus) {
         this.sellStatus = sellStatus;
+    }
+
+    // 리팩토링 코드
+    /**
+     * requiredStatus가 SELLING(판매글)일 땐
+     *   본인 소유 불가(TradeSelfRequestException)
+     * requiredStatus가 PENDING(구매글)일 땐
+     *   반드시 본인 소유여야 함(TradePermissionDeniedException)
+     */
+    public void ensureCreatableBy(Member m, SellStatus requiredStatus) {
+        boolean isOwner = this.member.equals(m);
+
+        if (requiredStatus == SELLING && isOwner) {
+            throw new TradeSelfRequestException();
+        }
+        if (requiredStatus == PENDING && !isOwner) {
+            throw new TradePermissionDeniedException();
+        }
+    }
+
+    /** 실시간 판매 카드인지 검증 */
+    public void ensureRealTimeSellCategory() {
+        if (this.cardCategory != REALTIME_SELL) {
+            throw new NotRealTimeSellCardException();
+        }
+    }
+
+    public void ensureSellStatus(SellStatus expected) {
+        if (this.sellStatus != expected) {
+            throw new CardInvalidStatusException();
+        }
+    }
+
+    // SellStatus 변경
+    public void markTrading() {
+        ensureSellStatus(SELLING);
+        this.sellStatus = TRADING;
+    }
+
+    public void markSelling() {
+        ensureSellStatus(PENDING);
+        this.sellStatus = SELLING;
+    }
+
+    public void markSoldOut() {
+        ensureSellStatus(TRADING);
+        this.sellStatus = SOLD_OUT;
+    }
+
+    public void ensurePaymentMatches(long money, long point) {
+        long total = money + point;
+        if (this.price.longValue() != total) {
+            throw new TradePaymentMismatchException();
+        }
+    }
+
+    public void ensureDeletable() {
+        if (this.sellStatus == SellStatus.TRADING || this.sellStatus == SellStatus.SOLD_OUT) {
+            throw new CardInvalidStatusException();
+        }
     }
 }

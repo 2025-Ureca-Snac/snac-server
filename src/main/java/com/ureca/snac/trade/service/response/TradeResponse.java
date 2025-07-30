@@ -48,7 +48,7 @@ public class TradeResponse {
                 trade.getId(),
 
                 trade.getBuyer().getEmail(),
-                trade.getSeller().getEmail(),
+                (trade.getSeller() != null) ? trade.getSeller().getEmail() : "",
 
                 trade.getPriceGb(),
                 trade.getDataAmount(),
@@ -76,7 +76,7 @@ public class TradeResponse {
         return new TradeResponse(
                 trade.getId(),
                 trade.getBuyer().getEmail(),
-                trade.getSeller().getEmail(),
+                (trade.getSeller() != null) ? trade.getSeller().getEmail() : "",
                 trade.getPriceGb(),
                 trade.getDataAmount(),
                 phoneToShow,

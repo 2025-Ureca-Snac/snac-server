@@ -10,4 +10,6 @@ public final class RedisKeyConstants {
     public static final String BUYER_FILTER_PREFIX = "buyer_filter:";
     public static final String WS_DISCONNECT_LOCK_PREFIX  = "lock:ws:disconnect:";
     public static final String REDISSON_HOST_PREFIX = "redis://";
+    public static final String WS_CONNECTED_PREFIX = "ws_connected:";
+
 }

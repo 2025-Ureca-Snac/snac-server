@@ -1,9 +1,6 @@
 package com.ureca.snac.board.controller;
 
-import com.ureca.snac.board.service.response.ArticleResponse;
-import com.ureca.snac.board.service.response.CreateArticleResponse;
-import com.ureca.snac.board.service.response.ListArticleResponse;
-import com.ureca.snac.board.service.response.UpdateArticleResponse;
+import com.ureca.snac.board.service.response.*;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.swagger.annotation.error.ErrorCode400;
 import com.ureca.snac.swagger.annotation.error.ErrorCode401;
@@ -100,4 +97,13 @@ public interface ArticleControllerSwagger {
             @Parameter(description = "마지막으로 조회한 게시글 ID(커서)") @RequestParam(required = false) Long lastArticleId,
             @Parameter(description = "페이지 당 조회 개수", example = "9") @RequestParam(defaultValue = "9") Integer size
     );
+
+    @Operation(
+            summary = "게시글 개수 조회",
+            description = "전체 게시글 수를 반환합니다."
+    )
+    @ApiSuccessResponse(description = "게시글 개수 조회 성공")
+    @ErrorCode401(description = "인증되지 않은 사용자 접근")
+    @GetMapping("/count")
+    ResponseEntity<ApiResponse<CountArticleResponse>> countArticles(@AuthenticationPrincipal UserDetails userDetails);
 }

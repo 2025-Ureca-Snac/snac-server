@@ -1,8 +1,8 @@
 package com.ureca.snac.wallet.listener;
 
 import com.ureca.snac.config.RabbitMQConfig;
-import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.entity.Member;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.event.MemberJoinEvent;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.wallet.Repository.WalletRepository;

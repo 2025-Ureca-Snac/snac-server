@@ -33,8 +33,7 @@ import java.util.concurrent.TimeUnit;
 import static com.ureca.snac.board.entity.constants.CardCategory.REALTIME_SELL;
 import static com.ureca.snac.board.entity.constants.SellStatus.SELLING;
 import static com.ureca.snac.board.entity.constants.SellStatus.TRADING;
-import static com.ureca.snac.common.RedisKeyConstants.CONNECTED_USERS;
-import static com.ureca.snac.common.RedisKeyConstants.WS_DISCONNECT_LOCK_PREFIX;
+import static com.ureca.snac.common.RedisKeyConstants.*;
 import static com.ureca.snac.trade.entity.CancelReason.BUYER_FORCED_TERMINATION;
 import static com.ureca.snac.trade.entity.CancelReason.SELLER_FORCED_TERMINATION;
 import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
@@ -71,7 +70,6 @@ public class WebSocketTradeEventListener {
 
     // 소켓 해제시 호출
     @EventListener
-    @Transactional
     public void handleSessionDisconnect(SessionDisconnectEvent event) {
         String username = extractUsername(event);
         if (username == null) return;
@@ -88,6 +86,10 @@ public class WebSocketTradeEventListener {
                 log.warn("Disconnect 처리용 락 획득 실패, 건너뜀: {}", username);
                 return;
             }
+
+            // 0) 연결 해재시 기존 접속자 제거
+            String connectKey = WS_CONNECTED_PREFIX + username;
+            redisTemplate.delete(connectKey);
 
             // 1) 접속자 목록에서 제거
             redisTemplate.opsForSet().remove(CONNECTED_USERS, username);
@@ -112,7 +114,7 @@ public class WebSocketTradeEventListener {
             Thread.currentThread().interrupt();
             log.error("락 대기 중 인터럽트 발생: {}", username, e);
         } finally {
-            if (acquired) {
+            if (acquired && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
@@ -132,10 +134,6 @@ public class WebSocketTradeEventListener {
         List<TradeDto> buyerTrades = tradeQueryService.findBuyerRealTimeTrade(username);
         for (TradeDto trade : buyerTrades) {
             if (isCancellable(trade.getStatus())) {
-//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-//                }
-
                 TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
                         trade.getTradeId(),
                         username,
@@ -154,10 +152,6 @@ public class WebSocketTradeEventListener {
         List<TradeDto> sellerTrades = tradeQueryService.findSellerRealTimeTrade(username);
         for (TradeDto trade : sellerTrades) {
             if (isCancellable(trade.getStatus())) {
-//                if (trade.getStatus() == PAYMENT_CONFIRMED) {
-//                    tradeCancelService.cancelRealTimeTradeWithRefund(trade.getId(), trade.getBuyer());
-//                }
-
                 TradeDto tradeDto = tradeCancelService.cancelRealTimeTrade(
                         trade.getTradeId(),
                         username,

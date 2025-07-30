@@ -4,7 +4,7 @@ import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.asset.service.AssetChangedEventFactory;
 import com.ureca.snac.asset.service.AssetHistoryEventPublisher;
 import com.ureca.snac.infra.dto.response.TossConfirmResponse;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.money.entity.MoneyRecharge;
 import com.ureca.snac.money.repository.MoneyRechargeRepository;
 import com.ureca.snac.payment.entity.Payment;

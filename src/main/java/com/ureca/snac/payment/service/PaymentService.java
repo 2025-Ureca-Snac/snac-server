@@ -1,6 +1,6 @@
 package com.ureca.snac.payment.service;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.payment.dto.PaymentFailureRequest;
 import com.ureca.snac.payment.entity.Payment;

@@ -24,6 +24,7 @@ public class ArticleResponse {
                 .nickname(article.getMember().getNickname())
                 .articleUrl(generateArticleKey)
                 .imageUrl(generateImageKey)
+                .title(article.getTitle())
                 .build();
     }
 
