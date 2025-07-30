@@ -271,6 +271,12 @@ public enum BaseCode {
     AUTO_REFUND_SUCCESS("AUTO_REFUND_SUCCESS_200", HttpStatus.OK, "판매자 지연으로 자동 환불되었습니다."),
     AUTO_PAYOUT_SUCCESS("AUTO_PAYOUT_SUCCESS_200", HttpStatus.OK, "구매자 미확정으로 자동 정산되었습니다."),
 
+    // 거래 소요 시간 통계 - 성공
+    TRADE_DURATION_STATISTIC_READ_SUCCESS("TRADE_DURATION_STATISTIC_READ_SUCCESS_200", HttpStatus.OK, "거래 소요 시간 통계 데이터를 성공적으로 조회했습니다."),
+
+    // 거래 소요 시간 통계 - 실패
+    TRADE_DURATION_STATISTIC_NOT_FOUND("TRADE_DURATION_STATISTIC_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 거래 소요 시간 통계 데이터를 찾을 수 없습니다."),
+
     // 신고 예외
     DISPUTE_PERMISSION_DENIED("DISPUTE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래 당사자만 신고할 수 있습니다."),
     DISPUTE_ADMIN_PERMISSION_DENIED("DISPUTE_ADMIN_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "관리자 아니야"),
