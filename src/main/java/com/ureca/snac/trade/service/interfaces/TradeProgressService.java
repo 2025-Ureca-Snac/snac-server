@@ -19,20 +19,5 @@ public interface TradeProgressService {
      * @param tradeId  거래 ID
      * @param username 요청 판매자 이메일
      */
-//    Long confirmTrade(Long tradeId, String username, Boolean hasCard);
     TradeDto confirmTrade(Long tradeId, String username, Boolean hasCard);
-
-//    List<TradeDto> cancelOtherTradesOfCard(Long cardId, Long acceptedTradeId);
-//
-//    TradeDto cancelBuyRequestByBuyerOfCard(CancelBuyRequest request, String username);
-//
-//    List<TradeDto> cancelBuyRequestBySellerOfCard(CancelBuyRequest request, String username);
-//
-//    TradeDto cancelAcceptedTradeByBuyer(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
-//
-//    TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
-//
-//    TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason);
-//
-//    TradeDto cancelRealTimeTradeWithRefund(Long tradeId, String username);
 }

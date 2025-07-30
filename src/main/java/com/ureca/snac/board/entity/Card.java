@@ -131,10 +131,21 @@ public class Card extends BaseTimeEntity {
         this.sellStatus = SELLING;
     }
 
+    public void markSoldOut() {
+        ensureSellStatus(TRADING);
+        this.sellStatus = SOLD_OUT;
+    }
+
     public void ensurePaymentMatches(long money, long point) {
         long total = money + point;
         if (this.price.longValue() != total) {
             throw new TradePaymentMismatchException();
+        }
+    }
+
+    public void ensureDeletable() {
+        if (this.sellStatus == SellStatus.TRADING || this.sellStatus == SellStatus.SOLD_OUT) {
+            throw new CardInvalidStatusException();
         }
     }
 }
