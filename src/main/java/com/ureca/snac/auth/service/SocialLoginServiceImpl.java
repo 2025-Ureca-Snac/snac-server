@@ -3,12 +3,13 @@ package com.ureca.snac.auth.service;
 import com.ureca.snac.auth.dto.TokenDto;
 import com.ureca.snac.auth.exception.SocialLoginException;
 import com.ureca.snac.auth.refresh.Refresh;
-import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.repository.RefreshRepository;
 import com.ureca.snac.auth.util.JWTUtil;
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.auth.oauth2.SocialProvider;
+import com.ureca.snac.member.entity.SocialLink;
+import com.ureca.snac.member.repository.SocialLinkRepository;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
 
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
-    private final AuthRepository authRepository;
+    private final SocialLinkRepository socialLinkRepository;
 
     @Override
     public TokenDto socialLogin(String socialToken) {
@@ -52,12 +53,13 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         String providerId = jwtUtil.getProviderId(socialToken);
         log.info("프로바이더={}, providerId={} 로 멤버 조회 시도", provider, providerId);
 
-        Member member = authRepository
-                .findBySocialProviderId(provider, providerId)
+        SocialLink socialLink = socialLinkRepository
+                .findByProviderAndProviderId(provider, providerId)
                 .orElseThrow(() ->{
                     log.warn("DB에 일치하는 소셜 계정 없음: provider={}, providerId={}", provider, providerId);
                     return new SocialLoginException(BaseCode.SOCIAL_TOKEN_INVALID);
                 });
+        Member member = socialLink.getMember();
 
         String username = jwtUtil.getUsername(socialToken);
         if(!member.getEmail().equals(username)){

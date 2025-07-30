@@ -1,7 +1,7 @@
 package com.ureca.snac.board.repository;
 
 import com.ureca.snac.board.entity.Article;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

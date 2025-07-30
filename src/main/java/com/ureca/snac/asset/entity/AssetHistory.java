@@ -2,7 +2,7 @@ package com.ureca.snac.asset.entity;
 
 import com.ureca.snac.asset.exception.*;
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

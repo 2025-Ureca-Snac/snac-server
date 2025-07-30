@@ -1,7 +1,7 @@
 package com.ureca.snac.money.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.money.exception.InvalidPaymentForRechargeException;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.entity.PaymentStatus;

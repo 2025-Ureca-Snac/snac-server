@@ -1,7 +1,7 @@
 package com.ureca.snac.member.repository;
 
 import com.ureca.snac.member.Activated;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

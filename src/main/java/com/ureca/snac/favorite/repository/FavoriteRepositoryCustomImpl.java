@@ -4,7 +4,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ureca.snac.favorite.dto.FavoriteListRequest;
 import com.ureca.snac.favorite.entity.Favorite;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;

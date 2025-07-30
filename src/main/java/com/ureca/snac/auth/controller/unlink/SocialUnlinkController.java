@@ -2,9 +2,8 @@ package com.ureca.snac.auth.controller.unlink;
 
 import com.ureca.snac.auth.dto.CustomUserDetails;
 import com.ureca.snac.auth.dto.response.NaverUnlinkResponse;
-import com.ureca.snac.auth.service.unlink.GoogleUnlinkService;
-import com.ureca.snac.auth.service.unlink.KakaoUnlinkService;
-import com.ureca.snac.auth.service.unlink.NaverUnlinkService;
+import com.ureca.snac.auth.oauth2.SocialProvider;
+import com.ureca.snac.auth.service.unlink.SocialUnlinkManager;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.swagger.annotation.UserInfo;
@@ -21,19 +20,17 @@ import java.util.Map;
 @Slf4j
 public class SocialUnlinkController implements SocialUnlinkControllerSwagger {
 
-    private final GoogleUnlinkService googleUnlinkService;
-    private final KakaoUnlinkService kakaoUnlinkService;
-    private final NaverUnlinkService naverUnlinkService;
+    private final SocialUnlinkManager socialUnlinkManager;
 
     @Override
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> unlinkGoogle(
             @UserInfo CustomUserDetails userDetails
     ) {
-        googleUnlinkService.unlinkGoogleUser(userDetails.getUsername());
+        Boolean revoked = socialUnlinkManager.unlink(SocialProvider.GOOGLE, userDetails.getUsername());
         return ResponseEntity.ok(
                 ApiResponse.of(
                         BaseCode.GOOGLE_UNLINK_SUCCESS,
-                        Collections.singletonMap("revoked", true)
+                        Collections.singletonMap("revoked", revoked)
                 )
         );
     }
@@ -42,7 +39,7 @@ public class SocialUnlinkController implements SocialUnlinkControllerSwagger {
     public ResponseEntity<ApiResponse<Map<String, Long>>> unlinkKakao(
             @UserInfo CustomUserDetails userDetails
     ) {
-        Long unlinkedUserId = kakaoUnlinkService.unlinkKakaoUser(userDetails.getUsername());
+        Long unlinkedUserId = socialUnlinkManager.unlink(SocialProvider.KAKAO, userDetails.getUsername());
         return ResponseEntity.ok(
                 ApiResponse.of(
                         BaseCode.KAKAO_UNLINK_SUCCESS,
@@ -55,7 +52,7 @@ public class SocialUnlinkController implements SocialUnlinkControllerSwagger {
     public ResponseEntity<ApiResponse<NaverUnlinkResponse>> unlinkNaver(
             @UserInfo CustomUserDetails userDetails
     ) {
-        NaverUnlinkResponse response = naverUnlinkService.unlinkNaverUser(userDetails.getUsername());
+        NaverUnlinkResponse response = socialUnlinkManager.unlink(SocialProvider.NAVER, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.of(BaseCode.NAVER_UNLINK_SUCCESS, response));
     }
 }

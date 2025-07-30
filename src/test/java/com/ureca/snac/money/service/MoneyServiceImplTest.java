@@ -4,7 +4,7 @@ import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.exception.InternalServerException;
 import com.ureca.snac.infra.PaymentGatewayAdapter;
 import com.ureca.snac.infra.dto.response.TossConfirmResponse;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.repository.PaymentRepository;

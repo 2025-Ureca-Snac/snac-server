@@ -6,7 +6,7 @@ import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.CardInvalidStatusException;
 import com.ureca.snac.board.exception.NotRealTimeSellCardException;
 import com.ureca.snac.common.BaseTimeEntity;
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.exception.TradePaymentMismatchException;
 import com.ureca.snac.trade.exception.TradePermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeSelfRequestException;
