@@ -192,6 +192,9 @@ public enum BaseCode {
     INCONSISTENT_TRANSACTION_TYPE("INCONSISTENT_TRANSACTION_TYPE_409", HttpStatus.CONFLICT, "거래 타입과 카테고리가 일치하지 않습니다"),
     INVALID_ASSET_CATEGORY_COMBINATION("INVALID_ASSET_CATEGORY_COMBINATION_409", HttpStatus.CONFLICT, "자산 타입과 카테고리의 조합이 유효하지 않습니다"),
 
+    // 회원 - 성공
+    MEMBER_COUNT_SUCCESS("MEMBER_COUNT_SUCCESS_200", HttpStatus.OK, "전체 회원 수를 성공적으로 조회했습니다."),
+
     // 회원 - 예외
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."),
 
