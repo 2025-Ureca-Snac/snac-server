@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.exception;
+package com.ureca.snac.member.exception;
 
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.exception.BusinessException;

@@ -1,21 +1,20 @@
-package com.ureca.snac.auth.service;
+package com.ureca.snac.member.service;
 
-import com.ureca.snac.auth.dto.request.JoinRequest;
-import com.ureca.snac.auth.exception.EmailDuplicateException;
+import com.ureca.snac.member.dto.request.JoinRequest;
+import com.ureca.snac.member.exception.EmailDuplicateException;
 import com.ureca.snac.auth.exception.EmailNotVerifiedException;
-import com.ureca.snac.auth.exception.NicknameDuplicateException;
+import com.ureca.snac.member.exception.NicknameDuplicateException;
 import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.service.verify.EmailService;
 import com.ureca.snac.auth.service.verify.SnsService;
-import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.member.Member;
 import com.ureca.snac.member.event.MemberJoinEvent;
+import com.ureca.snac.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,7 +29,7 @@ import static com.ureca.snac.member.Role.USER;
 @Slf4j
 public class JoinServiceImpl implements JoinService {
 
-    private final AuthRepository authRepository;
+    private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SnsService snsService;
     private final EmailService emailService;
@@ -56,14 +55,14 @@ public class JoinServiceImpl implements JoinService {
         log.info("email < {} > 인증 되었음.", email);
 
         // 이메일 중복 체크
-        if (authRepository.existsByEmail(email)) {
+        if (memberRepository.existsByEmail(email)) {
             throw new EmailDuplicateException();
         }
         log.info("Email < {} > 은 중복이 아님.", email);
 
         String nickname = joinRequest.getNickname();
         // 닉네임 중복 체크
-        if (authRepository.existsByNickname(nickname)) {
+        if (memberRepository.existsByNickname(nickname)) {
             throw new NicknameDuplicateException();
         }
         log.info("Nickname < {} > 은 중복이 아님.", nickname);
@@ -80,7 +79,7 @@ public class JoinServiceImpl implements JoinService {
                 .activated(NORMAL)
                 .build();
 
-        authRepository.save(member);
+        memberRepository.save(member);
         log.info("회원가입 완료됨! : 이메일 : {}, 이름 : {}", member.getEmail(),member.getName());
 
         // 여기서 이벤트 발행 서비스 동작

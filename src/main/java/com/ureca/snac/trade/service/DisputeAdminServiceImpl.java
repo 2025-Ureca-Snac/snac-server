@@ -2,7 +2,7 @@ package com.ureca.snac.trade.service;
 
 import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.Role;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.DisputeSearchCond;

@@ -2,7 +2,7 @@ package com.ureca.snac.notification.service;
 
 import com.ureca.snac.board.dto.CardDto;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.notification.repository.NotificationRepository;
 import com.ureca.snac.trade.dto.CancelTradeDto;

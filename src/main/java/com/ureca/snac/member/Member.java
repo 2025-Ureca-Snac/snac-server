@@ -2,6 +2,7 @@ package com.ureca.snac.member;
 
 import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.common.BaseTimeEntity;
+import com.ureca.snac.member.exception.NicknameChangeTooEarlyException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -111,6 +112,9 @@ public class Member extends BaseTimeEntity {
     }
 
     public void changeNicknameTo(String newNickname) {
+        if (nicknameUpdatedAt != null && nicknameUpdatedAt.isAfter(LocalDateTime.now().minusDays(1))) {
+            throw new NicknameChangeTooEarlyException();
+        }
         this.nickname = newNickname;
         this.nicknameUpdatedAt = LocalDateTime.now();
     }

@@ -39,7 +39,7 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
 
         String state = request.getParameter("state");
 
-        log.info("요청 state 파라미터: {}", state);
+        log.debug("요청 state 파라미터: {}", state);
         if (StringUtils.hasText(state)) {
             return OAuth2AuthorizationRequest.from(authorizationRequest)
                     .state(state)

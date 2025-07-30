@@ -9,7 +9,7 @@ import com.ureca.snac.favorite.exception.CannotFavoriteSelfException;
 import com.ureca.snac.favorite.exception.FavoriteRelationNotFoundException;
 import com.ureca.snac.favorite.repository.FavoriteRepository;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

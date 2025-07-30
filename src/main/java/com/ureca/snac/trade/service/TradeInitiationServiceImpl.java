@@ -9,7 +9,7 @@ import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.board.exception.*;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateRealTimeTradePaymentRequest;

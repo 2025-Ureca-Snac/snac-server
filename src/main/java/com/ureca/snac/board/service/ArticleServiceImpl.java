@@ -1,7 +1,5 @@
 package com.ureca.snac.board.service;
 
-import com.ureca.snac.board.controller.request.CreateArticleRequest;
-import com.ureca.snac.board.controller.request.UpdateArticleRequest;
 import com.ureca.snac.board.entity.Article;
 import com.ureca.snac.board.exception.ArticleNotFoundException;
 import com.ureca.snac.board.repository.ArticleRepository;
@@ -10,7 +8,7 @@ import com.ureca.snac.board.service.response.ListArticleResponse;
 import com.ureca.snac.common.s3.S3Path;
 import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
