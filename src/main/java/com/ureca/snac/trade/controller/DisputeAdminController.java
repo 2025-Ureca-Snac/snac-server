@@ -30,6 +30,7 @@ public class DisputeAdminController {
     private final DisputeService disputeService;
 
 
+
     // 처리
     @PatchMapping("/{id}/resolve")
     public ResponseEntity<ApiResponse<?>> answer(
