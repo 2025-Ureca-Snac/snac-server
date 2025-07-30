@@ -4,7 +4,7 @@ import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.member.Activated;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.trade.entity.Penalty;
 import com.ureca.snac.trade.entity.PenaltyLevel;
 import com.ureca.snac.trade.entity.PenaltyReason;

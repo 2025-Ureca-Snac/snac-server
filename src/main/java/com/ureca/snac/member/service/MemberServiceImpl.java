@@ -1,23 +1,21 @@
 package com.ureca.snac.member.service;
 
-import com.ureca.snac.auth.exception.NicknameDuplicateException;
-import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
-import com.ureca.snac.member.dto.request.*;
+import com.ureca.snac.member.dto.request.NicknameChangeRequest;
+import com.ureca.snac.member.dto.request.PasswordChangeRequest;
+import com.ureca.snac.member.dto.request.PhoneChangeRequest;
 import com.ureca.snac.member.exception.InvalidCurrentMemberInfoException;
 import com.ureca.snac.member.exception.MemberNotFoundException;
-import com.ureca.snac.member.exception.NicknameChangeTooEarlyException;
+import com.ureca.snac.member.exception.NicknameDuplicateException;
+import com.ureca.snac.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -26,9 +24,7 @@ import java.time.temporal.ChronoUnit;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final AuthRepository authRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-
 
     @Override
     public String findEmailByPhone(String phone) {
@@ -64,7 +60,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public void validateNicknameAvailable(String nickname) {
-        if (authRepository.existsByNickname(nickname)) {
+        if (memberRepository.existsByNickname(nickname)) {
             throw new NicknameDuplicateException();
         }
     }
@@ -74,11 +70,6 @@ public class MemberServiceImpl implements MemberService {
     public String changeNickname(String email, NicknameChangeRequest nicknameChangeRequest) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
-
-        LocalDateTime lastUpdated = member.getNicknameUpdatedAt();
-        if (lastUpdated!=null && ChronoUnit.HOURS.between(lastUpdated, LocalDateTime.now()) < 24) {
-            throw new NicknameChangeTooEarlyException();
-        }
         member.changeNicknameTo(nicknameChangeRequest.getNickname());
         return member.getNicknameUpdatedAt()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

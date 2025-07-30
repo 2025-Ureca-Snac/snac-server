@@ -1,4 +1,4 @@
-package com.ureca.snac.auth.dto.request;
+package com.ureca.snac.member.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;

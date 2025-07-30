@@ -5,7 +5,7 @@ import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.common.s3.S3Path;
 import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.member.Member;
-import com.ureca.snac.member.MemberRepository;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.trade.entity.Attachment;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.exception.AttachmentAlreadyExistsException;
