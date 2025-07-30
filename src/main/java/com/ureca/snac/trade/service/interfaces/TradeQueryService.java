@@ -44,4 +44,6 @@ public interface TradeQueryService {
     List<TradeDto> findBuyerRealTimeTrade(String buyerUsername);
 
     List<TradeDto> findSellerRealTimeTrade(String sellerUsername);
+
+    TradeDto onBuyerDataSentRealTime(String username);
 }

@@ -10,8 +10,6 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
-import com.ureca.snac.board.exception.CardAlreadySoldOutException;
-import com.ureca.snac.board.exception.CardAlreadyTradingException;
 import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.board.service.response.CardResponse;
@@ -28,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.ureca.snac.board.entity.constants.CardCategory.*;
+import static com.ureca.snac.board.entity.constants.CardCategory.BUY;
+import static com.ureca.snac.board.entity.constants.CardCategory.REALTIME_SELL;
+import static com.ureca.snac.board.entity.constants.SellStatus.SOLD_OUT;
 
 @Slf4j
 @Service
@@ -93,13 +93,7 @@ public class CardServiceImpl implements CardService {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
 
-        if (card.getSellStatus() == SellStatus.TRADING) {
-            throw new CardAlreadyTradingException();
-        }
-
-        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
-            throw new CardAlreadySoldOutException();
-        }
+        card.ensureSellStatus(SellStatus.SELLING); // 판매중인 글만 삭제 가능
 
         card.update(
                 updateCardRequest.getCardCategory(),
@@ -135,13 +129,7 @@ public class CardServiceImpl implements CardService {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
 
-        if (card.getSellStatus() == SellStatus.TRADING) {
-            throw new CardAlreadyTradingException();
-        }
-
-        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
-            throw new CardAlreadySoldOutException();
-        }
+        card.ensureDeletable();
 
         cardRepository.delete(card);
     }
@@ -152,9 +140,7 @@ public class CardServiceImpl implements CardService {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
 
-        if (card.getSellStatus() == SellStatus.SOLD_OUT) {
-            throw new CardAlreadySoldOutException();
-        }
+        card.ensureSellStatus(SOLD_OUT);
 
         cardRepository.delete(card);
     }

@@ -109,6 +109,16 @@ public class TradeQueryServiceImpl implements TradeQueryService {
                 .toList();
     }
 
+    @Override
+    @Transactional
+    public TradeDto onBuyerDataSentRealTime(String username) {
+        Member member = findMember(username);
+
+        return tradeRepository.findByBuyerAndStatus(member, DATA_SENT)
+                .map(TradeDto::from)
+                .orElse(null);
+    }
+
     private Member findMember(String email) {
         return memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
     }
