@@ -13,7 +13,7 @@ import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
 import com.ureca.snac.member.entity.Member;
-import com.ureca.snac.member.QMember;
+import com.ureca.snac.member.entity.QMember;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

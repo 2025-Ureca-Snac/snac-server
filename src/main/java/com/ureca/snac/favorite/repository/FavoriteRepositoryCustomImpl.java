@@ -17,7 +17,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static com.ureca.snac.favorite.entity.QFavorite.favorite;
-import static com.ureca.snac.member.QMember.member;
+import static com.ureca.snac.member.entity.QMember.member;
 
 @Slf4j
 @Repository
