@@ -4,7 +4,7 @@ import com.ureca.snac.finance.entity.Account;
 import com.ureca.snac.finance.exception.AccountNotFoundException;
 import com.ureca.snac.finance.repository.AccountRepository;
 import com.ureca.snac.member.entity.Member;
-import com.ureca.snac.settlement.exception.SettlementAccountMismatchException;
+import com.ureca.snac.settlement.domain.exception.SettlementAccountMismatchException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

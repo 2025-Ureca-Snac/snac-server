@@ -22,8 +22,8 @@ public class Account extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id", nullable = false, unique = true)
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = LAZY)
@@ -44,5 +44,12 @@ public class Account extends BaseTimeEntity {
     public void update(Bank bank, String accountNumber) {
         this.bank = bank;
         this.accountNumber = accountNumber;
+    }
+
+    public boolean isSameAccountNumber(String requestAccountNumber) {
+        if (requestAccountNumber == null) {
+            return false;
+        }
+        return this.accountNumber.equals(requestAccountNumber);
     }
 }

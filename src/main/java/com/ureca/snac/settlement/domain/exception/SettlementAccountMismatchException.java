@@ -1,4 +1,4 @@
-package com.ureca.snac.settlement.exception;
+package com.ureca.snac.settlement.domain.exception;
 
 import com.ureca.snac.common.exception.BusinessException;
 

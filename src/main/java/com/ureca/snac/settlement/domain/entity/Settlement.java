@@ -2,7 +2,7 @@ package com.ureca.snac.settlement.domain.entity;
 
 import com.ureca.snac.common.BaseTimeEntity;
 import com.ureca.snac.member.entity.Member;
-import com.ureca.snac.settlement.exception.InvalidSettlementRequestException;
+import com.ureca.snac.settlement.domain.exception.InvalidSettlementRequestException;
 import jakarta.persistence.*;
 import lombok.*;
 
