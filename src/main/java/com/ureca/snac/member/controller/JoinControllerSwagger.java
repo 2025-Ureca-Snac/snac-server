@@ -1,6 +1,6 @@
-package com.ureca.snac.auth.controller;
+package com.ureca.snac.member.controller;
 
-import com.ureca.snac.auth.dto.request.JoinRequest;
+import com.ureca.snac.member.dto.request.JoinRequest;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.swagger.annotation.error.ErrorCode400;
 import com.ureca.snac.swagger.annotation.error.ErrorCode409;

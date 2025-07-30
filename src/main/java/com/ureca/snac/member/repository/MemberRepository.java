@@ -1,5 +1,7 @@
-package com.ureca.snac.member;
+package com.ureca.snac.member.repository;
 
+import com.ureca.snac.member.Activated;
+import com.ureca.snac.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -19,4 +21,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("select m.email from Member m where m.phone = :phone")
     Optional<String> findEmailByPhone(String phone);
+
+    Boolean existsByNickname(String nickname);
+
+    Boolean existsByEmail(String email);
+
 }
