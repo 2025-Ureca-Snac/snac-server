@@ -49,7 +49,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     private final AssetChangedEventFactory assetChangedEventFactory;
 
     @Override
-    public void requestCancel(Long tradeId, String userEmail, CancelReason reason) {
+    public TradeDto requestCancel(Long tradeId, String userEmail, CancelReason reason) {
 
         Member requester = findMember(userEmail);
 
@@ -141,6 +141,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             cancelRepo.save(cancel);
             // 알림 등 호출
         }
+
+        return TradeDto.from(trade);
     }
 
     // 허락하는건 판매자, 즉 취소 요청이 구매자

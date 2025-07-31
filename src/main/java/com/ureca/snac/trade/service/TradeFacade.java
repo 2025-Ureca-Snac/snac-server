@@ -11,6 +11,7 @@ import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.dto.TradeMessageDto;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.CancelReason;
+import com.ureca.snac.trade.entity.TradeStatus;
 import com.ureca.snac.trade.service.interfaces.*;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
@@ -22,6 +23,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.ureca.snac.trade.entity.TradeStatus.*;
 
 @Slf4j
 @Service
@@ -132,13 +135,21 @@ public class TradeFacade {
     // 거래 취소 요청
     @Transactional
     public void requestCancel(Long tradeId, String username, CancelReason reason) {
-        tradeCancelService.requestCancel(tradeId, username, reason);
+        TradeDto tradeDto = tradeCancelService.requestCancel(tradeId, username, reason);
+
+        if (tradeDto.getStatus() == CANCELED) {
+            TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
+            rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
+        }
     }
 
     // 거래 취소 수락
     @Transactional
     public void acceptCancel(Long tradeId, String username) {
         tradeCancelService.acceptCancel(tradeId, username);
+
+        TradeMessageDto tradeMessageDto = tradeMessageBuilder.buildTradeMessage(tradeId);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_TRADE_ROUTING_KEY, tradeMessageDto);
     }
 
     // 거래 취소 거절

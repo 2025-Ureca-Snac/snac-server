@@ -7,7 +7,7 @@ import com.ureca.snac.trade.entity.CancelReason;
 import java.util.List;
 
 public interface TradeCancelService {
-    void requestCancel(Long tradeId, String username, CancelReason reason);
+    TradeDto requestCancel(Long tradeId, String userEmail, CancelReason reason);
     void acceptCancel(Long tradeId, String username);
     void rejectCancel(Long tradeId, String username);
 
