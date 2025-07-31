@@ -19,7 +19,7 @@ import com.ureca.snac.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-@EnableScheduling
+@Profile("scheduler")
 @RequiredArgsConstructor
 public class TradeAutoProcessor {
 
