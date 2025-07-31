@@ -1,7 +1,7 @@
 package com.ureca.snac.auth.service.unlink;
 
 import com.ureca.snac.auth.exception.SocialUnlinkApiException;
-import com.ureca.snac.auth.exception.SocialUnlinkException;
+import com.ureca.snac.auth.exception.SocialUnlinkFailedException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.entity.Member;
@@ -51,7 +51,7 @@ public class GoogleUnlinkServiceImpl implements SocialUnlinkService<Void> {
 
         Optional<SocialLink> socialLink = member.getSocialLink(getProvider());
         if (socialLink.isEmpty()) {
-            throw new SocialUnlinkException(BaseCode.GOOGLE_NO_LINKED);
+            throw new SocialUnlinkFailedException(BaseCode.GOOGLE_NO_LINKED);
         }
 
         String providerId = socialLink.get().getProviderId();
@@ -60,7 +60,7 @@ public class GoogleUnlinkServiceImpl implements SocialUnlinkService<Void> {
         String redisKey = "GOOGLE:" + providerId;
         String googleToken = stringRedisTemplate.opsForValue().get(redisKey);
         if (googleToken == null) {
-            throw new SocialUnlinkException(BaseCode.GOOGLE_TOKEN_NOT_FOUND);
+            throw new SocialUnlinkFailedException(BaseCode.GOOGLE_TOKEN_NOT_FOUND);
         }
 
         try {
