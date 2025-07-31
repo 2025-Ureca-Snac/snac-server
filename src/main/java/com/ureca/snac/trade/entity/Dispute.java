@@ -41,14 +41,22 @@ public class Dispute extends BaseTimeEntity {
     private String answer;
     private LocalDateTime answerAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "prev_trade_status", length = 20)
+    private TradeStatus prevTradeStatus;  // 직전 Trade 상태 백업
 
+    @Column(name = "reported_applied", nullable = false)
+    private boolean reportedApplied; // 거래 상태 변경한 신고인가?
     @Builder
-    public Dispute(Trade trade, Member reporter, DisputeType type, String description) {
+    public Dispute(Trade trade, Member reporter, DisputeType type, String description,
+                   TradeStatus prevTradeStatus, boolean reportedApplied) {
         this.trade = trade;
         this.reporter = reporter;
         this.type = type;
         this.description = description;
         this.status = DisputeStatus.IN_PROGRESS;
+        this.prevTradeStatus = prevTradeStatus;
+        this.reportedApplied = reportedApplied;
     }
 
     // 상태 변경

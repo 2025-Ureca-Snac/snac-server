@@ -6,19 +6,20 @@ import com.ureca.snac.trade.dto.dispute.DisputeCreateRequest;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/trades")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class DisputeController {
 
     private final DisputeService disputeService;
 
-    @PostMapping("/{tradeId}/disputes")
+    @PostMapping("/trades/{tradeId}/disputes")
     public ResponseEntity<ApiResponse<?>> createDispute(
             @PathVariable Long tradeId,
             @RequestBody @Valid DisputeCreateRequest disputeCreateRequest,
@@ -44,4 +45,27 @@ public class DisputeController {
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS,disputeService.getDispute(id, email)));
     }
 
+    // 내가 신고한 목록
+    @GetMapping("/disputes/mine")
+    public ResponseEntity<ApiResponse<?>> myDisputes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal UserDetails me) {
+
+        PageRequest pr = PageRequest.of(page, size);
+        var data = disputeService.listMyDisputes(me.getUsername(), pr);
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_MY_LIST_SUCCESS, data));
+    }
+
+    // 내가 신고받은 목록
+    @GetMapping("/disputes/received")
+    public ResponseEntity<ApiResponse<?>> receivedDisputes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal UserDetails me) {
+
+        PageRequest pr = PageRequest.of(page, size);
+        var data = disputeService.listDisputesAgainstMe(me.getUsername(), pr);
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_RECEIVED_LIST_SUCCESS, data));
+    }
 }
