@@ -24,9 +24,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.web.cors.CorsConfiguration;
-
-import java.util.List;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Slf4j
 @Configuration
@@ -34,12 +32,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomOAuth2SuccessHandler customSuccessHandler;
-    private final CustomOAuth2FailHandler customFailHandler;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+    private final CustomOAuth2FailHandler customOAuth2FailHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
@@ -52,72 +49,43 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, RefreshRepository refreshRepository) throws Exception {
-
-        http.
-                cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration cfg = new CorsConfiguration();
-                    cfg.setAllowedOrigins(List.of(
-                            "http://localhost:3000",
-                            "http://localhost:5500",
-                            "http://127.0.0.1:5500",
-                            "http://127.0.0.1:3000",
-                            "https://docs.tosspayments.com",
-                            "https://snac-app.com",
-                            "https://www.snac-app.com",
-                            "https://api.snac-app.com",
-                            "https://develop.df83wi2m9axuw.amplifyapp.com",
-                            "https://seungwoo.i234.me",
-                            "https://kapi.kakao.com"
-
-                    ));
-                    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-                    cfg.setAllowedHeaders(List.of("*"));
-                    cfg.setExposedHeaders(List.of("Authorization"));
-                    cfg.setAllowCredentials(true);
-                    return cfg;
-                }));
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           RefreshRepository refreshRepository,
+                                           CorsConfigurationSource corsConfigurationSource,
+                                           AuthenticationManager authenticationManager) throws Exception {
 
         http
-                .csrf((auth) -> auth.disable());
-
-        http
-                .formLogin((auth) -> auth.disable());
-
-        http
-                .httpBasic((auth) -> auth.disable());
-
-        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf((auth) -> auth.disable())
+                .formLogin((auth) -> auth.disable())
+                .httpBasic((auth) -> auth.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(customSuccessHandler)
-                        .failureHandler(customFailHandler)
+                        .successHandler(customOAuth2SuccessHandler)
+                        .failureHandler(customOAuth2FailHandler)
                         .userInfoEndpoint(userinfo -> userinfo
                                 .userService(customOAuth2UserService))
                         .authorizationEndpoint(endpoint -> endpoint
                                 .authorizationRequestResolver(customAuthorizationRequestResolver))
-                );
-
-
-        http
+                )
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll());
 
-
         http
-                .addFilterBefore(new JWTFilter(objectMapper, jwtUtil), OAuth2AuthorizationRequestRedirectFilter.class);
-        http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, objectMapper, refreshRepository), UsernamePasswordAuthenticationFilter.class);
-
-        http
+                .addFilterBefore(jwtFilter(), OAuth2AuthorizationRequestRedirectFilter.class)
+                .addFilterAt(loginFilter(authenticationManager, refreshRepository), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
 
-
-        // jwt를 통한 인증/인가를 위해서 세션을 stateless 상태로 설정해야 됨
-        http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
+
+    }
+
+    private JWTFilter jwtFilter() {
+        return new JWTFilter(objectMapper, jwtUtil);
+    }
+
+    private LoginFilter loginFilter(AuthenticationManager authenticationManager, RefreshRepository refreshRepository) {
+        return new LoginFilter(authenticationManager, jwtUtil, objectMapper, refreshRepository);
     }
 }
