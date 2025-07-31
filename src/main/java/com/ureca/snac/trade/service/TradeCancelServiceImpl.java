@@ -110,7 +110,24 @@ public class TradeCancelServiceImpl implements TradeCancelService {
 
             // 알림 추가
 
-        } else {
+        } else if (trade.getSeller() == null){
+            // 취소 엔티티 저장: ACCEPTED & resolvedAt
+            TradeCancel cancel = TradeCancel.builder()
+                    .trade(trade)
+                    .requester(requester)
+                    .reason(reason)
+                    .status(CancelStatus.ACCEPTED)
+                    .resolvedAt(LocalDateTime.now())
+                    .build();
+            cancelRepo.save(cancel);
+            // 카드 상태 취소
+            card.changeSellStatus(SellStatus.CANCEL);
+            // 거래 취소 및 환불
+            trade.cancel(requester);
+            refundToBuyerAndPublishEvent(trade, card, buyer);
+            // 패널티 x
+        }
+        else {
             // 구매자 => 취소
             TradeCancel cancel = TradeCancel.builder()
                     .trade(trade)
