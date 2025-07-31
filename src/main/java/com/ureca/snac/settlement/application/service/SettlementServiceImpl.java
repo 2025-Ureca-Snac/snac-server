@@ -67,6 +67,6 @@ public class SettlementServiceImpl implements SettlementService {
         );
 
         assetHistoryEventPublisher.publish(event);
-        log.info("[정산 처리] 자산 병동 이벤트 발행 완료. 회원 ID : {}", member.getId());
+        log.info("[정산 처리] 자산 변동 이벤트 발행 완료. 회원 ID : {}", member.getId());
     }
 }
