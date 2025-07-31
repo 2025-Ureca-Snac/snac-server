@@ -45,7 +45,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         log.info("사용자 이메일: {}, 권한: {}", email, role);
 
         log.info("socialToken 생성");
-        String socialToken = jwtUtil.createJwtForSocial("social", email, role, provider, providerId, 43200000L);
+        String socialToken = jwtUtil.createSocialToken(email, role, provider, providerId);
         log.debug("socialToken 생성 완료: {}", socialToken);
 
         log.info("리다이렉트 URL 생성 및 토큰 추가");

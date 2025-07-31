@@ -49,8 +49,8 @@ public class ReissueServiceImpl implements ReissueService {
         }
         String role = jwtUtil.getRole(refresh);
 
-        String newAccess = jwtUtil.createJwt("access", username, role, 43200000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String newAccess = jwtUtil.createAccessToken(username, role);
+        String newRefresh = jwtUtil.createRefreshToken(username, role);
 
 
         // 5. 기존 리프레시 토큰 레디스에서 삭제, 새 거 저장 => 생각해보니까 굳이 삭제 할 필요가 없고 덮어씌우면 되어서 코드 변경
