@@ -6,10 +6,10 @@ import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.Role;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
-import com.ureca.snac.trade.entity.Dispute;
-import com.ureca.snac.trade.entity.DisputeAttachment;
-import com.ureca.snac.trade.entity.DisputeType;
-import com.ureca.snac.trade.entity.Trade;
+import com.ureca.snac.trade.dto.dispute.MyDisputeListItemDto;
+import com.ureca.snac.trade.dto.dispute.ReceivedDisputeListItemDto;
+import com.ureca.snac.trade.dto.dispute.TradeSummaryDto;
+import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
 import com.ureca.snac.trade.exception.DisputePermissionDeniedException;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
@@ -19,6 +19,8 @@ import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,12 +50,24 @@ public class DisputeServiceImpl implements DisputeService {
 
         trade.pauseAutoConfirm();
 
+        // 거래 최초 신고인지 확인
+        boolean applied = false;
+        TradeStatus prev = null;
+        if (trade.getStatus() != TradeStatus.REPORTED) {
+            prev = trade.getStatus(); // 백업
+            trade.changeStatus(TradeStatus.REPORTED);
+            applied = true; // 내가 상태 전환을 적용했다
+        }
+
+
         Dispute dispute = disputeRepository.save(
                 Dispute.builder()
                         .trade(trade)
                         .reporter(reporter)
                         .type(type)
                         .description(description)
+                        .prevTradeStatus(prev)
+                        .reportedApplied(applied)
                         .build()
         );
 
@@ -87,6 +101,48 @@ public class DisputeServiceImpl implements DisputeService {
                 urls,
                 dispute.getCreatedAt(),
                 dispute.getAnswerAt());
+    }
+
+    // 내가 신고한 목록 (설명 포함)
+    public Page<MyDisputeListItemDto> listMyDisputes(String email, Pageable pageable) {
+        Member me = findMember(email);
+        return disputeRepository.findByReporterOrderByCreatedAtDesc(me, pageable)
+                .map(dispute -> new MyDisputeListItemDto(
+                        dispute.getId(),
+                        dispute.getStatus(),
+                        dispute.getType(),
+                        dispute.getDescription(),
+                        dispute.getCreatedAt(),
+                        dispute.getAnswerAt(),
+                        toTradeSummary(dispute.getTrade(), me)
+                ));
+    }
+    // 신고받은 목록
+    public Page<ReceivedDisputeListItemDto> listDisputesAgainstMe(String email, Pageable pageable) {
+        Member me = findMember(email);
+        return disputeRepository.findReceivedByParticipant(me, pageable)
+                .map(dispute -> new ReceivedDisputeListItemDto(
+                        dispute.getId(),
+                        dispute.getStatus(),
+                        dispute.getType(),
+                        dispute.getCreatedAt(),
+                        toTradeSummary(dispute.getTrade(), me)
+                ));
+    }
+
+    private TradeSummaryDto toTradeSummary(Trade trade, Member me) {
+        boolean meIsBuyer = me.equals(trade.getBuyer());
+        Member counter = meIsBuyer ? trade.getSeller() : trade.getBuyer(); // 상대방
+        return new TradeSummaryDto(
+                trade.getId(),
+                trade.getStatus(),
+                trade.getTradeType(),
+                trade.getPriceGb(),
+                trade.getDataAmount(),
+                trade.getCarrier().name(),
+                meIsBuyer ? "BUYER" : "SELLER",
+                counter != null ? counter.getId() : null
+        );
     }
 
     private Member findMember(String email) {
