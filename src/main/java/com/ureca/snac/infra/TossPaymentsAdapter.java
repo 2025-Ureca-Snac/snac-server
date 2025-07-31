@@ -5,11 +5,13 @@ import com.ureca.snac.infra.dto.response.TossConfirmResponse;
 import com.ureca.snac.payment.dto.PaymentCancelResponse;
 import com.ureca.snac.payment.mapper.PaymentCancelMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
  * 어댑터 토스페이먼츠 구현체
  */
+@Profile("prod")
 @Component
 @RequiredArgsConstructor
 public class TossPaymentsAdapter implements PaymentGatewayAdapter {

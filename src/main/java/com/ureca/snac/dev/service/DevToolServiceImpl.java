@@ -11,10 +11,16 @@ import com.ureca.snac.dev.dto.DevForceTradeCompleteRequest;
 import com.ureca.snac.dev.dto.DevPointGrantRequest;
 import com.ureca.snac.dev.dto.DevRechargeRequest;
 import com.ureca.snac.dev.support.DevDataSupport;
+import com.ureca.snac.infra.PaymentGatewayAdapter;
+import com.ureca.snac.infra.dto.response.TossConfirmResponse;
 import com.ureca.snac.member.entity.Member;
+import com.ureca.snac.member.exception.MemberNotFoundException;
+import com.ureca.snac.member.repository.MemberRepository;
+import com.ureca.snac.money.service.MoneyDepositor;
 import com.ureca.snac.payment.entity.Payment;
 import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;
+import com.ureca.snac.payment.service.PaymentService;
 import com.ureca.snac.wallet.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,35 +34,37 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DevToolServiceImpl implements DevToolService {
 
+    private final MemberRepository memberRepository;
+    private final PaymentService paymentService;
+    private final PaymentGatewayAdapter paymentGatewayAdapter;
+    private final MoneyDepositor moneyDepositor;
     private final DevDataSupport devDataSupport;
     private final WalletService walletService;
-    private final AssetHistoryEventPublisher eventPublisher;
     private final PaymentRepository paymentRepository;
+    private final AssetHistoryEventPublisher assetHistoryEventPublisher;
 
     @Override
     @Transactional
     public Long forceRecharge(DevRechargeRequest request) {
         log.info("[개발용 머니 충전] 시작. 이메일 : {}, 금액 : {}",
                 request.email(), request.amount());
-        DevDataSupport.RechargeContext ctx =
-                devDataSupport.prepareRecharge(request.email(), request.amount());
 
-        Long balanceAfter = walletService.depositMoney(ctx.member().getId(), request.amount());
+        Member member = memberRepository.findByEmail(request.email())
+                .orElseThrow(MemberNotFoundException::new);
 
-        publishEvent(
-                ctx.member().getId(),
-                AssetType.MONEY,
-                TransactionType.DEPOSIT,
-                TransactionCategory.RECHARGE,
-                request.amount(),
-                balanceAfter,
-                "개발용 강제 충전",
-                null,
-                ctx.recharge().getId()
-        );
+        Payment payment = paymentService.preparePayment(member, request.amount());
 
-        log.info("[개발용 머니 충전] 완료. 생성된 Payment Id : {}", ctx.payment().getId());
-        return ctx.payment().getId();
+        TossConfirmResponse fakeConfirmResponse =
+                paymentGatewayAdapter.confirmPayment(
+                        "dev_payment_key_" + System.currentTimeMillis(),
+                        payment.getOrderId(),
+                        payment.getAmount()
+                );
+
+        moneyDepositor.deposit(payment, member, fakeConfirmResponse);
+
+        log.info("[개발용 머니 충전] 완료. 생성된 Payment Id : {}", payment.getId());
+        return payment.getId();
     }
 
     @Override
@@ -65,7 +73,8 @@ public class DevToolServiceImpl implements DevToolService {
         log.info("[개발용 포인트 지급] 시작. 이메일 : {}, 양 : {}, 이유 : {}",
                 request.email(), request.amount(), request.reason());
 
-        Member member = devDataSupport.findMemberByEmail(request.email());
+        Member member = memberRepository.findByEmail(request.email())
+                .orElseThrow(MemberNotFoundException::new);
 
         walletService.depositPoint(member.getId(), request.amount());
         long balanceAfter = walletService.getPointBalance(member.getId());
@@ -94,24 +103,13 @@ public class DevToolServiceImpl implements DevToolService {
         Payment payment = paymentRepository.findById(request.paymentId())
                 .orElseThrow(PaymentNotFoundException::new);
 
-        payment.cancel(request.reason());
-
-        Long balanceAfter = walletService.withdrawMoney(payment.getMember().getId(),
-                payment.getAmount());
-
-        publishEvent(
-                payment.getMember().getId(),
-                AssetType.MONEY,
-                TransactionType.WITHDRAWAL
-                , TransactionCategory.CANCEL,
-                payment.getAmount()
-                , balanceAfter
-                , "개발용 강제 충전 취소",
-                SourceDomain.PAYMENT,
-                payment.getId()
+        paymentService.cancelPayment(
+                payment.getPaymentKey(),
+                request.reason(),
+                payment.getMember().getEmail()
         );
 
-        log.info("[개발용 충전 취소] 완료.");
+        log.info("[개발용 충전 취소] 취소 서비스 완료.");
     }
 
 
@@ -162,7 +160,7 @@ public class DevToolServiceImpl implements DevToolService {
     private void publishEvent(Long memberId, AssetType assetType, TransactionType transactionType,
                               TransactionCategory category, Long amount, Long balanceAfter,
                               String title, SourceDomain domain, Long sourceId) {
-        eventPublisher.publish(AssetChangedEvent.builder()
+        assetHistoryEventPublisher.publish(AssetChangedEvent.builder()
                 .memberId(memberId)
                 .assetType(assetType)
                 .transactionType(transactionType)
@@ -175,6 +173,4 @@ public class DevToolServiceImpl implements DevToolService {
                 .build()
         );
     }
-
-
 }

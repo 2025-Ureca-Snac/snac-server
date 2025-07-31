@@ -65,6 +65,7 @@ public class DevToolController {
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.STATUS_OK));
     }
 
+    @Operation(summary = "개발용 강제 거래 완료")
     @PostMapping("/trade/complete")
     public ResponseEntity<ApiResponse<Long>> forceTradeComplete(
             @RequestBody DevForceTradeCompleteRequest request) {
