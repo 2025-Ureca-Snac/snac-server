@@ -2,7 +2,6 @@ package com.ureca.snac.asset.service;
 
 import com.ureca.snac.asset.dto.AssetHistoryListRequest;
 import com.ureca.snac.asset.dto.AssetHistoryResponse;
-import com.ureca.snac.asset.event.AssetChangedEvent;
 import com.ureca.snac.common.CursorResult;
 
 /**
@@ -10,15 +9,6 @@ import com.ureca.snac.common.CursorResult;
  * 외부 계약 내부계약 구분해야됨
  */
 public interface AssetHistoryService {
-
-    /**
-     * 이벤트를 받아서 새로운 내역 생성 저장
-     * 내부 계약
-     *
-     * @param event 자산 변동 정보 이벤트
-     */
-    void handleAssetChangedEvent(AssetChangedEvent event);
-
 
     /**
      * 컨트롤러로 부터 요청을 처리하는 API 조회서비스
