@@ -1,6 +1,7 @@
 package com.ureca.snac.member.controller;
 
 import com.ureca.snac.auth.dto.CustomUserDetails;
+import com.ureca.snac.auth.dto.request.PhoneRequest;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.member.dto.response.CountMemberResponse;
