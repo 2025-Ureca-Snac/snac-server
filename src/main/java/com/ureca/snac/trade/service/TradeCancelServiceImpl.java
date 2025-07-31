@@ -49,7 +49,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     private final AssetChangedEventFactory assetChangedEventFactory;
 
     @Override
-    public void requestCancel(Long tradeId, String userEmail, CancelReason reason) {
+    public TradeDto requestCancel(Long tradeId, String userEmail, CancelReason reason) {
 
         Member requester = findMember(userEmail);
 
@@ -91,8 +91,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
                 card.changeSellStatus(SellStatus.SELLING);
             }
 
-            // 거래 취소 및 환불
+            // 거래 취소 및 환불 및 취소 이유 입력
             trade.cancel(requester);
+            trade.changeCancelReason(reason);
 
             refundToBuyerAndPublishEvent(trade, card, buyer);
 //            일단 프라비잇으로 환불 로직이랑 이벤트 호출하는거 헬퍼 메소드로 뺏다. 중복 로직이라서 이후의 리팩토링은 자유
@@ -122,8 +123,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             cancelRepo.save(cancel);
             // 카드 상태 취소
             card.changeSellStatus(SellStatus.CANCEL);
-            // 거래 취소 및 환불
+            // 거래 취소 및 환불 및 이유 입력
             trade.cancel(requester);
+            trade.changeCancelReason(reason);
             refundToBuyerAndPublishEvent(trade, card, buyer);
             // 패널티 x
         }
@@ -139,6 +141,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             cancelRepo.save(cancel);
             // 알림 등 호출
         }
+
+        return TradeDto.from(trade);
     }
 
     // 허락하는건 판매자, 즉 취소 요청이 구매자
@@ -176,6 +180,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         // 취소 처리
         cancel.accept();
         trade.cancel(seller); //상태변경까지
+        trade.changeCancelReason(cancel.getReason());//취소 사유
 
 //        위와 마찬가지 이유
         refundToBuyerAndPublishEvent(trade, card, buyer);
