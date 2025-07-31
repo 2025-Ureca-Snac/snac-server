@@ -9,6 +9,7 @@ import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.entity.TradeType;
 import com.ureca.snac.trade.exception.TradeNotFoundException;
+import com.ureca.snac.trade.repository.TradeCancelRepository;
 import com.ureca.snac.trade.repository.TradeRepository;
 import com.ureca.snac.trade.service.interfaces.TradeQueryService;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ureca.snac.trade.entity.TradeStatus.DATA_SENT;
 import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
@@ -31,6 +34,7 @@ import static com.ureca.snac.trade.entity.TradeStatus.PAYMENT_CONFIRMED;
 public class TradeQueryServiceImpl implements TradeQueryService {
     private final TradeRepository tradeRepository;
     private final MemberRepository memberRepository;
+    private final TradeCancelRepository tradeCancelRepository;
 
     // 판매 또는 구매에 대한 거래내역을 가져옵니다.
     // TradeSide를 기준으로 BUY, SELL을 구분합니다.
@@ -45,9 +49,27 @@ public class TradeQueryServiceImpl implements TradeQueryService {
 
         boolean hasNext = trades.size() > size;
 
-        List<TradeResponse> dto = trades.stream()
-                .limit(size)
-                .map(t -> TradeResponse.from(t, side))
+//        List<TradeResponse> dto = trades.stream()
+//                .limit(size)
+//                .map(t -> TradeResponse.from(t, side))
+//                .toList();
+
+        // 화면 표시 대상만 추리기
+        List<Trade> page = trades.stream().limit(size).toList();
+        // 취소 요청 가져오기
+        List<Long> tradeIds = page.stream().map(Trade::getId).toList();
+        var summaries = tradeCancelRepository.findRequestedSummaryByTradeIds(tradeIds);
+        Map<Long, TradeCancelRepository.TradeCancelSummary> cancelMap = summaries.stream()
+                .collect(Collectors.toMap(
+                        TradeCancelRepository.TradeCancelSummary::getTradeId,
+                        s -> s
+                ));
+
+        List<TradeResponse> dto = page.stream()
+                .map(t -> {
+                    var cancel = cancelMap.get(t.getId());
+                    return TradeResponse.from(t, side, cancel);
+                })
                 .toList();
 
         return new ScrollTradeResponse(dto, hasNext);
