@@ -14,6 +14,7 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
     private final SocialLinkRepository socialLinkRepository;
 
     @Override
+    @Transactional
     public TokenDto socialLogin(String socialToken) {
         log.info("소셜 로그인 요청 시작");
         if (socialToken == null) {
