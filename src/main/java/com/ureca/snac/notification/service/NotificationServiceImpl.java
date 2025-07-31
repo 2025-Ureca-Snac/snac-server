@@ -8,6 +8,7 @@ import com.ureca.snac.notification.repository.NotificationRepository;
 import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
+import com.ureca.snac.trade.dto.dispute.DisputeNotificationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,6 +54,13 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendCancelNotification(CancelTradeDto dto) {
         log.info("[거래 취소 발행] username={} tradeId={}", dto.getUsername(), dto.getTradeDto().getTradeId());
         rabbitTemplate.convertAndSend(CANCEL_EXCHANGE, CANCEL_ROUTING_KEY, dto);
+    }
+
+    @Override
+    public void sendDisputeNotification(String username, DisputeNotificationDto dto) {
+        log.info("[신고 알림 발행] username={}, dto={}", username, dto);
+        String routingKey = String.format("dispute.notification.%s", username);
+        rabbitTemplate.convertAndSend(DISPUTE_NOTIFICATION_EXCHANGE, routingKey, dto);
     }
 
     private Member getMember(String email) {
