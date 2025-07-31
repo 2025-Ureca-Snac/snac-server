@@ -189,4 +189,22 @@ public class AssetChangedEventFactory {
                 memberId, paymentId, amount, balanceAfter);
 
     }
+
+    // 정산 관련
+    public AssetChangedEvent createForSettlement(
+            Long memberId, Long settlementId,
+            Long amount, Long balanceAfter) {
+
+        return AssetChangedEvent.builder()
+                .memberId(memberId)
+                .assetType(AssetType.MONEY)
+                .transactionType(TransactionType.WITHDRAWAL)
+                .category(TransactionCategory.SETTLEMENT)
+                .amount(amount)
+                .balanceAfter(balanceAfter)
+                .title(String.format("%,d원 정산", amount))
+                .sourceDomain(SourceDomain.SETTLEMENT)
+                .sourceId(settlementId)
+                .build();
+    }
 }

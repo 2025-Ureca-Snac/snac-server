@@ -186,6 +186,12 @@ public enum BaseCode {
     // 거래 내역 - 예외
     ASSET_HISTORY_NOT_FOUND("ASSET_HISTORY_NOT_FOUND_404", HttpStatus.NOT_FOUND, "해당 자산 내역을 차즐 수 없습니다"),
 
+    // 정산 - 성공
+    SETTLEMENT_SUCCESS("SETTLEMENT_SUCCESS_200", HttpStatus.OK, "정산 요청이 성공되었습니다"),
+    // 정산 - 예외
+    SETTLEMENT_ACCOUNT_MISMATCH("SETTLEMENT_ACCOUNT_MISMATCH_400", HttpStatus.BAD_REQUEST, "입력하신 계좌번호가 등록된 정보와 일치하지 않습니다"),
+    INVALID_SETTLEMENT_REQUEST("INVALID_SETTLEMENT_REQUEST_400", HttpStatus.BAD_REQUEST, "정산 요청 정보가 올바르지 않습니다"),
+
     // 거래 내역 생성 - 예외
     INVALID_ASSET_AMOUNT("INVALID_ASSET_AMOUNT_400", HttpStatus.BAD_REQUEST, "거래 금액은 0보다 커야 합니다."),
     INVALID_ASSET_BALANCE("INVALID_ASSET_BALANCE_400", HttpStatus.BAD_REQUEST, "거래 후 잔액은은 0이상 입니다."),
@@ -280,12 +286,13 @@ public enum BaseCode {
     // 신고 예외
     DISPUTE_PERMISSION_DENIED("DISPUTE_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "거래 당사자만 신고할 수 있습니다."),
     DISPUTE_ADMIN_PERMISSION_DENIED("DISPUTE_ADMIN_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "관리자 아니야"),
-    DISPUTE_NOT_FOUND("DISPUTE_NOT_FOUND_404", HttpStatus.NOT_FOUND,"신고를 찾을 수 없습니다."),
+    DISPUTE_NOT_FOUND("DISPUTE_NOT_FOUND_404", HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다."),
     DISPUTE_COMMENT_PERMISSION_DENIED("DISPUTE_COMMENT_PERMISSION_DENIED_403", HttpStatus.FORBIDDEN, "답변 작성 권한이 없습니다."),
     // 신고 성공
     DISPUTE_CREATE_SUCCESS("DISPUTE_CREATE_SUCCESS_201", HttpStatus.CREATED, "신고가 접수되었습니다."),
-    DISPUTE_DETAIL_SUCCESS("DISPUTE_DETAIL_SUCCESS_200", HttpStatus.OK,"신고 상세를 조회했습니다."),
+    DISPUTE_DETAIL_SUCCESS("DISPUTE_DETAIL_SUCCESS_200", HttpStatus.OK, "신고 상세를 조회했습니다."),
     DISPUTE_COMMENT_SUCCESS("DISPUTE_COMMENT_SUCCESS_201", HttpStatus.CREATED, "신고 답변이 등록되었습니다."),
+
     DISPUTE_NEED_MORE("DISPUTE_NEED_MORE_200", HttpStatus.OK,"추가 자료 요청"),
     DISPUTE_ANSWERED_SUCCESS("DISPUTE_ANSWERED_SUCCESS_200", HttpStatus.OK,"신고가 처리되었습니다."),
     DISPUTE_REJECTED_SUCCESS("DISPUTE_REJECTED_SUCCESS_200", HttpStatus.OK,"신고 기각 처리되었습니다."),
