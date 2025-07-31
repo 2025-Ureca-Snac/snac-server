@@ -1,6 +1,6 @@
 package com.ureca.snac.trade.repository;
 
-import com.ureca.snac.member.Member;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.entity.Dispute;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import org.springframework.data.domain.Page;
