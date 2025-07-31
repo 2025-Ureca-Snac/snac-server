@@ -72,7 +72,13 @@ public class GoogleUnlinkServiceImpl implements SocialUnlinkService<Void> {
                     .retrieve()
                     .toBodilessEntity();
         } catch (RestClientException e) {
-            throw new SocialUnlinkApiException(BaseCode.GOOGLE_UNLINK_FAILED, "구글 API 호출 실패: " + e.getMessage());
+/*            if (e.getMessage().contains("invalid_token")) {
+                log.warn("구글 revoke: invalid_token 무시, 내부 unlink만 수행");
+                //“invalid_token: Token is not revocable.” 오류는 해당 토큰이 이미 만료되었거나, 액세스 토큰(access token)이어서 리보크 대상이 아닌 경우에 발생.
+                // Google 공식 가이드와 커뮤니티 권고에 따르면, 이 오류는 “토큰이 이미 폐기되었음”을 의미하므로 무시하고 내부 unlink 처리만 수행해도 무방
+            } else */
+                throw new SocialUnlinkApiException(BaseCode.GOOGLE_UNLINK_FAILED, "구글 API 호출 실패: " + e.getMessage());
+
         }
 
         member.removeSocialLink(getProvider());
