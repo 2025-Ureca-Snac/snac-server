@@ -66,13 +66,13 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, CustomTrade
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Trade> findLockedByCardIdAndBuyer(Long cardId, Member buyer);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @Lock(LockModeType.PESSIMISTIC_WRITE) -> 락 해제
     List<Trade> findAllByBuyerAndTradeType(Member member, TradeType tradeType);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @Lock(LockModeType.PESSIMISTIC_WRITE) -> 락 해제
     List<Trade> findAllBySellerAndTradeType(Member member, TradeType tradeType);
 
-    @Lock(PESSIMISTIC_WRITE)
+//    @Lock(PESSIMISTIC_WRITE) -> 락 해제
     Optional<Trade> findByBuyerAndStatus(Member member, TradeStatus status);
 
     List<Trade> findByTradeTypeAndStatusAndUpdatedAtBetween(TradeType tradeType, TradeStatus status, LocalDateTime from, LocalDateTime to);
