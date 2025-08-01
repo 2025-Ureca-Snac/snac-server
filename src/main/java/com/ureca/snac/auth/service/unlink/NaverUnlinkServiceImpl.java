@@ -2,7 +2,7 @@ package com.ureca.snac.auth.service.unlink;
 
 import com.ureca.snac.auth.dto.response.NaverUnlinkResponse;
 import com.ureca.snac.auth.exception.SocialUnlinkApiException;
-import com.ureca.snac.auth.exception.SocialUnlinkException;
+import com.ureca.snac.auth.exception.SocialUnlinkFailedException;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.entity.Member;
@@ -59,14 +59,14 @@ public class NaverUnlinkServiceImpl implements SocialUnlinkService<NaverUnlinkRe
 
         Optional<SocialLink> socialLink = member.getSocialLink(getProvider());
         if (socialLink.isEmpty()) {
-            throw new SocialUnlinkException(BaseCode.NAVER_NO_LINKED);
+            throw new SocialUnlinkFailedException(BaseCode.NAVER_NO_LINKED);
         }
         String providerId = socialLink.get().getProviderId();
 
         String redisKey = "NAVER:" + providerId;
         String naverToken = stringRedisTemplate.opsForValue().get(redisKey);
         if (naverToken == null) {
-            throw new SocialUnlinkException(BaseCode.NAVER_TOKEN_NOT_FOUND);
+            throw new SocialUnlinkFailedException(BaseCode.NAVER_TOKEN_NOT_FOUND);
         }
 
         try {

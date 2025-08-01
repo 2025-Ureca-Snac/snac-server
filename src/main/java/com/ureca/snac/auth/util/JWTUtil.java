@@ -14,6 +14,15 @@ public class JWTUtil {
 
     private SecretKey secretKey;
 
+    @Value("${spring.jwt.access-expiration}")
+    private long accessExpirationMs;
+
+    @Value("${spring.jwt.refresh-expiration}")
+    private long refreshExpirationMs;
+
+    @Value("${spring.jwt.social-expiration}")
+    private long socialExpirationMs;
+
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
@@ -64,5 +73,17 @@ public class JWTUtil {
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey) // 시그니처를 만들어서 암호화 진행
                 .compact();
+    }
+
+    public String createAccessToken(String username, String role) {
+        return createJwt("access", username, role, accessExpirationMs);
+    }
+
+    public String createRefreshToken(String username, String role) {
+        return createJwt("refresh", username, role, refreshExpirationMs);
+    }
+
+    public String createSocialToken(String username, String role, String provider, String providerId) {
+        return createJwtForSocial("social", username, role, provider, providerId, socialExpirationMs);
     }
 }

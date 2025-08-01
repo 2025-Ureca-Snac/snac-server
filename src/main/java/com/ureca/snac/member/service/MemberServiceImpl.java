@@ -1,12 +1,11 @@
 package com.ureca.snac.member.service;
 
-import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.dto.request.NicknameChangeRequest;
 import com.ureca.snac.member.dto.request.PasswordChangeRequest;
 import com.ureca.snac.member.dto.request.PhoneChangeRequest;
 import com.ureca.snac.member.dto.response.CountMemberResponse;
-import com.ureca.snac.member.exception.InvalidCurrentMemberInfoException;
+import com.ureca.snac.member.entity.Member;
+import com.ureca.snac.member.exception.InvalidCurrentPasswordException;
 import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.member.exception.NicknameDuplicateException;
 import com.ureca.snac.member.repository.MemberRepository;
@@ -39,7 +38,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(MemberNotFoundException::new);
 
         if (!passwordEncoder.matches(req.getCurrentPwd(), member.getPassword())) {
-            throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PASSWORD);
+            throw new InvalidCurrentPasswordException();
         }
         member.changePasswordTo(passwordEncoder.encode(req.getNewPwd()));
     }
@@ -48,7 +47,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
         if (!passwordEncoder.matches(request.getPwd(), member.getPassword())) {
-            throw new InvalidCurrentMemberInfoException(BaseCode.INVALID_CURRENT_PASSWORD);
+            throw new InvalidCurrentPasswordException();
         }
     }
 
