@@ -116,7 +116,7 @@ public class Member extends BaseTimeEntity {
     }
 
     public void changeNicknameTo(String newNickname) {
-        if (nicknameUpdatedAt != null && nicknameUpdatedAt.isAfter(LocalDateTime.now().minusDays(1))) {
+        if (nicknameUpdatedAt != null && nicknameUpdatedAt.isAfter(LocalDateTime.now().minusMinutes(3)/*minusDays(1)*/)) {
             throw new NicknameChangeTooEarlyException();
         }
         this.nickname = newNickname;
