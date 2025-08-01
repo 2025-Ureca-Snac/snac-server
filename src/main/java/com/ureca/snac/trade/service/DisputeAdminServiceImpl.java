@@ -1,5 +1,8 @@
 package com.ureca.snac.trade.service;
 
+import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.board.exception.CardNotFoundException;
+import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.exception.BusinessException;
 import com.ureca.snac.common.s3.S3Uploader;
@@ -17,6 +20,7 @@ import com.ureca.snac.trade.repository.DisputeAttachmentRepository;
 import com.ureca.snac.trade.repository.DisputeRepository;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
 import com.ureca.snac.trade.service.interfaces.PenaltyService;
+import com.ureca.snac.trade.service.interfaces.TradeCancelService;
 import com.ureca.snac.wallet.Repository.WalletRepository;
 import com.ureca.snac.wallet.entity.Wallet;
 import com.ureca.snac.wallet.exception.WalletNotFoundException;
@@ -36,9 +40,11 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
     private final DisputeRepository disputeRepository;
     private final MemberRepository memberRepository;
     private final WalletRepository walletRepository;
+    private final CardRepository cardRepository;
     private final DisputeAttachmentRepository disputeAttachmentRepository;
     private final PenaltyService penaltyService;
     private final S3Uploader s3;   // presigned URL 변환용
+    private final TradeCancelService tradeCancelService;
 
     private static final List<DisputeStatus> ACTIVE = List.of(DisputeStatus.IN_PROGRESS, DisputeStatus.NEED_MORE);
 
@@ -135,17 +141,22 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
             throw new BusinessException(BaseCode.TRADE_ALREADY_CANCELED);
         }
 
-        // 환불 계산
-        int priceGb = trade.getPriceGb() == null ? 0 : trade.getPriceGb();
-        int pointUnit = trade.getPoint()   == null ? 0 : trade.getPoint();
+        // 환불
+        Card card = cardRepository.findById(trade.getCardId()).orElseThrow(CardNotFoundException::new);
+        Member buyer = trade.getBuyer();
 
-        long refundMoney = Math.max(0, priceGb - pointUnit);
-        long refundPoint = Math.max(0, pointUnit); // 포인트
-
-        // 지갑 환불 (구매자)
-        Wallet buyerWallet = findLockedWallet(trade.getBuyer().getId());
-        if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
-        if (refundPoint > 0) buyerWallet.depositPoint(refundPoint);
+        tradeCancelService.refundToBuyerAndPublishEvent(trade, card, buyer);
+//        // 환불 계산
+//        int priceGb = trade.getPriceGb() == null ? 0 : trade.getPriceGb();
+//        int pointUnit = trade.getPoint()   == null ? 0 : trade.getPoint();
+//
+//        long refundMoney = Math.max(0, priceGb - pointUnit);
+//        long refundPoint = Math.max(0, pointUnit); // 포인트
+//
+//        // 지갑 환불 (구매자)
+//        Wallet buyerWallet = findLockedWallet(trade.getBuyer().getId());
+//        if (refundMoney > 0) buyerWallet.depositMoney(refundMoney);
+//        if (refundPoint > 0) buyerWallet.depositPoint(refundPoint);
 
         // 거래 취소 + 자동확정 재개
         trade.changeStatus(TradeStatus.CANCELED);
@@ -203,7 +214,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 .toList();
 
         return new DisputeDetailResponse(
-                d.getId(), d.getStatus(), d.getType(),
+                d.getId(), d.getStatus(), d.getType(), d.getTitle(),
                 d.getDescription(), d.getAnswer(),
                 urls, d.getCreatedAt(), d.getAnswerAt());
     }

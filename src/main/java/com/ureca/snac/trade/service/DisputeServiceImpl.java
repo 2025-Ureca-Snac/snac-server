@@ -37,7 +37,7 @@ public class DisputeServiceImpl implements DisputeService {
     private final S3Uploader s3Uploader;
 
     @Override
-    public Long createDispute(Long tradeId, String email,
+    public Long createDispute(Long tradeId, String email, String title,
                               DisputeType type, String description,
                               List<String> attachmentKeys) {
 
@@ -62,6 +62,7 @@ public class DisputeServiceImpl implements DisputeService {
 
         Dispute dispute = disputeRepository.save(
                 Dispute.builder()
+                        .title(title)
                         .trade(trade)
                         .reporter(reporter)
                         .type(type)
@@ -96,6 +97,7 @@ public class DisputeServiceImpl implements DisputeService {
                 dispute.getId(),
                 dispute.getStatus(),
                 dispute.getType(),
+                dispute.getTitle(),
                 dispute.getDescription(),
                 dispute.getAnswer(),
                 urls,
@@ -111,6 +113,7 @@ public class DisputeServiceImpl implements DisputeService {
                         dispute.getId(),
                         dispute.getStatus(),
                         dispute.getType(),
+                        dispute.getTitle(),
                         dispute.getDescription(),
                         dispute.getCreatedAt(),
                         dispute.getAnswerAt(),
@@ -143,6 +146,34 @@ public class DisputeServiceImpl implements DisputeService {
                 meIsBuyer ? "BUYER" : "SELLER",
                 counter != null ? counter.getId() : null
         );
+    }
+
+    @Override
+    public Long createQna(String title, String email,
+                          DisputeType type, String description,
+                          List<String> attachmentKeys) {
+        Member reporter = findMember(email);
+
+        // QnA 문의는 trade 없이 생성
+        Dispute dispute = disputeRepository.save(
+                Dispute.builder()
+                        .title(title)
+                        .trade(null)
+                        .reporter(reporter)
+                        .type(type)
+                        .description(description)
+                        .prevTradeStatus(null)
+                        .reportedApplied(false)
+                        .build()
+        );
+
+        // 첨부파일 저장
+        if (attachmentKeys != null) {
+            for (String key : attachmentKeys) {
+                disputeAttachmentRepository.save(new DisputeAttachment(dispute, key));
+            }
+        }
+        return dispute.getId();
     }
 
     private Member findMember(String email) {

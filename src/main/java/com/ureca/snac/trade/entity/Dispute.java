@@ -18,7 +18,7 @@ public class Dispute extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY) // 거래 FK
-    @JoinColumn(name = "trade_id", nullable = false)
+    @JoinColumn(name = "trade_id", nullable = true)
     private Trade trade;
 
     @ManyToOne(fetch = FetchType.LAZY) // 신고자
@@ -36,6 +36,9 @@ public class Dispute extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private DisputeStatus status;
 
+    @Column(nullable = false, length = 100)
+    private String title;
+
     // 관리자 답변
     @Column(columnDefinition = "TEXT")
     private String answer;
@@ -48,8 +51,9 @@ public class Dispute extends BaseTimeEntity {
     @Column(name = "reported_applied", nullable = false)
     private boolean reportedApplied; // 거래 상태 변경한 신고인가?
     @Builder
-    public Dispute(Trade trade, Member reporter, DisputeType type, String description,
+    public Dispute(String title, Trade trade, Member reporter, DisputeType type, String description,
                    TradeStatus prevTradeStatus, boolean reportedApplied) {
+        this.title = title;
         this.trade = trade;
         this.reporter = reporter;
         this.type = type;

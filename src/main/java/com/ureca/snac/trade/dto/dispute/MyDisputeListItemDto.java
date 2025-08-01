@@ -13,6 +13,7 @@ public class MyDisputeListItemDto {
     private Long disputeId;
     private DisputeStatus status;
     private DisputeType type;
+    private String title;
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime answerAt;

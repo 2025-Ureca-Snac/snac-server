@@ -1,8 +1,11 @@
 package com.ureca.snac.trade.service.interfaces;
 
+import com.ureca.snac.board.entity.Card;
+import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.trade.controller.request.CancelBuyRequest;
 import com.ureca.snac.trade.dto.TradeDto;
 import com.ureca.snac.trade.entity.CancelReason;
+import com.ureca.snac.trade.entity.Trade;
 
 import java.util.List;
 
@@ -22,4 +25,6 @@ public interface TradeCancelService {
 //    TradeDto cancelAcceptedTradeBySeller(CancelRealTimeTradeRequest cancelRealTimeTradeRequest, String username);
 
     TradeDto cancelRealTimeTrade(Long tradeId, String username, CancelReason reason);
+
+    void refundToBuyerAndPublishEvent(Trade trade, Card card, Member buyer);
 }

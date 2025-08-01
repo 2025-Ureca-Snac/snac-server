@@ -248,6 +248,7 @@ public class MatchingServiceFacade {
         Long disputeId = disputeService.createDispute(
                 request.getTradeId(),
                 username,
+                request.getTitle(),
                 request.getType(),
                 request.getDescription(),
                 request.getAttachmentKeys() // S3 업로드 키 리스트
