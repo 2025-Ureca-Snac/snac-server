@@ -140,8 +140,6 @@ public class CardServiceImpl implements CardService {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
         Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
 
-        card.ensureSellStatus(SOLD_OUT);
-
         cardRepository.delete(card);
     }
 
