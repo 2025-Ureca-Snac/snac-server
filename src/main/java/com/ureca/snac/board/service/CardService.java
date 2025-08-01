@@ -48,7 +48,8 @@ public interface CardService {
      * @return 스크롤 방식으로 응답하는 카드 목록과 다음 페이지 존재 여부
      */
     ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
-                                   Integer size, Long lastCardId, LocalDateTime lastUpdatedAt);
+                                   Integer size, Long lastCardId, LocalDateTime lastUpdatedAt,
+                                   Boolean favoriteOnly, String username);
 
     /**
      * 카드(판매글/구매글)를 삭제합니다.
@@ -75,7 +76,9 @@ public interface CardService {
      * @return 카드 정보
      */
     CardResponse findCardById(Long cardId);
+
     List<CardResponse> getSellingCardsByEmail(String email);
+
     List<CardDto> findAllDevCard();
 
     ScrollCardResponse getCardsByOwner(String username, CardCategory cardCategory, int size, Long lastCardId, LocalDateTime lastUpdatedAt);
