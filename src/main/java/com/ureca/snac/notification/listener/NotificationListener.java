@@ -91,7 +91,7 @@ public class NotificationListener {
     // 신고 알림 리스너 추가
     @RabbitListener(queues = RabbitMQConfig.DISPUTE_NOTIFICATION_QUEUE)
     public void onDisputeNotification(DisputeNotificationDto disputeDto, @Header("amqp_receivedRoutingKey") String routingKey) {
-        String username = routingKey.substring("matching.notification.".length());
+        String username = routingKey.substring("dispute.notification.".length());
 
         log.info("[신고 알림] 사용자: {}, disputeId: {}", username, disputeDto.getDisputeId());
         messaging.convertAndSendToUser(
