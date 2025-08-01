@@ -1,13 +1,15 @@
 package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.common.ApiResponse;
-import com.ureca.snac.swagger.annotation.error.*;
+import com.ureca.snac.swagger.annotation.error.ErrorCode400;
+import com.ureca.snac.swagger.annotation.error.ErrorCode401;
+import com.ureca.snac.swagger.annotation.error.ErrorCode403;
+import com.ureca.snac.swagger.annotation.error.ErrorCode404;
 import com.ureca.snac.swagger.annotation.response.ApiCreatedResponse;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeQueryType;
-import com.ureca.snac.trade.dto.TradeConfirmResponse;
 import com.ureca.snac.trade.dto.TradeSide;
 import com.ureca.snac.trade.service.response.ProgressTradeCountResponse;
 import com.ureca.snac.trade.service.response.ScrollTradeResponse;
@@ -75,8 +77,8 @@ public interface BasicTradeControllerSwagger {
     @ErrorCode403(description = "구매자만 거래를 확정할 수 있습니다.")
     @ErrorCode404(description = "거래를 찾을 수 없습니다.")
     @PatchMapping("/{tradeId}/confirm")
-    ResponseEntity<ApiResponse<TradeConfirmResponse>> confirmTrade(@PathVariable Long tradeId,
-                                                                   @AuthenticationPrincipal UserDetails userDetails);
+    ResponseEntity<ApiResponse<Void>> confirmTrade(@PathVariable Long tradeId,
+                                                   @AuthenticationPrincipal UserDetails userDetails);
 
     @Operation(summary = "거래 내역 조회 (무한 스크롤)", description = "로그인한 사용자의 거래 내역을 BUY/SELL 관점으로 무한 스크롤 방식으로 조회합니다.")
     @ApiSuccessResponse(description = "거래 내역 조회 성공")
