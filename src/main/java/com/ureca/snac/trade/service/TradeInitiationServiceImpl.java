@@ -50,7 +50,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     public Long acceptRealTimeTrade(Long tradeId, String username) {
         Member member = findMember(username);
         Trade trade = findLockedTrade(tradeId);
-        Card card = findLockedCard(trade.getCardId());
+//        Card card = findLockedCard(trade.getCardId()); -> 락 해제
+        Card card = findCard(trade.getCardId());
 
         card.markTrading();  // 카드는 판매 상태이여야 함
         trade.accept(member); // 거래요청 상태이여야 함, 구매 요청 상태이어야 함
@@ -64,7 +65,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
         // 1. 거래 조회 (락 걸어서)
         Member member = findMember(username);
         Trade trade = findLockedTrade(createRealTimeTradePaymentRequest.getTradeId());
-        Card card = findLockedCard(trade.getCardId());
+//        Card card = findLockedCard(trade.getCardId()); -> 락 해제
+        Card card = findCard(trade.getCardId());
         Wallet wallet = findLockedWallet(member.getId());
 
         long moneyToUse = createRealTimeTradePaymentRequest.getMoney();
@@ -157,7 +159,8 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
     public Long acceptBuyRequest(ClaimBuyRequest claimBuyRequest, String username) {
         Member seller = findMember(username);
         Trade trade = tradeRepository.findLockedByCardId(claimBuyRequest.getCardId()).orElseThrow(TradeNotFoundException::new);
-        Card card = findLockedCard(claimBuyRequest.getCardId());
+//        Card card = findLockedCard(claimBuyRequest.getCardId()); -> 불필요한 락 제거
+        Card card = findCard(claimBuyRequest.getCardId());
 
         card.ensureSellStatus(SELLING); // 판매 가능 상태가 아니라면 수락할 수 없음
         trade.assignSeller(seller);  // 본인이 판매를 수락하는 것은 허용하지 않음, 거래에 판매자 등록 및 카드 상태 변경
@@ -239,6 +242,10 @@ public class TradeInitiationServiceImpl implements TradeInitiationService {
 
     private Card findLockedCard(Long cardId) {
         return cardRepository.findLockedById(cardId).orElseThrow(CardNotFoundException::new);
+    }
+
+    private Card findCard(Long cardId) {
+        return cardRepository.findById(cardId).orElseThrow(CardNotFoundException::new);
     }
 
     private Trade findLockedTrade(Long tradeId) {
