@@ -10,6 +10,7 @@ import com.ureca.snac.config.RabbitMQConfig;
 import com.ureca.snac.member.dto.request.*;
 import com.ureca.snac.member.dto.response.CountMemberResponse;
 import com.ureca.snac.member.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +66,7 @@ public class MemberController implements MemberControllerSwagger {
     @Override
     public ResponseEntity<ApiResponse<Void>> changePhone(
             CustomUserDetails userDetails,
-            PhoneRequest phoneRequest
+            @Valid PhoneRequest phoneRequest
     ) {
         String changePhone = phoneRequest.getPhone();
         boolean phoneVerified = snsService.isPhoneVerified(changePhone);
@@ -90,8 +91,8 @@ public class MemberController implements MemberControllerSwagger {
     public ResponseEntity<ApiResponse<String>> changeNickname(
             CustomUserDetails userDetails,
             NicknameChangeRequest nicknameChangeRequest) {
-        String lastUpdated = memberService.changeNickname(userDetails.getUsername(), nicknameChangeRequest);
-        return ResponseEntity.ok(ApiResponse.of(BaseCode.NICKNAME_CHANGED, lastUpdated));
+        String unlockAt = memberService.changeNickname(userDetails.getUsername(), nicknameChangeRequest);
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.NICKNAME_CHANGED, unlockAt));
     }
 
     //TODO 휴대폰 인증으로 이메일 찾기 (완료, 검증완료)
@@ -104,7 +105,7 @@ public class MemberController implements MemberControllerSwagger {
 
     // 3. 검증 되었는지 확인 후 이메일 찾아주기
     @Override
-    public ResponseEntity<ApiResponse<String>> findEmail(PhoneRequest phoneRequest) {
+    public ResponseEntity<ApiResponse<String>> findEmail(@Valid PhoneRequest phoneRequest) {
         String phone = phoneRequest.getPhone();
         boolean phoneVerified = snsService.isPhoneVerified(phone);
         if (!phoneVerified) {
