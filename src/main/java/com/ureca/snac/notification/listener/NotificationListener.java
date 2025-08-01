@@ -6,15 +6,18 @@ import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.SocketErrorDto;
 import com.ureca.snac.trade.dto.TradeDto;
+import com.ureca.snac.trade.dto.dispute.DisputeNotificationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Profile("!scheduler")
 @RequiredArgsConstructor
 public class NotificationListener {
     private final SimpMessagingTemplate messaging;
@@ -82,6 +85,19 @@ public class NotificationListener {
                 dto.getUsername(),
                 "/queue/filters",
                 dto.getBuyerFilter()
+        );
+    }
+
+    // 신고 알림 리스너 추가
+    @RabbitListener(queues = RabbitMQConfig.DISPUTE_NOTIFICATION_QUEUE)
+    public void onDisputeNotification(DisputeNotificationDto disputeDto, @Header("amqp_receivedRoutingKey") String routingKey) {
+        String username = routingKey.substring("dispute.notification.".length());
+
+        log.info("[신고 알림] 사용자: {}, disputeId: {}", username, disputeDto.getDisputeId());
+        messaging.convertAndSendToUser(
+                username,
+                "/queue/dispute",
+                disputeDto
         );
     }
 
