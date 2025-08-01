@@ -8,9 +8,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class DisputeCreateRequest {
-    private DisputeType type;
-    private String description;
+public class QnaCreateRequest {
     private String title;
-    private List<String> attachmentKeys; // s3 키 목록
+    private DisputeType type; // 결제, 계정, 기술 문제 등
+    private String description;
+    private List<String> attachmentKeys; // 첨부파일 (선택)
 }

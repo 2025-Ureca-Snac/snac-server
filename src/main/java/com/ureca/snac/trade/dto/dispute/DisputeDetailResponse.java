@@ -14,6 +14,7 @@ public class DisputeDetailResponse {
     private Long id;
     private DisputeStatus status;
     private DisputeType type;
+    private String title;
     private String description;
     private String answer;
 
