@@ -13,6 +13,7 @@ import com.ureca.snac.board.service.response.CardResponse;
 import com.ureca.snac.board.service.response.CreateCardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.swagger.annotation.UserInfo;
 import com.ureca.snac.swagger.annotation.error.ErrorCode400;
 import com.ureca.snac.swagger.annotation.error.ErrorCode401;
 import com.ureca.snac.swagger.annotation.error.ErrorCode404;
@@ -32,8 +33,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.ureca.snac.common.BaseCode.CARD_READ_SUCCESS;
 
 
 @Tag(name = "판매글/구매글 관리", description = "판매글(SELL), 구매글(BUY) 등록, 조회, 삭제, 수정 기능 제공")
@@ -82,14 +81,16 @@ public interface CardControllerSwagger {
     @GetMapping("/scroll")
     ResponseEntity<ApiResponse<ScrollCardResponse>> scrollCards(@Parameter(
                                                                         description = "카드 카테고리",
-                                                                        schema = @Schema(type = "string", allowableValues = {"BUY", "SELL"}))@RequestParam CardCategory cardCategory,
+                                                                        schema = @Schema(type = "string", allowableValues = {"BUY", "SELL"})) @RequestParam CardCategory cardCategory,
                                                                 @RequestParam(required = false) Carrier carrier,
                                                                 @RequestParam(value = "priceRanges") PriceRange priceRange,
                                                                 @RequestParam SellStatusFilter sellStatusFilter,
                                                                 @RequestParam(defaultValue = "true") Boolean highRatingFirst,
                                                                 @RequestParam(defaultValue = "54") Integer size,
                                                                 @RequestParam(required = false) Long lastCardId,
-                                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt);
+                                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt,
+                                                                @RequestParam(defaultValue = "false") Boolean favoriteOnly,
+                                                                @UserInfo CustomUserDetails userDetails);
 
     @Operation(
             summary = "판매글 또는 구매글 삭제",
@@ -127,12 +128,12 @@ public interface CardControllerSwagger {
     @Operation(
             summary = "본인 작성 판매글 또는 구매글 목록 조회 (스크롤)",
             description = """
-        본인이 등록한 판매글(SELL) 또는 구매글(BUY)을 스크롤 방식으로 조회합니다.
-        - `cardCategory`는 필수이며, SELL 또는 BUY 중 하나입니다.
-        - 커서 페이징 방식 사용:
-          - 초기 조회 시 `lastCardId`, `lastUpdatedAt` 없이 호출 가능합니다.
-          - 이후 추가 조회(더보기) 시 두 값을 모두 전달해야 합니다.
-    """
+                        본인이 등록한 판매글(SELL) 또는 구매글(BUY)을 스크롤 방식으로 조회합니다.
+                        - `cardCategory`는 필수이며, SELL 또는 BUY 중 하나입니다.
+                        - 커서 페이징 방식 사용:
+                          - 초기 조회 시 `lastCardId`, `lastUpdatedAt` 없이 호출 가능합니다.
+                          - 이후 추가 조회(더보기) 시 두 값을 모두 전달해야 합니다.
+                    """
     )
     @ApiSuccessResponse(description = "목록 조회 성공")
     @ErrorCode400(description = "조회 실패 - 잘못된 요청 파라미터")

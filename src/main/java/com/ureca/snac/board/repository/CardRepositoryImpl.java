@@ -12,6 +12,7 @@ import com.ureca.snac.board.entity.constants.CardCategory;
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.board.entity.constants.PriceRange;
 import com.ureca.snac.board.entity.constants.SellStatus;
+import com.ureca.snac.favorite.entity.QFavorite;
 import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.entity.QMember;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
@@ -36,7 +37,11 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                              SellStatusFilter sellStatusFilter,
                              Boolean highRatingFirst,
                              Integer size,
-                             Long lastCardId, LocalDateTime lastUpdatedAt) {
+                             Long lastCardId,
+                             LocalDateTime lastUpdatedAt,
+                             Boolean favoriteOnly,
+                             String username
+    ) {
 
         QCard c = QCard.card;
         QMember m = QMember.member;
@@ -52,6 +57,15 @@ public class CardRepositoryImpl implements CardRepositoryCustom {
                         priceRangeEq(priceRange, c),
                         sellStatusCond(sellStatusFilter, c)
                 );
+
+        // 단골 필터링이 트루일때 동적으로 추가
+        if (Boolean.TRUE.equals(favoriteOnly) && username != null) {
+            QFavorite f = QFavorite.favorite;
+            q.join(f).on(c.member.eq(f.toMember))
+                    // 카드의 작성자와 단골 대상을 조인
+                    .where(f.fromMember.email.eq(username));
+            // 단골을 추가한 사람이 현재 사용자
+        }
 
         if (highRatingFirst) {
             q.orderBy(m.ratingScore.desc(), c.updatedAt.desc(), c.id.desc());

@@ -14,9 +14,10 @@ import com.ureca.snac.board.exception.CardNotFoundException;
 import com.ureca.snac.board.repository.CardRepository;
 import com.ureca.snac.board.service.response.CardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
+import com.ureca.snac.favorite.repository.FavoriteRepository;
 import com.ureca.snac.member.entity.Member;
-import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.member.exception.MemberNotFoundException;
+import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.trade.controller.request.BuyerFilterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 import static com.ureca.snac.board.entity.constants.CardCategory.BUY;
 import static com.ureca.snac.board.entity.constants.CardCategory.REALTIME_SELL;
-import static com.ureca.snac.board.entity.constants.SellStatus.SOLD_OUT;
 
 @Slf4j
 @Service
@@ -38,6 +38,7 @@ public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
     private final MemberRepository memberRepository;
+    private final FavoriteRepository favoriteRepository;
 
     @Override
     @Transactional
@@ -105,20 +106,48 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public ScrollCardResponse scrollCards(CardCategory cardCategory, Carrier carrier, PriceRange priceRange, SellStatusFilter sellStatusFilter, Boolean highRatingFirst,
-                                          Integer size, Long lastCardId, LocalDateTime lastUpdatedAt) {
+                                          Integer size, Long lastCardId, LocalDateTime lastUpdatedAt,
+                                          Boolean favoriteOnly, String username) {
 
         List<Card> raw = cardRepository.scroll(cardCategory, carrier, priceRange, sellStatusFilter, highRatingFirst,
-                size + 1, lastCardId, lastUpdatedAt);
+                size + 1, lastCardId, lastUpdatedAt, favoriteOnly, username);
 
+        // 단골 여부 확인 N+1 방지
+        Set<Long> favoriteAuthorIds = Collections.emptySet();
+
+        // 로그인한 사용자에다가 조회된 카드가 있을 때
+        if (username != null && !raw.isEmpty()) {
+            // 작성자 ID 추출
+            Set<Long> authorIdSet = new HashSet<>();
+
+            for (Card card : raw) {
+                authorIdSet.add(card.getMember().getId());
+            }
+            List<Long> authorIds = new ArrayList<>(authorIdSet);
+
+            // 현재 로그인 사용자
+            Member currentMember = memberRepository.findByEmail(username)
+                    .orElseThrow(MemberNotFoundException::new);
+
+            // 내가 단골로 추가한 작성자 ID 목록을 조회
+            favoriteAuthorIds =
+                    favoriteRepository.findFavoriteToMemberIdsByFromMember(currentMember, authorIds);
+        }
         boolean hasNext = raw.size() > size;
 
-        List<Card> slice = raw.stream()
-                .limit(size)
-                .toList();
+        List<CardResponse> dtoList = new ArrayList<>();
 
-        List<CardResponse> dtoList = slice.stream()
-                .map(CardResponse::from)
-                .toList();
+        int loopSize = hasNext ? size : raw.size();
+
+        for (int i = 0; i < loopSize; i++) {
+            Card card = raw.get(i);
+            // 작성자가 내가 단골로 추가햇는지
+            boolean isFavorite =
+                    favoriteAuthorIds.contains(card.getMember().getId());
+
+            CardResponse dto = CardResponse.from(card, isFavorite);
+            dtoList.add(dto);
+        }
 
         return new ScrollCardResponse(dtoList, hasNext);
     }

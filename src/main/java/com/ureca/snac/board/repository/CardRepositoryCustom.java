@@ -19,7 +19,10 @@ public interface CardRepositoryCustom {
                       Boolean highRatingFirst,
                       Integer size,
                       Long lastCardId,
-                      LocalDateTime lastUpdatedAt);
+                      LocalDateTime lastUpdatedAt,
+                      Boolean favoriteOnly,
+                      String username
+    );
 
     List<Card> findRealtimeCardsByFilter(BuyerFilterRequest filter);
 

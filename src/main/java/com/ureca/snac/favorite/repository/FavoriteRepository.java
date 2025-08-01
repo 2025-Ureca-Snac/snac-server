@@ -3,8 +3,12 @@ package com.ureca.snac.favorite.repository;
 import com.ureca.snac.favorite.entity.Favorite;
 import com.ureca.snac.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long>,
         FavoriteRepositoryCustom {
@@ -34,4 +38,11 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long>,
      * @return 단골 수
      */
     Long countByFromMember(Member fromMember);
+
+    @Query("""
+            select f.toMember.id from Favorite f where f.fromMember = :fromMember and 
+            f.toMember.id in :toMemberIds
+            """)
+    Set<Long> findFavoriteToMemberIdsByFromMember(@Param("fromMember") Member fromMember,
+                                                  @Param("toMemberIds") List<Long> toMemberIds);
 }
