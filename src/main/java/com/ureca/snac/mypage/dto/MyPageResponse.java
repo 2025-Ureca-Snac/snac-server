@@ -17,7 +17,7 @@ public class MyPageResponse {
     private LocalDate birthDate;
     private int score;
     private String nickname;
-    private LocalDateTime nicknameUpdatedAt;
+    private LocalDateTime nextNicknameChangeAllowedAt;
     private boolean isNaverConnected;
     private boolean isGoogleConnected;
     private boolean isKakaoConnected;
@@ -30,7 +30,7 @@ public class MyPageResponse {
                 .birthDate(member.getBirthDate())
                 .score(member.getRatingScore())
                 .nickname(member.getNickname())
-                .nicknameUpdatedAt(member.getNicknameUpdatedAt())
+                .nextNicknameChangeAllowedAt(member.getNextNicknameChangeAllowedAt())
                 .isNaverConnected(member.isConnected(NAVER))
                 .isGoogleConnected(member.isConnected(GOOGLE))
                 .isKakaoConnected(member.isConnected(KAKAO))

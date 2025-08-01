@@ -5,6 +5,7 @@ import com.ureca.snac.auth.dto.request.VerificationEmailRequest;
 import com.ureca.snac.auth.service.verify.EmailService;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.config.RabbitMQConfig;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class EmailController implements EmailControllerSwagger {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestBody EmailRequest dto) {
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@Valid @RequestBody EmailRequest dto) {
         rabbitTemplate.convertAndSend(RabbitMQConfig.EMAIL_EXCHANGE, RabbitMQConfig.EMAIL_ROUTING_KEY, dto.getEmail());
 
 //        emailService.sendVerificationCode(dto.getEmail()); // rabbitMQ로 비동기 처리 함
@@ -31,7 +32,7 @@ public class EmailController implements EmailControllerSwagger {
 
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody VerificationEmailRequest dto) {
+    public ResponseEntity<ApiResponse<Void>> verifyCode(@Valid @RequestBody VerificationEmailRequest dto) {
         emailService.verifyCode(dto.getEmail(), dto.getCode());
         return ResponseEntity.ok(ApiResponse.ok(EMAIL_CODE_VERIFICATION_SUCCESS));
     }

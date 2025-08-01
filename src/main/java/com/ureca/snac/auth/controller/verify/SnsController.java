@@ -5,6 +5,7 @@ import com.ureca.snac.auth.dto.request.VerificationPhoneRequest;
 import com.ureca.snac.auth.service.verify.SnsService;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.config.RabbitMQConfig;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +22,14 @@ public class SnsController implements SnsControllerSwagger {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestBody PhoneRequest dto) {
+    public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@Valid @RequestBody PhoneRequest dto) {
         rabbitTemplate.convertAndSend(RabbitMQConfig.SMS_EXCHANGE, RabbitMQConfig.SMS_AUTH_ROUTING_KEY, dto.getPhone());
 //        snsService.sendVerificationCode(dto.getPhone()); // 기존 코드를 rabbitMQ 비동기로 변경했습니다.
         return ResponseEntity.ok(ApiResponse.ok(SMS_VERIFICATION_SENT));
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody VerificationPhoneRequest dto) {
+    public ResponseEntity<ApiResponse<Void>> verifyCode(@Valid @RequestBody VerificationPhoneRequest dto) {
         snsService.verifyCode(dto.getPhone(), dto.getCode());
         return ResponseEntity.ok(ApiResponse.ok(SMS_CODE_VERIFICATION_SUCCESS));
     }

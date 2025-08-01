@@ -3,6 +3,7 @@ package com.ureca.snac.member.controller;
 import com.ureca.snac.member.dto.request.JoinRequest;
 import com.ureca.snac.member.service.JoinServiceImpl;
 import com.ureca.snac.common.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ public class JoinController implements JoinControllerSwagger {
     private final JoinServiceImpl joinServiceImpl;
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> joinProcess(@RequestBody JoinRequest joinRequest) {
+    public ResponseEntity<ApiResponse<Void>> joinProcess(@RequestBody @Valid JoinRequest joinRequest) {
         joinServiceImpl.joinProcess(joinRequest);
         return ResponseEntity.ok(ApiResponse.ok(USER_SIGNUP_SUCCESS));
     }
