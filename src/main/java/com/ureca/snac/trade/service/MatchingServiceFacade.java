@@ -269,6 +269,6 @@ public class MatchingServiceFacade {
                 username
         );
         notificationService.sendDisputeNotification(trade.getSeller(), disputeDto);
-        notificationService.sendCancelNotification(new CancelTradeDto(trade.getSeller(), canceledTrade));
+        notificationService.sendDisputeNotification(trade.getBuyer(), disputeDto);
     }
 }

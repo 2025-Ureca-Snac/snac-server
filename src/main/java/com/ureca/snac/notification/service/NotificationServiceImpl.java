@@ -12,6 +12,7 @@ import com.ureca.snac.trade.dto.dispute.DisputeNotificationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import static com.ureca.snac.config.RabbitMQConfig.*;

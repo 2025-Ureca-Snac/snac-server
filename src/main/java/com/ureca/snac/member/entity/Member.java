@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -84,6 +85,7 @@ public class Member extends BaseTimeEntity {
         this.activated = activated;
     }
 
+
     public void addSocialLink(SocialProvider provider, String providerId) {
         SocialLink socialLink = SocialLink.builder()
                 .member(this)
@@ -115,12 +117,22 @@ public class Member extends BaseTimeEntity {
         this.phone = newPhone;
     }
 
+
+    private static final Duration NICKNAME_CHANGE_COOLDOWN = Duration.ofMinutes(3);
+
     public void changeNicknameTo(String newNickname) {
-        if (nicknameUpdatedAt != null && nicknameUpdatedAt.isAfter(LocalDateTime.now().minusDays(1))) {
+        if (nicknameUpdatedAt != null && nicknameUpdatedAt.isAfter(LocalDateTime.now().minus(NICKNAME_CHANGE_COOLDOWN))) {
             throw new NicknameChangeTooEarlyException();
         }
         this.nickname = newNickname;
         this.nicknameUpdatedAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getNextNicknameChangeAllowedAt() {
+        if (nicknameUpdatedAt == null) {
+            return LocalDateTime.now();
+        }
+        return nicknameUpdatedAt.plus(NICKNAME_CHANGE_COOLDOWN);
     }
 
     // 임시 정지
