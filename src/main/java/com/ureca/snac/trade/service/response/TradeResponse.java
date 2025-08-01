@@ -2,10 +2,7 @@ package com.ureca.snac.trade.service.response;
 
 import com.ureca.snac.board.entity.constants.Carrier;
 import com.ureca.snac.trade.dto.TradeSide;
-import com.ureca.snac.trade.entity.CancelReason;
-import com.ureca.snac.trade.entity.Trade;
-import com.ureca.snac.trade.entity.TradeStatus;
-import com.ureca.snac.trade.entity.TradeType;
+import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.repository.TradeCancelRepository;
 import lombok.Getter;
 
@@ -33,6 +30,7 @@ public class TradeResponse {
     // 대기 중인 취소요청 표시용
     private boolean cancelRequested; // 취소요청 대기중?
     private CancelReason cancelRequestReason; // 취소 요청 사유
+    private CancelStatus cancelRequestStatus;
 
     private boolean isPartnerFavorite; // 거래 상대방이 나랑 단골인지?
 
@@ -40,6 +38,7 @@ public class TradeResponse {
                           Integer dataAmount, String phone, Carrier carrier, CancelReason cancelReason,
                           TradeStatus status, TradeType tradeType, LocalDateTime createdAt,
                           boolean cancelRequested, CancelReason cancelRequestReason,
+                          CancelStatus cancelRequestStatus,
                           boolean isPartnerFavorite) {
         this.tradeId = tradeId;
         this.buyer = buyer;
@@ -54,6 +53,7 @@ public class TradeResponse {
         this.createdAt = createdAt;
         this.cancelRequested = cancelRequested;
         this.cancelRequestReason = cancelRequestReason;
+        this.cancelRequestStatus = cancelRequestStatus;
         this.isPartnerFavorite = isPartnerFavorite;
     }
 
@@ -71,6 +71,7 @@ public class TradeResponse {
 
         boolean isCancelRequest = cancel != null;
         CancelReason reason = isCancelRequest ? cancel.getReason() : null;
+        CancelStatus status = isCancelRequest ? cancel.getStatus() : null;
 
         return new TradeResponse(
                 trade.getId(),
@@ -86,6 +87,7 @@ public class TradeResponse {
                 trade.getCreatedAt(),
                 isCancelRequest,
                 reason,
+                status,
                 isPartnerFavorite
         );
     }
