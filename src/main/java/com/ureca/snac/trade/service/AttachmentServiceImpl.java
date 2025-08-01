@@ -80,4 +80,5 @@ public class AttachmentServiceImpl implements AttachmentService {
         // url 생성 및 반환 s3 객체키로 url 만듦
         return s3Uploader.generatePresignedUrl(attachment.getS3Key());
     }
+
 }

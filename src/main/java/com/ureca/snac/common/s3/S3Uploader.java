@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -52,7 +53,7 @@ public class S3Uploader {
     }
     // 고유 객체키 생성 역할
     // 객체 키 = {prefix}/{yyyy}/{MM}/{uuid}_{원본명}
-    private String buildKey(String originalName, String prefix) {
+    public String buildKey(String originalName, String prefix) {
         LocalDate today = LocalDate.now();
         String uuid = UUID.randomUUID().toString();
         return String.format("%s/%d/%02d/%s_%s",
@@ -92,5 +93,19 @@ public class S3Uploader {
             log.error("S3 파일 삭제 실패: {}", s3Key, e);
             throw new BusinessException(BaseCode.S3_DELETE_FAILED);
         }
+    }
+
+    public String generatePresignedPutUrl(String s3Key) {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(props.getBucket())
+                .key(s3Key)
+                .build();
+
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))
+                .putObjectRequest(putObjectRequest)
+                .build();
+
+        return s3Presigner.presignPutObject(presignRequest).url().toString();
     }
 }

@@ -10,6 +10,9 @@ import com.ureca.snac.trade.controller.request.*;
 import com.ureca.snac.trade.dto.CancelTradeDto;
 import com.ureca.snac.trade.dto.RetrieveFilterDto;
 import com.ureca.snac.trade.dto.TradeDto;
+import com.ureca.snac.trade.dto.dispute.DisputeNotificationDto;
+import com.ureca.snac.trade.entity.CancelReason;
+import com.ureca.snac.trade.entity.Trade;
 import com.ureca.snac.trade.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,7 @@ public class MatchingServiceFacade {
     private final TradeCancelService tradeCancelService;
     private final BuyFilterService buyFilterService;
     private final AttachmentService attachmentService;
+    private final DisputeService disputeService;
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
@@ -236,5 +240,35 @@ public class MatchingServiceFacade {
         Integer max = priceRange.getMax();
         // 0원 이상만 허용, max가 null이면 전체 허용
         return price >= 0 && (max == null || price <= max);
+    }
+
+    @Transactional
+    public void createDispute(CreateDisputeRequest request, String username) {
+        // 신고 생성
+        Long disputeId = disputeService.createDispute(
+                request.getTradeId(),
+                username,
+                request.getType(),
+                request.getDescription(),
+                request.getAttachmentKeys() // S3 업로드 키 리스트
+        );
+
+        // 자동 거래 취소
+        TradeDto canceledTrade = tradeCancelService.cancelRealTimeTrade(
+                request.getTradeId(),
+                username,
+                CancelReason.REAL_TIME_REPORTED
+        );
+
+        // 알림 (신고 알림 + 거래취소 알림)
+        TradeDto trade = tradeQueryService.findByTradeId(request.getTradeId());
+        DisputeNotificationDto disputeDto = new DisputeNotificationDto(
+                disputeId,
+                trade.getTradeId(),
+                request.getType(),
+                username
+        );
+        notificationService.sendDisputeNotification(trade.getSeller(), disputeDto);
+        notificationService.sendCancelNotification(new CancelTradeDto(trade.getSeller(), canceledTrade));
     }
 }

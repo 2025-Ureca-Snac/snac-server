@@ -264,6 +264,29 @@ public class RabbitMQConfig {
                 .with(ERROR_ROUTING_KEY);
     }
 
+    // --- 신고 ---
+    public static final String DISPUTE_NOTIFICATION_EXCHANGE = "dispute_notification_exchange";
+    public static final String DISPUTE_NOTIFICATION_QUEUE = "dispute_notification_queue";
+    public static final String DISPUTE_NOTIFICATION_ROUTING_KEY_PATTERN = "dispute.notification.#";
+
+    @Bean
+    public TopicExchange disputeNotificationExchange() {
+        return new TopicExchange(DISPUTE_NOTIFICATION_EXCHANGE);
+    }
+
+    @Bean
+    public Queue disputeNotificationQueue() {
+        return new Queue(DISPUTE_NOTIFICATION_QUEUE, false);
+    }
+
+    @Bean
+    public Binding disputeNotificationBinding(TopicExchange disputeNotificationExchange, Queue disputeNotificationQueue) {
+        return BindingBuilder
+                .bind(disputeNotificationQueue)
+                .to(disputeNotificationExchange)
+                .with(DISPUTE_NOTIFICATION_ROUTING_KEY_PATTERN);
+    }
+
     // 공통 비즈니스 익스체인지
     public static final String BUSINESS_EXCHANGE       = "business_exchange";
 

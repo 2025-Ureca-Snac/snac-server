@@ -112,4 +112,10 @@ public class MatchingController implements MatchingControllerSwagger {
         log.info("[거래취소] /trade/payment/cancel/seller, 사용자: {}, 거래ID: {}", principal.getName(), request.getTradeId());
         matchingServiceFacade.cancelPaymentTradeBySeller(request, principal.getName());
     }
+
+    @MessageMapping("/trade/dispute")
+    public void createDispute(@Payload CreateDisputeRequest request, Principal principal) {
+        log.info("[신고] /trade/dispute 호출, 사용자: {}, 요청: {}", principal.getName(), request);
+        matchingServiceFacade.createDispute(request, principal.getName());
+    }
 }

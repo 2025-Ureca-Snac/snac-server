@@ -35,7 +35,7 @@ public class AttachmentController {
         return ResponseEntity.ok(ApiResponse.of(BaseCode.ATTACHMENT_PRESIGNED_URL_ISSUED, url));
     }
 
-    // 신고할때 이미지 올리기
+    // 신고할때 이미지 올리기 (백엔드 거쳐서 업로드)
     @PostMapping(value = "/dispute/attachment",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> upload(
             @RequestPart("files") List<MultipartFile> files) {
@@ -45,5 +45,16 @@ public class AttachmentController {
                 .toList();
 
         return ResponseEntity.ok(ApiResponse.of(BaseCode.ATTACHMENT_UPLOAD_SUCCESS, keys));
+    }
+
+    // 프론트에서 바로 업로드하는 뉴 방법
+    // 서버는 presigned url 을 만들어주기만 하고 실제 업로드는 s3가
+    // s3에 직접 put 방식으로
+    @PostMapping("/dispute/attachment-url")
+    public ResponseEntity<ApiResponse<String>> getDisputePresignedUrl(
+            @RequestParam("filename") String filename) {
+        String s3Key = s3Uploader.buildKey(filename, "disputes/attachments");
+        String url = s3Uploader.generatePresignedPutUrl(s3Key); // PUT presigned url
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.ATTACHMENT_PRESIGNED_URL_ISSUED, url));
     }
 }
