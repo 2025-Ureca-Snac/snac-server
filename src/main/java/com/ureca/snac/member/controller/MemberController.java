@@ -34,7 +34,7 @@ public class MemberController implements MemberControllerSwagger {
     @Override
     public ResponseEntity<ApiResponse<Void>> changePwd(
             CustomUserDetails userDetails,
-            PasswordChangeRequest request
+            @Valid PasswordChangeRequest request
     ) {
         memberService.changePassword(userDetails.getUsername(), request);
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.PASSWORD_CHANGED));
@@ -50,7 +50,7 @@ public class MemberController implements MemberControllerSwagger {
     @Override
     public ResponseEntity<ApiResponse<Void>> checkPhone(
             CustomUserDetails userDetails,
-            PhoneChangeRequest phoneChangeRequest) {
+            @Valid PhoneChangeRequest phoneChangeRequest) {
 
         memberService.checkPassword(userDetails.getUsername(), phoneChangeRequest);
 
@@ -79,7 +79,7 @@ public class MemberController implements MemberControllerSwagger {
 
     //TODO 닉네임 변경 가능 여부(완료, 검증완료)
     @Override
-    public ResponseEntity<ApiResponse<Void>> checkNicknameDuplicate(NicknameCheckRequest request) {
+    public ResponseEntity<ApiResponse<Void>> checkNicknameDuplicate(@Valid NicknameChangeRequest request) {
         memberService.validateNicknameAvailable(request.getNickname());
         return ResponseEntity.ok(ApiResponse.ok(BaseCode.NICKNAME_AVAILABLE));
     }
@@ -90,7 +90,7 @@ public class MemberController implements MemberControllerSwagger {
     @Override
     public ResponseEntity<ApiResponse<String>> changeNickname(
             CustomUserDetails userDetails,
-            NicknameChangeRequest nicknameChangeRequest) {
+            @Valid NicknameChangeRequest nicknameChangeRequest) {
         String unlockAt = memberService.changeNickname(userDetails.getUsername(), nicknameChangeRequest);
         return ResponseEntity.ok(ApiResponse.of(BaseCode.NICKNAME_CHANGED, unlockAt));
     }
@@ -131,7 +131,7 @@ public class MemberController implements MemberControllerSwagger {
     // 3. 비밀번호 교체
     @Override
     public ResponseEntity<ApiResponse<Void>> resetPwdByPhone(
-            PasswordResetByPhoneRequest req) {
+            @Valid PasswordResetByPhoneRequest req) {
 
         String phone = req.getPhone();
         if (!snsService.isPhoneVerified(phone)) {
@@ -152,7 +152,7 @@ public class MemberController implements MemberControllerSwagger {
     // 3. 비밀번호 교체
     @Override
     public ResponseEntity<ApiResponse<Void>> resetPwdByEmail(
-            PasswordResetByEmailRequest req) {
+            @Valid PasswordResetByEmailRequest req) {
 
         String email = req.getEmail();
         if (!emailService.isEmailVerified(email)) {

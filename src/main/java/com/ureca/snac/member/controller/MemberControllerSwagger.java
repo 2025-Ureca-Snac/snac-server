@@ -68,7 +68,7 @@ public interface MemberControllerSwagger {
     @ErrorCode409(description = "이미 사용 중인 닉네임입니다.")
     @ErrorCode500
     @PostMapping("/check-nickname")
-    ResponseEntity<ApiResponse<Void>> checkNicknameDuplicate(@Valid @RequestBody NicknameCheckRequest request);
+    ResponseEntity<ApiResponse<Void>> checkNicknameDuplicate(@Valid @RequestBody NicknameChangeRequest request);
 
 
     @Operation(summary = "닉네임 변경", description = "닉네임을 변경합니다. 마지막 변경일로부터 1일이 지나야 변경 가능합니다.")

@@ -7,6 +7,7 @@ import com.ureca.snac.swagger.annotation.error.ErrorCode409;
 import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,5 +22,5 @@ public interface JoinControllerSwagger {
     @ErrorCode400(description = "잘못된 요청 (유효성 검사 실패)")
     @ErrorCode409(description = "이메일 중복")
     @PostMapping("/join")
-    ResponseEntity<ApiResponse<Void>> joinProcess(@RequestBody JoinRequest joinRequest);
+    ResponseEntity<ApiResponse<Void>> joinProcess(@RequestBody @Valid JoinRequest joinRequest);
 }
