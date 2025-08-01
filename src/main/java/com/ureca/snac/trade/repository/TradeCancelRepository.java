@@ -18,6 +18,7 @@ public interface TradeCancelRepository extends JpaRepository<TradeCancel, Long> 
 //    List<TradeCancel> findByStatusAndCreatedAtBefore(CancelStatus status, LocalDateTime before);
 //
     boolean existsByTradeIdAndStatus(Long tradeId, CancelStatus status);
+    boolean existsByTradeId(Long tradeId);
 
     // 무한 스크롤에 표시용 요약 조회 , 대기중인 취쇼요청만 조회
     @Query("""
