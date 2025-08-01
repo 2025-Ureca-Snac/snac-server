@@ -9,12 +9,14 @@ import com.ureca.snac.trade.dto.TradeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Profile("!scheduler")
 @RequiredArgsConstructor
 public class NotificationListener {
     private final SimpMessagingTemplate messaging;
