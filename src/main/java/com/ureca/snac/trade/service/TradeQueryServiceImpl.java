@@ -98,7 +98,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         }
 
         List<TradeCancelRepository.TradeCancelSummary> summaries =
-                tradeCancelRepository.findRequestedSummaryByTradeIds(tradesIds);
+                tradeCancelRepository.findCancelSummaryByTradeIds(tradesIds);
 
         Map<Long, TradeCancelRepository.TradeCancelSummary> cancelMap = new HashMap<>();
 

@@ -18,6 +18,7 @@ public interface TradeCancelRepository extends JpaRepository<TradeCancel, Long> 
 //    List<TradeCancel> findByStatusAndCreatedAtBefore(CancelStatus status, LocalDateTime before);
 //
     boolean existsByTradeIdAndStatus(Long tradeId, CancelStatus status);
+    boolean existsByTradeId(Long tradeId);
 
     // 무한 스크롤에 표시용 요약 조회 , 대기중인 취쇼요청만 조회
     @Query("""
@@ -30,9 +31,21 @@ public interface TradeCancelRepository extends JpaRepository<TradeCancel, Long> 
     """)
     List<TradeCancelSummary> findRequestedSummaryByTradeIds(@Param("tradeIds") Collection<Long> tradeIds);
 
+    // Cancel Status 전부 조회
+    @Query("""
+    select tc.trade.id as tradeId,
+           tc.reason   as reason,
+           tc.status   as status,
+           tc.createdAt as createdAt
+      from TradeCancel tc
+     where tc.trade.id in :tradeIds
+    """)
+    List<TradeCancelSummary> findCancelSummaryByTradeIds(@Param("tradeIds") Collection<Long> tradeIds);
+
     interface TradeCancelSummary {
         Long getTradeId();
         com.ureca.snac.trade.entity.CancelReason getReason();
+        CancelStatus getStatus();
         LocalDateTime getCreatedAt();
     }
 }
