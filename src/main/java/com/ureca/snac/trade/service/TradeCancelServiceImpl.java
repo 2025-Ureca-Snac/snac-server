@@ -55,6 +55,11 @@ public class TradeCancelServiceImpl implements TradeCancelService {
 
         Trade trade = findLockedTrade(tradeId);
 
+        // 이미 취소요청이 있었다면 중복 요청 불가
+        if (cancelRepo.existsByTradeId(tradeId)) {
+            throw new TradeAlreadyCancelRequestedException();
+        }
+
         // 제목 생성위해서 만들었음.. 리팩토링 시 변경 가능
         Card card = findLockedCard(trade.getCardId());
 
@@ -66,8 +71,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             throw new TradeInvalidStatusException();
 
         // 이미 요청이 있으면 중복 차단
-        if (cancelRepo.existsByTradeIdAndStatus(tradeId, CancelStatus.REQUESTED)
-        ) throw new TradeAlreadyCancelRequestedException();
+//        if (cancelRepo.existsByTradeIdAndStatus(tradeId, CancelStatus.REQUESTED)
+//        ) throw new TradeAlreadyCancelRequestedException();
 
         boolean isSeller = requester.equals(trade.getSeller());
 
