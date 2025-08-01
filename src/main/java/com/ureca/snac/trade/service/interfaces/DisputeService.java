@@ -13,6 +13,7 @@ public interface DisputeService {
     Long createDispute(
             Long tradeId,
             String userEmail,
+            String title,
             DisputeType type,
             String description,
             List<String> attachmentKeys
@@ -22,4 +23,6 @@ public interface DisputeService {
     Page<MyDisputeListItemDto> listMyDisputes(String email, Pageable pageable);
 
     Page<ReceivedDisputeListItemDto> listDisputesAgainstMe(String email, Pageable pageable);
+
+    Long createQna(String title, String email, DisputeType type, String description, List<String> attachmentKeys);
 }

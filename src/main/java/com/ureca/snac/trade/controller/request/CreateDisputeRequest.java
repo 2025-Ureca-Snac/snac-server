@@ -13,6 +13,7 @@ import java.util.List;
 public class CreateDisputeRequest {
     private Long tradeId;
     private DisputeType type;
+    private String title;
     private String description;
     private List<String> attachmentKeys;
 

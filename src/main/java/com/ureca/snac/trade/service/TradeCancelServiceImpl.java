@@ -194,7 +194,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         penaltyService.givePenalty(cancel.getRequester().getEmail(), PenaltyReason.BUYER_FAULT);
     }
 
-    private void refundToBuyerAndPublishEvent(Trade trade, Card card, Member buyer) {
+    public void refundToBuyerAndPublishEvent(Trade trade, Card card, Member buyer) {
         long moneyToRefund = trade.getPriceGb() - trade.getPoint();
 
         if (moneyToRefund > 0) {

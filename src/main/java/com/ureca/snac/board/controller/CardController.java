@@ -13,6 +13,7 @@ import com.ureca.snac.board.service.response.CardResponse;
 import com.ureca.snac.board.service.response.CreateCardResponse;
 import com.ureca.snac.board.service.response.ScrollCardResponse;
 import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.swagger.annotation.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ import static com.ureca.snac.common.BaseCode.*;
 @RestController
 @RequestMapping("/api/cards")
 @RequiredArgsConstructor
-public class CardController implements CardControllerSwagger{
+public class CardController implements CardControllerSwagger {
 
     private final CardService cardService;
 
@@ -63,10 +64,15 @@ public class CardController implements CardControllerSwagger{
                                                                        @RequestParam(defaultValue = "true") Boolean highRatingFirst,
                                                                        @RequestParam(defaultValue = "54") Integer size,
                                                                        @RequestParam(required = false) Long lastCardId,
-                                                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt) {
+                                                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastUpdatedAt,
+                                                                       @RequestParam(defaultValue = "false") Boolean favoriteOnly,
+                                                                       @UserInfo CustomUserDetails userDetails) {
+
+        String username = (userDetails != null) ? userDetails.getUsername() : null;
 
         ScrollCardResponse response = cardService.scrollCards(cardCategory, carrier, priceRange,
-                sellStatusFilter, highRatingFirst, size, lastCardId, lastUpdatedAt);
+                sellStatusFilter, highRatingFirst, size, lastCardId, lastUpdatedAt,
+                favoriteOnly, username);
 
         return ResponseEntity.ok(ApiResponse.of(CARD_READ_SUCCESS, response));
     }

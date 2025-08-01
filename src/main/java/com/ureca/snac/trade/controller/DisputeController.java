@@ -3,6 +3,7 @@ package com.ureca.snac.trade.controller;
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.trade.dto.dispute.DisputeCreateRequest;
+import com.ureca.snac.trade.dto.dispute.QnaCreateRequest;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class DisputeController {
         Long id = disputeService.createDispute(
                 tradeId,
                 userDetails.getUsername(),
+                disputeCreateRequest.getTitle(),
                 disputeCreateRequest.getType(),
                 disputeCreateRequest.getDescription(),
                 disputeCreateRequest.getAttachmentKeys()
@@ -67,5 +69,19 @@ public class DisputeController {
         PageRequest pr = PageRequest.of(page, size);
         var data = disputeService.listDisputesAgainstMe(me.getUsername(), pr);
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_RECEIVED_LIST_SUCCESS, data));
+    }
+
+    @PostMapping("/qna")
+    public ResponseEntity<ApiResponse<?>> createQna(
+            @RequestBody @Valid QnaCreateRequest qnaCreateRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long id = disputeService.createQna(
+                qnaCreateRequest.getTitle(),
+                userDetails.getUsername(),
+                qnaCreateRequest.getType(),
+                qnaCreateRequest.getDescription(),
+                qnaCreateRequest.getAttachmentKeys()
+        );
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.QNA_CREATE_SUCCESS, id));
     }
 }
