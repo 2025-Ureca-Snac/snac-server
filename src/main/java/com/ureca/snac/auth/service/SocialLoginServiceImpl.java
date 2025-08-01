@@ -72,8 +72,8 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         String role = jwtUtil.getRole(socialToken);
         log.info("소셜 로그인 검증 완료: email={}, role={}", username, role);
 
-        String newAccess = jwtUtil.createJwt("access", username, role, 43200000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String newAccess = jwtUtil.createAccessToken(username, role);
+        String newRefresh = jwtUtil.createRefreshToken(username, role);
 
         refreshRepository.save(new Refresh(username, newRefresh));
 

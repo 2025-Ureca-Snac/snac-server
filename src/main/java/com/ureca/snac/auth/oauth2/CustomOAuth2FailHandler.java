@@ -1,8 +1,6 @@
 package com.ureca.snac.auth.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureca.snac.common.ApiResponse;
-import com.ureca.snac.common.BaseCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
