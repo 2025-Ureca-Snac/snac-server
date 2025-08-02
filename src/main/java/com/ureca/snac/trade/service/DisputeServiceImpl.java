@@ -69,6 +69,7 @@ public class DisputeServiceImpl implements DisputeService {
                         .description(description)
                         .prevTradeStatus(prev)
                         .reportedApplied(applied)
+                        .category(DisputeCategory.REPORT)
                         .build()
         );
 
@@ -100,6 +101,7 @@ public class DisputeServiceImpl implements DisputeService {
                 dispute.getTitle(),
                 dispute.getDescription(),
                 dispute.getAnswer(),
+                dispute.getCategory(),
                 urls,
                 dispute.getCreatedAt(),
                 dispute.getAnswerAt());
@@ -120,6 +122,7 @@ public class DisputeServiceImpl implements DisputeService {
                             dispute.getType(),
                             dispute.getTitle(),
                             dispute.getDescription(),
+                            dispute.getCategory(),
                             dispute.getCreatedAt(),
                             dispute.getAnswerAt(),
                             summary
@@ -171,6 +174,7 @@ public class DisputeServiceImpl implements DisputeService {
                         .description(description)
                         .prevTradeStatus(null)
                         .reportedApplied(false)
+                        .category(DisputeCategory.QNA)
                         .build()
         );
 
