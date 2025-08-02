@@ -1,6 +1,9 @@
 package com.ureca.snac.trade.controller;
 
+import com.ureca.snac.auth.dto.response.ImageValidationResult;
+import com.ureca.snac.auth.service.lmm.TradeImageValidationService;
 import com.ureca.snac.common.ApiResponse;
+import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.trade.controller.request.ClaimBuyRequest;
 import com.ureca.snac.trade.controller.request.CreateTradeRequest;
 import com.ureca.snac.trade.controller.request.TradeQueryType;
@@ -30,6 +33,7 @@ import static com.ureca.snac.common.BaseCode.*;
 public class BasicTradeController implements BasicTradeControllerSwagger {
 
     private final TradeFacade tradeFacade;
+    private final TradeImageValidationService tradeImageValidationService;
 
 
     @GetMapping("/count/buy")
@@ -73,6 +77,18 @@ public class BasicTradeController implements BasicTradeControllerSwagger {
     public ResponseEntity<ApiResponse<?>> sendTradeData(@PathVariable Long tradeId,
                                                         @RequestPart("file") MultipartFile file,
                                                         @AuthenticationPrincipal UserDetails userDetails) {
+
+        // lmm 도입
+
+        // 추후 3자(skt, lg, 또 한개 뭐였지)와 합의 후, 추출된 사진에서의 데이터를 직접 보내어 실제로 데이터 전달이 이루어졌는지 확인하는
+        // 확장성을 고려한 기술 도입
+        // 현재의 목적은 데이터 전송 사진 외에 사적 사진 제재
+        ImageValidationResult validation = tradeImageValidationService.validateImage(file);
+        if (!validation.valid()) {
+            String message = validation.message();
+            return ResponseEntity.ok(ApiResponse.of(BaseCode.IMAGE_CRITERIA_REJECTED, message));
+        }
+
         tradeFacade.sendTradeData(tradeId, userDetails.getUsername(), file);
 
         return ResponseEntity.ok(ApiResponse.ok(TRADE_DATA_SENT_SUCCESS));
