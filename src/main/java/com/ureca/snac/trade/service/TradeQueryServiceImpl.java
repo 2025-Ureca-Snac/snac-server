@@ -51,15 +51,6 @@ public class TradeQueryServiceImpl implements TradeQueryService {
                 : tradeRepository.findTradesBySellerInfinite(member.getId(), lastTradeId, tradeQueryType, size + 1);
 
         boolean hasNext = trades.size() > size;
-
-
-//        List<TradeResponse> dto = trades.stream()
-//                .limit(size)
-//                .map(t -> TradeResponse.from(t, side))
-//                .toList();
-
-//        // 화면 표시 대상만 추리기
-//        List<Trade> page = trades.stream().limit(size).toList();
         List<Trade> page = hasNext ? trades.subList(0, size) : trades;
 
         // 단골 여부 확인데이터
@@ -68,30 +59,22 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         if (!page.isEmpty()) {
             Set<Long> partnerIdSet = new HashSet<>();
             for (Trade trade : page) {
-                Long partnerId = trade.getBuyer().getId().equals(member.getId()) ?
-                        trade.getSeller().getId() : trade.getBuyer().getId();
-                partnerIdSet.add(partnerId);
+                // 내가 구매자 이면 상대방이 판매자
+                if (trade.getBuyer().getId().equals(member.getId())) {
+                    // 구매글 처리
+                    if (trade.getSeller() != null) {
+                        partnerIdSet.add(trade.getSeller().getId());
+                    }
+                } else {
+                    partnerIdSet.add(trade.getBuyer().getId());
+                }
             }
-            List<Long> partnerIds = new ArrayList<>(partnerIdSet);
-            favoritePartnerIds = favoriteRepository.findFavoriteToMemberIdsByFromMember(member, partnerIds);
+            if (!partnerIdSet.isEmpty()) {
+                List<Long> partnerIds = new ArrayList<>(partnerIdSet);
+                favoritePartnerIds = favoriteRepository.findFavoriteToMemberIdsByFromMember(member, partnerIds);
+            }
         }
 
-//        // 취소 요청 가져오기
-//        List<Long> tradeIds = page.stream().map(Trade::getId).toList();
-//        var summaries = tradeCancelRepository.findRequestedSummaryByTradeIds(tradeIds);
-//        Map<Long, TradeCancelRepository.TradeCancelSummary> cancelMap = summaries.stream()
-//                .collect(Collectors.toMap(
-//                        TradeCancelRepository.TradeCancelSummary::getTradeId,
-//                        s -> s
-//                ));
-//
-//        List<TradeResponse> dto = page.stream()
-//                .map(t -> {
-//                    var cancel = cancelMap.get(t.getId());
-//                    return TradeResponse.from(t, side, cancel);
-//                })
-//                .toList();
-//
         List<Long> tradesIds = new ArrayList<>();
         for (Trade t : page) {
             tradesIds.add(t.getId());
@@ -109,8 +92,15 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         // DTO 생성
         List<TradeResponse> dtoList = new ArrayList<>();
         for (Trade t : page) {
-            Long partnerId = t.getBuyer().getId().equals(member.getId()) ?
-                    t.getSeller().getId() : t.getBuyer().getId();
+            Long partnerId = null;
+
+            if (t.getBuyer().getId().equals(member.getId())) {
+                if (t.getSeller() != null) {
+                    partnerId = t.getSeller().getId();
+                }
+            } else {
+                partnerId = t.getBuyer().getId();
+            }
 
             boolean isPartnerFavorite = favoritePartnerIds.contains(partnerId);
 
