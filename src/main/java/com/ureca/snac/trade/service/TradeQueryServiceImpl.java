@@ -75,6 +75,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
             }
         }
 
+        // 취소 요청 정보
         List<Long> tradesIds = new ArrayList<>();
         for (Trade t : page) {
             tradesIds.add(t.getId());
@@ -93,20 +94,24 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         List<TradeResponse> dtoList = new ArrayList<>();
         for (Trade t : page) {
             Long partnerId = null;
+            String partnerNickname = null;
 
             if (t.getBuyer().getId().equals(member.getId())) {
                 if (t.getSeller() != null) {
                     partnerId = t.getSeller().getId();
+                    partnerNickname = t.getSeller().getNickname();
                 }
             } else {
                 partnerId = t.getBuyer().getId();
+                partnerNickname = t.getBuyer().getNickname();
             }
 
-            boolean isPartnerFavorite = favoritePartnerIds.contains(partnerId);
+            boolean isPartnerFavorite = (partnerId != null) && favoritePartnerIds.contains(partnerId);
 
             TradeCancelRepository.TradeCancelSummary cancel = cancelMap.get(t.getId());
 
-            TradeResponse dto = TradeResponse.from(t, username, isPartnerFavorite, cancel);
+            TradeResponse dto = TradeResponse.from(
+                    t, username, isPartnerFavorite, cancel, partnerId, partnerNickname);
             dtoList.add(dto);
         }
 
@@ -142,9 +147,33 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     public TradeResponse getTradeById(Long tradeId, String username) {
         Member member = findMember(username);
 
-        return tradeRepository.findByIdAndParticipant(tradeId, member)
-                .map(t -> TradeResponse.from(t, member.getEmail()))
+//        return tradeRepository.findByIdAndParticipant(tradeId, member)
+//                .map(t -> TradeResponse.from(t, member.getEmail()))
+//                .orElseThrow(TradeNotFoundException::new);
+
+        Trade trade = tradeRepository.findByIdAndParticipant(tradeId, member)
                 .orElseThrow(TradeNotFoundException::new);
+
+        Long partnerId = null;
+        String partnerNickname = null;
+
+        if (trade.getBuyer().getId().equals(member.getId())) {
+            if (trade.getSeller() != null) {
+                partnerId = trade.getSeller().getId();
+                partnerNickname = trade.getSeller().getNickname();
+            }
+        } else {
+            partnerId = trade.getBuyer().getId();
+            partnerNickname = trade.getBuyer().getNickname();
+        }
+
+        boolean isPartnerFavorite = false;
+        if (partnerId != null) {
+            isPartnerFavorite =
+                    favoriteRepository.existsByFromMemberIdAndToMemberId(member.getId(), partnerId);
+        }
+        return TradeResponse.from(
+                trade, username, isPartnerFavorite, null, partnerId, partnerNickname);
     }
 
     @Override
