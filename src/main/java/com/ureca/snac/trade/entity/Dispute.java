@@ -75,10 +75,10 @@ public class Dispute extends BaseTimeEntity {
         this.status     = DisputeStatus.ANSWERED;
     }
 
-    public void reject(String answer) {
-        this.answer   = answer;
-        this.answerAt = LocalDateTime.now();
-        this.status   = DisputeStatus.REJECTED;
-    }
+//    public void reject(String answer) {
+//        this.answer   = answer;
+//        this.answerAt = LocalDateTime.now();
+//        this.status   = DisputeStatus.REJECTED;
+//    }
 
 }

@@ -44,7 +44,7 @@ public class DisputeAdminController {
 
         BaseCode baseCode = switch (disputeAnswerRequest.getResult()) {
             case NEED_MORE -> DISPUTE_NEED_MORE;
-            case REJECTED  -> DISPUTE_REJECTED_SUCCESS;
+//            case REJECTED  -> DISPUTE_REJECTED_SUCCESS;
             default        -> DISPUTE_ANSWERED_SUCCESS;
         };
 
@@ -60,19 +60,19 @@ public class DisputeAdminController {
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
-        var cond = new DisputeSearchCond(status, type, reporter);
-        var data = disputeAdminService.list(cond, PageRequest.of(page,size));
+        DisputeSearchCond cond = new DisputeSearchCond(status, type, reporter);
+        Page<DisputeDetailResponse> data = disputeAdminService.searchList(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
-    // 처리 대기 신고
+    // 처리 대기 신고(문의)
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<?>> pending(
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
         DisputeSearchCond cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null);
-        Page<DisputeDetailResponse> data = disputeAdminService.list(cond, PageRequest.of(page,size));
+        Page<DisputeDetailResponse> data = disputeAdminService.searchList(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
@@ -114,7 +114,7 @@ public class DisputeAdminController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails admin) {
 
-        boolean restored = disputeAdminService.finalizeIfNoActive(id, admin.getUsername());
+        boolean restored = disputeAdminService.restoreIfNoActive(id, admin.getUsername());
         BaseCode code = restored ? BaseCode.DISPUTE_FINALIZE_RESTORED
                 : BaseCode.DISPUTE_FINALIZE_SKIPPED;
         return ResponseEntity.ok(ApiResponse.ok(code));

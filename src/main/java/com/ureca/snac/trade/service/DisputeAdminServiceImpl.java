@@ -62,14 +62,13 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 dispute.needMore(dto.getAnswer()); // 답변 상태 갱신
                 // 자동확정은 안됨.. 고려해봐야 할 부분
             }
-            case REJECTED  -> { // 신고 기각
-                dispute.reject(dto.getAnswer());
-                //  trade.resumeAutoConfirm(); // 자동확정 재개
-
-                restoreTradeIfNoActive(trade);
-
-                // 환불 패널티 x
-            }
+//            case REJECTED  -> { // 신고 기각
+//                dispute.reject(dto.getAnswer());
+//
+//                restoreTradeIfNoActive(trade);
+//
+//                // 환불 패널티 x
+//            }
             case ANSWERED  -> {
                 dispute.answered(dto.getAnswer());
 
@@ -91,7 +90,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
 
 
     // 목록 조회
-    public Page<DisputeDetailResponse> list(DisputeSearchCond cond, Pageable page) {
+    public Page<DisputeDetailResponse> searchList(DisputeSearchCond cond, Pageable page) {
         /* repository.search(...) 가 Page<Dispute> 를 주면
            map(this::toDto) 로 DTO 변환, 페이징 정보는 그대로 유지 */
         return disputeRepository.search(cond, page)
@@ -182,7 +181,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
      *  - 반환값: true = 복구됨 / false = 스킵
      */
     @Override
-    public boolean finalizeIfNoActive(Long disputeId, String adminEmail) {
+    public boolean restoreIfNoActive(Long disputeId, String adminEmail) {
         assertAdmin(adminEmail);
 
         Dispute d = disputeRepository.findById(disputeId)
