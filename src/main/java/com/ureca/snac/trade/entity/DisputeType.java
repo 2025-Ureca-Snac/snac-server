@@ -6,5 +6,6 @@ public enum DisputeType {
     PAYMENT, // 결제 관련
     ACCOUNT, // 계정 관련
     TECHNICAL_PROBLEM, // 기술적 문제
-    OTHER // 기타
+    REPORT_OTHER, // 기타
+    QNA_OTHER // 기타
 }

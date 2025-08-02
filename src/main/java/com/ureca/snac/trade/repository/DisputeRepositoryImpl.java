@@ -34,6 +34,10 @@ public class DisputeRepositoryImpl implements DisputeRepositoryCustom {
         if (hasText(cond.getReporter())) {
             booleanBuilder.and(qDispute.reporter.email.contains(cond.getReporter()));
         }
+        if (cond.getCategory() != null) {
+            booleanBuilder.and(qDispute.category.eq(cond.getCategory()));
+        }
+
 
 
         List<Dispute> content = qf.selectFrom(qDispute)

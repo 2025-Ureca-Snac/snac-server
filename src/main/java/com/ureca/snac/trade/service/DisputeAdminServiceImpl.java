@@ -214,7 +214,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
 
         return new DisputeDetailResponse(
                 d.getId(), d.getStatus(), d.getType(), d.getTitle(),
-                d.getDescription(), d.getAnswer(),
+                d.getDescription(), d.getAnswer(), d.getCategory(),
                 urls, d.getCreatedAt(), d.getAnswerAt());
     }
 
