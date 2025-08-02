@@ -6,6 +6,7 @@ import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
 import com.ureca.snac.trade.entity.Dispute;
+import com.ureca.snac.trade.entity.DisputeCategory;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
@@ -27,7 +28,7 @@ import static com.ureca.snac.common.BaseCode.*;
 @RequestMapping("/api/admin/disputes")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-public class DisputeAdminController {
+public class DisputeAdminController implements  DisputeAdminControllerSwagger{
 
     private final DisputeAdminService disputeAdminService;
     private final DisputeService disputeService;
@@ -53,32 +54,33 @@ public class DisputeAdminController {
 
     // 전체 검색
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> search(
+    public ResponseEntity<ApiResponse<Page<DisputeDetailResponse>>> search(
             @RequestParam(required=false) DisputeStatus status,
             @RequestParam(required=false) DisputeType type,
             @RequestParam(required=false) String reporter,
+            @RequestParam(required=false) DisputeCategory category,
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
-        DisputeSearchCond cond = new DisputeSearchCond(status, type, reporter);
+        DisputeSearchCond cond = new DisputeSearchCond(status, type, reporter, category);
         Page<DisputeDetailResponse> data = disputeAdminService.searchList(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
     // 처리 대기 신고(문의)
     @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<?>> pending(
+    public ResponseEntity<ApiResponse<Page<DisputeDetailResponse>>> pending(
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
-        DisputeSearchCond cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null);
+        DisputeSearchCond cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null,null);
         Page<DisputeDetailResponse> data = disputeAdminService.searchList(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
     // 상세
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> detailDispute(
+    public ResponseEntity<ApiResponse<DisputeDetailResponse>> detailDispute(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
