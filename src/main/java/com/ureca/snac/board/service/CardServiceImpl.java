@@ -167,16 +167,18 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public void deleteCardByRealTime(String username, Long cardId) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
-        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+//        Card card = cardRepository.findLockedByIdAndMember(cardId, member).orElseThrow(CardNotFoundException::new);
+//        cardRepository.delete(card);
 
-        cardRepository.delete(card);
+        cardRepository.findLockedByIdAndMember(cardId, member).ifPresent(cardRepository::delete);
     }
 
     @Transactional
     public List<CardDto> findByMemberUsernameAndSellStatusesAndCardCategory(String username, List<SellStatus> sellStatuses, CardCategory cardCategory) {
         Member member = memberRepository.findByEmail(username).orElseThrow(MemberNotFoundException::new);
 
-        return cardRepository.findLockedByMemberAndSellStatusInAndCardCategory(member, sellStatuses, cardCategory)
+//        return cardRepository.findLockedByMemberAndSellStatusInAndCardCategory(member, sellStatuses, cardCategory) -> 락 해제
+        return cardRepository.findByMemberAndSellStatusInAndCardCategory(member, sellStatuses, cardCategory)
                 .stream()
                 .map(CardDto::from)
                 .toList();

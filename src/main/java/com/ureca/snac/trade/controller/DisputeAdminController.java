@@ -4,12 +4,16 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
+import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
+import com.ureca.snac.trade.entity.Dispute;
+import com.ureca.snac.trade.entity.DisputeCategory;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,10 +25,10 @@ import static com.ureca.snac.common.BaseCode.*;
 
 
 @RestController
-@RequestMapping("/admin/disputes")
+@RequestMapping("/api/admin/disputes")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-public class DisputeAdminController {
+public class DisputeAdminController implements  DisputeAdminControllerSwagger{
 
     private final DisputeAdminService disputeAdminService;
     private final DisputeService disputeService;
@@ -41,7 +45,7 @@ public class DisputeAdminController {
 
         BaseCode baseCode = switch (disputeAnswerRequest.getResult()) {
             case NEED_MORE -> DISPUTE_NEED_MORE;
-            case REJECTED  -> DISPUTE_REJECTED_SUCCESS;
+//            case REJECTED  -> DISPUTE_REJECTED_SUCCESS;
             default        -> DISPUTE_ANSWERED_SUCCESS;
         };
 
@@ -50,32 +54,33 @@ public class DisputeAdminController {
 
     // 전체 검색
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> search(
+    public ResponseEntity<ApiResponse<Page<DisputeDetailResponse>>> search(
             @RequestParam(required=false) DisputeStatus status,
             @RequestParam(required=false) DisputeType type,
             @RequestParam(required=false) String reporter,
+            @RequestParam(required=false) DisputeCategory category,
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
-        var cond = new DisputeSearchCond(status, type, reporter);
-        var data = disputeAdminService.list(cond, PageRequest.of(page,size));
+        DisputeSearchCond cond = new DisputeSearchCond(status, type, reporter, category);
+        Page<DisputeDetailResponse> data = disputeAdminService.searchList(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
-    // 처리 대기 신고
+    // 처리 대기 신고(문의)
     @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<?>> pending(
+    public ResponseEntity<ApiResponse<Page<DisputeDetailResponse>>> pending(
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
-        var cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null);
-        var data = disputeAdminService.list(cond, PageRequest.of(page,size));
+        DisputeSearchCond cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null,null);
+        Page<DisputeDetailResponse> data = disputeAdminService.searchList(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
     // 상세
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> detailDispute(
+    public ResponseEntity<ApiResponse<DisputeDetailResponse>> detailDispute(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
@@ -111,7 +116,7 @@ public class DisputeAdminController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails admin) {
 
-        boolean restored = disputeAdminService.finalizeIfNoActive(id, admin.getUsername());
+        boolean restored = disputeAdminService.restoreIfNoActive(id, admin.getUsername());
         BaseCode code = restored ? BaseCode.DISPUTE_FINALIZE_RESTORED
                 : BaseCode.DISPUTE_FINALIZE_SKIPPED;
         return ResponseEntity.ok(ApiResponse.ok(code));

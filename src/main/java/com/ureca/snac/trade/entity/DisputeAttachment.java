@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.entity;
 
+import com.ureca.snac.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "dispute_attachment")
-public class DisputeAttachment {
+public class DisputeAttachment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,13 +13,13 @@ import java.util.Set;
 public interface FavoriteRepository extends JpaRepository<Favorite, Long>,
         FavoriteRepositoryCustom {
     /**
-     * 단골관계 있는지 여부 확인
+     * 특정 단골 관계 존재여부 ID 기반 조회
      *
-     * @param fromMember 단골 등록 하는 사람
-     * @param toMember   등록 당하는 사람
-     * @return 존재 여부
+     * @param fromMemberId 단골을 동록할 회원 ID
+     * @param toMemberId   단골로 등록될 회원 ID
+     * @return 관계 존재 여부
      */
-    boolean existsByFromMemberAndToMember(Member fromMember, Member toMember);
+    boolean existsByFromMemberIdAndToMemberId(Long fromMemberId, Long toMemberId);
 
     /**
      * 특정 단골 관계 조회
@@ -39,9 +39,17 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long>,
      */
     Long countByFromMember(Member fromMember);
 
+    /**
+     * 특정 회원이 주어진 ID 목록에서 단골로 추가한 회원의 ID 만 반환
+     * N+1대비
+     *
+     * @param fromMember  단골 목록의 기준이 되는 회원
+     * @param toMemberIds 확인할 상대방 회원 ID 목록
+     * @return 주어진 ID 목록중 단골 회원 ID 만 담은 SET
+     */
     @Query("""
-            select f.toMember.id from Favorite f where f.fromMember = :fromMember and 
-            f.toMember.id in :toMemberIds
+            select f.toMember.id from Favorite f where f.fromMember = :fromMember
+            and f.toMember.id in :toMemberIds
             """)
     Set<Long> findFavoriteToMemberIdsByFromMember(@Param("fromMember") Member fromMember,
                                                   @Param("toMemberIds") List<Long> toMemberIds);

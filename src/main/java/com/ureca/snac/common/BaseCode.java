@@ -276,7 +276,7 @@ public enum BaseCode {
     TRADE_CANCEL_REQUESTED("TRADE_CANCEL_REQUESTED_200", HttpStatus.OK, "거래 취소 요청이 등록되었습니다."),
     TRADE_CANCEL_ACCEPTED("TRADE_CANCEL_ACCEPTED_200", HttpStatus.OK, "거래 취소가 승인되었습니다."),
     TRADE_CANCEL_REJECTED("TRADE_CANCEL_REJECTED_200", HttpStatus.OK, "거래 취소 요청이 거절되었습니다."),
-    TRADE_ALREADY_CANCEL_REQUESTED("TRADE_ALREADY_CANCEL_REQUESTED_409", HttpStatus.CONFLICT, "이미 취소 요청이 있습니다."),
+    TRADE_ALREADY_CANCEL_REQUESTED("TRADE_ALREADY_CANCEL_REQUESTED_409", HttpStatus.CONFLICT, "이미 취소 요청 기록이 있습니다."),
     TRADE_CANCEL_NOT_FOUND("TRADE_CANCEL_NOT_FOUND_404", HttpStatus.NOT_FOUND, "취소 요청 정보를 찾을 수 없습니다."),
 
     // 스케줄러 자동 처리
@@ -333,7 +333,8 @@ public enum BaseCode {
     S3_UPLOAD_FAILED("S3_UPLOAD_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),
     S3_DELETE_FAILED("S3_DELETE_FAILED_500", HttpStatus.INTERNAL_SERVER_ERROR, "S3 삭제에 실패했습니다"),
     ATTACHMENT_UPLOAD_SUCCESS("ATTACHMENT_UPLOAD_SUCCESS_201", HttpStatus.CREATED, "이미지가 성공적으로 업로드되었습니다."),
-    ATTACHMENT_PRESIGNED_URL_ISSUED("ATTACHMENT_PRESIGNED_URL_ISSUED_200", HttpStatus.OK, "첨부 이미지에 대한 접근 URL이 발급되었습니다.");
+    ATTACHMENT_PRESIGNED_URL_ISSUED("ATTACHMENT_PRESIGNED_URL_ISSUED_200", HttpStatus.OK, "첨부 이미지에 대한 접근 URL이 발급되었습니다."),
+    ATTACHMENT_PRESIGNED_UPLOAD_URL_ISSUED("ATTACHMENT_PRESIGNED__UPLOAD_URL_ISSUED_200", HttpStatus.OK, "s3 업로드를 위한 URL이 발급되었습니다.");
     private final String code;
     private final HttpStatus status;
     private final String message;

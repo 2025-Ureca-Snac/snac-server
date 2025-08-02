@@ -1,5 +1,6 @@
 package com.ureca.snac.trade.dto.dispute;
 
+import com.ureca.snac.trade.entity.DisputeCategory;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ public class DisputeDetailResponse {
     private String title;
     private String description;
     private String answer;
+    private DisputeCategory category;
 
     private List<String> attachmentUrls;
     private LocalDateTime createdAt;

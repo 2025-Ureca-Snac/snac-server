@@ -69,6 +69,7 @@ public class DisputeServiceImpl implements DisputeService {
                         .description(description)
                         .prevTradeStatus(prev)
                         .reportedApplied(applied)
+                        .category(DisputeCategory.REPORT)
                         .build()
         );
 
@@ -100,6 +101,7 @@ public class DisputeServiceImpl implements DisputeService {
                 dispute.getTitle(),
                 dispute.getDescription(),
                 dispute.getAnswer(),
+                dispute.getCategory(),
                 urls,
                 dispute.getCreatedAt(),
                 dispute.getAnswerAt());
@@ -109,17 +111,25 @@ public class DisputeServiceImpl implements DisputeService {
     public Page<MyDisputeListItemDto> listMyDisputes(String email, Pageable pageable) {
         Member me = findMember(email);
         return disputeRepository.findByReporterOrderByCreatedAtDesc(me, pageable)
-                .map(dispute -> new MyDisputeListItemDto(
-                        dispute.getId(),
-                        dispute.getStatus(),
-                        dispute.getType(),
-                        dispute.getTitle(),
-                        dispute.getDescription(),
-                        dispute.getCreatedAt(),
-                        dispute.getAnswerAt(),
-                        toTradeSummary(dispute.getTrade(), me)
-                ));
+                .map(dispute -> {
+                    TradeSummaryDto summary = null;
+                    if (dispute.getTrade() != null) {
+                        summary = toTradeSummary(dispute.getTrade(), me);
+                    }
+                    return new MyDisputeListItemDto(
+                            dispute.getId(),
+                            dispute.getStatus(),
+                            dispute.getType(),
+                            dispute.getTitle(),
+                            dispute.getDescription(),
+                            dispute.getCategory(),
+                            dispute.getCreatedAt(),
+                            dispute.getAnswerAt(),
+                            summary
+                    );
+                });
     }
+
     // 신고받은 목록
     public Page<ReceivedDisputeListItemDto> listDisputesAgainstMe(String email, Pageable pageable) {
         Member me = findMember(email);
@@ -164,6 +174,7 @@ public class DisputeServiceImpl implements DisputeService {
                         .description(description)
                         .prevTradeStatus(null)
                         .reportedApplied(false)
+                        .category(DisputeCategory.QNA)
                         .build()
         );
 

@@ -22,6 +22,7 @@ public class TradeDto {
     private Long buyerId;
     private String buyer;
     private String buyerNickname;
+    private Integer buyerRatingScore;
 
     private Carrier carrier;
     private Integer priceGb;
@@ -44,7 +45,8 @@ public class TradeDto {
                 .buyerId(trade.getBuyer().getId())
                 .buyer(trade.getBuyer().getEmail())
                 .buyerNickname(trade.getBuyer().getNickname())
-                
+                .buyerRatingScore(trade.getBuyer().getRatingScore())
+
                 .carrier(trade.getCarrier())
                 .priceGb(trade.getPriceGb())
                 .dataAmount(trade.getDataAmount())

@@ -38,7 +38,7 @@ public class TradeProgressServiceImpl implements TradeProgressService {
     public Long sendTradeData(Long tradeId, String username) {
         Member seller = findMember(username);
         Trade trade = findLockedTrade(tradeId);
-        Card card = findLockedCard(trade.getCardId());
+//        Card card = findLockedCard(trade.getCardId()); -> 불필요한 락 제거
 
         trade.markDataSent(); // 결제가 완료되지 않은 상태에서는 판매자가 데이터를 전송할 수 없음
         trade.ensureSendPermission(seller);

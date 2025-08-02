@@ -103,6 +103,7 @@ public class WebSocketTradeEventListener {
             forceCancelRealTimeTrades(username);
 
             // 4) DB 카드 삭제
+            // 락 해제 및 삭제시만 락 적용
             List<CardDto> cards = cardService.findByMemberUsernameAndSellStatusesAndCardCategory(username, List.of(SELLING, TRADING), REALTIME_SELL);
             for (CardDto card : cards) {
                 cardService.deleteCardByRealTime(username, card.getCardId());
