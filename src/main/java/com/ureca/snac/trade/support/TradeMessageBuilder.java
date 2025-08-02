@@ -26,7 +26,6 @@ public class TradeMessageBuilder {
 
     public TradeMessageDto buildTradeMessage(Long tradeId) {
         Trade trade = tradeRepository.findById(tradeId).orElseThrow(TradeNotFoundException::new);
-        Card card = cardRepository.findById(trade.getCardId()).orElseThrow(CardNotFoundException::new);
 
         TradeStatus status = trade.getStatus();
 
