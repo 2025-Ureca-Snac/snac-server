@@ -2,16 +2,18 @@ package com.ureca.snac.trade.controller;
 
 import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
-import com.ureca.snac.trade.dto.dispute.DisputeCreateRequest;
-import com.ureca.snac.trade.dto.dispute.QnaCreateRequest;
+import com.ureca.snac.trade.dto.dispute.*;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -55,7 +57,7 @@ public class DisputeController {
             @AuthenticationPrincipal UserDetails me) {
 
         PageRequest pr = PageRequest.of(page, size);
-        var data = disputeService.listMyDisputes(me.getUsername(), pr);
+        Page<MyDisputeListItemDto> data = disputeService.listMyDisputes(me.getUsername(), pr);
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_MY_LIST_SUCCESS, data));
     }
 
@@ -67,7 +69,7 @@ public class DisputeController {
             @AuthenticationPrincipal UserDetails me) {
 
         PageRequest pr = PageRequest.of(page, size);
-        var data = disputeService.listDisputesAgainstMe(me.getUsername(), pr);
+        Page<ReceivedDisputeListItemDto> data = disputeService.listDisputesAgainstMe(me.getUsername(), pr);
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_RECEIVED_LIST_SUCCESS, data));
     }
 
@@ -84,4 +86,5 @@ public class DisputeController {
         );
         return ResponseEntity.ok(ApiResponse.of(BaseCode.QNA_CREATE_SUCCESS, id));
     }
+
 }

@@ -109,17 +109,24 @@ public class DisputeServiceImpl implements DisputeService {
     public Page<MyDisputeListItemDto> listMyDisputes(String email, Pageable pageable) {
         Member me = findMember(email);
         return disputeRepository.findByReporterOrderByCreatedAtDesc(me, pageable)
-                .map(dispute -> new MyDisputeListItemDto(
-                        dispute.getId(),
-                        dispute.getStatus(),
-                        dispute.getType(),
-                        dispute.getTitle(),
-                        dispute.getDescription(),
-                        dispute.getCreatedAt(),
-                        dispute.getAnswerAt(),
-                        toTradeSummary(dispute.getTrade(), me)
-                ));
+                .map(dispute -> {
+                    TradeSummaryDto summary = null;
+                    if (dispute.getTrade() != null) {
+                        summary = toTradeSummary(dispute.getTrade(), me);
+                    }
+                    return new MyDisputeListItemDto(
+                            dispute.getId(),
+                            dispute.getStatus(),
+                            dispute.getType(),
+                            dispute.getTitle(),
+                            dispute.getDescription(),
+                            dispute.getCreatedAt(),
+                            dispute.getAnswerAt(),
+                            summary
+                    );
+                });
     }
+
     // 신고받은 목록
     public Page<ReceivedDisputeListItemDto> listDisputesAgainstMe(String email, Pageable pageable) {
         Member me = findMember(email);

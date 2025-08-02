@@ -4,12 +4,15 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
+import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
+import com.ureca.snac.trade.entity.Dispute;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import com.ureca.snac.trade.service.interfaces.DisputeAdminService;
 import com.ureca.snac.trade.service.interfaces.DisputeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +24,7 @@ import static com.ureca.snac.common.BaseCode.*;
 
 
 @RestController
-@RequestMapping("/admin/disputes")
+@RequestMapping("/api/admin/disputes")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class DisputeAdminController {
@@ -68,8 +71,8 @@ public class DisputeAdminController {
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="20") int size) {
 
-        var cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null);
-        var data = disputeAdminService.list(cond, PageRequest.of(page,size));
+        DisputeSearchCond cond = new DisputeSearchCond(DisputeStatus.IN_PROGRESS, null, null);
+        Page<DisputeDetailResponse> data = disputeAdminService.list(cond, PageRequest.of(page,size));
         return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS, data));
     }
 
