@@ -34,4 +34,9 @@ public interface DisputeRepository extends JpaRepository<Dispute, Long> , Disput
     """)
     Page<Dispute> findReceivedByParticipant(@Param("me") Member me, Pageable pageable);
 
+    @Query("SELECT d.category, COUNT(d) FROM Dispute d GROUP BY d.category")
+    List<Object[]> countGroupByCategory();
+
+    @Query("SELECT d.type, COUNT(d) FROM Dispute d GROUP BY d.type")
+    List<Object[]> countGroupByType();
 }

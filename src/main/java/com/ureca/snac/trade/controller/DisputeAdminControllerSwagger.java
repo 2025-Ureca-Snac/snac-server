@@ -9,6 +9,7 @@ import com.ureca.snac.swagger.annotation.response.ApiSuccessResponse;
 import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
+import com.ureca.snac.trade.dto.dispute.DisputeStatisticsResponse;
 import com.ureca.snac.trade.entity.DisputeStatus;
 import com.ureca.snac.trade.entity.DisputeType;
 import com.ureca.snac.trade.entity.DisputeCategory;
@@ -121,4 +122,12 @@ public interface DisputeAdminControllerSwagger {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails admin
     );
+
+    @Operation(
+            summary = "신고/문의 통계 조회",
+            description = "카테고리별/타입별 신고 문의 건수 통계를 반환"
+    )
+    @ApiSuccessResponse(description = "통계 조회 성공")
+    @GetMapping("/statistics")
+    ResponseEntity<ApiResponse<DisputeStatisticsResponse>> statistics();
 }
