@@ -70,8 +70,7 @@ public class TradeResponse {
         if (username.equals(trade.getBuyer().getEmail())) {
             phoneToShow = trade.getPhone();
         } else if (trade.getSeller() != null &&
-                username.equals(trade.getSeller().getEmail()) &&
-                trade.getStatus() == TradeStatus.PAYMENT_CONFIRMED) {
+                username.equals(trade.getSeller().getEmail()) && (trade.getStatus() == TradeStatus.PAYMENT_CONFIRMED || trade.getStatus() == TradeStatus.PAYMENT_CONFIRMED_ACCEPTED)) {
             phoneToShow = trade.getPhone();
         }
 
