@@ -15,6 +15,7 @@ import org.springframework.ai.azure.openai.AzureOpenAiResponseFormat;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ import java.io.IOException;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class TradeImageValidationService {
 
     private static final String DEFAULT_DEPLOYMENT_NAME = "gpt-4o";
