@@ -146,6 +146,7 @@ cors:
     - https://develop.df83wi2m9axuw.amplifyapp.com
     - https://seungwoo.i234.me
     - https://kapi.kakao.com
+    - https://develop.df83wi2m9axuw.amplifyapp.com
   allowed-methods:
     - GET
     - POST
