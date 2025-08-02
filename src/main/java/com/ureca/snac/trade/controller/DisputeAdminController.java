@@ -5,6 +5,7 @@ import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
+import com.ureca.snac.trade.dto.dispute.DisputeStatisticsResponse;
 import com.ureca.snac.trade.entity.Dispute;
 import com.ureca.snac.trade.entity.DisputeCategory;
 import com.ureca.snac.trade.entity.DisputeStatus;
@@ -46,7 +47,7 @@ public class DisputeAdminController implements  DisputeAdminControllerSwagger{
         BaseCode baseCode = switch (disputeAnswerRequest.getResult()) {
             case NEED_MORE -> DISPUTE_NEED_MORE;
 //            case REJECTED  -> DISPUTE_REJECTED_SUCCESS;
-            default        -> DISPUTE_ANSWERED_SUCCESS;
+            default -> DISPUTE_ANSWERED_SUCCESS;
         };
 
         return ResponseEntity.ok(ApiResponse.ok(baseCode));
@@ -122,4 +123,9 @@ public class DisputeAdminController implements  DisputeAdminControllerSwagger{
         return ResponseEntity.ok(ApiResponse.ok(code));
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<ApiResponse<DisputeStatisticsResponse>> statistics() {
+        DisputeStatisticsResponse statistics = disputeAdminService.getStatistics();
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_STAT_SUCCESS, statistics));
+    }
 }

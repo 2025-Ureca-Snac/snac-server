@@ -172,8 +172,13 @@ public class TradeQueryServiceImpl implements TradeQueryService {
             isPartnerFavorite =
                     favoriteRepository.existsByFromMemberIdAndToMemberId(member.getId(), partnerId);
         }
+
+        TradeCancelRepository.TradeCancelSummary cancel =
+                tradeCancelRepository.findSummaryByTradeId(tradeId).orElse(null);
+
         return TradeResponse.from(
-                trade, username, isPartnerFavorite, null, partnerId, partnerNickname);
+                trade, username, isPartnerFavorite, cancel, partnerId, partnerNickname
+        );
     }
 
     @Override

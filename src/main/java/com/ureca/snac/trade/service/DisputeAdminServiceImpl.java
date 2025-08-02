@@ -13,6 +13,7 @@ import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
+import com.ureca.snac.trade.dto.dispute.DisputeStatisticsResponse;
 import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.DisputeAdminPermissionDeniedException;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
@@ -30,7 +31,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -202,6 +206,31 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
 
         trade.resumeAutoConfirm();
         return true;
+    }
+
+    @Override
+    public DisputeStatisticsResponse getStatistics() {
+        // 카테고리별
+        Map<DisputeCategory, Long> byCategory = new HashMap<>();
+        List<Object[]> categoryList = disputeRepository.countGroupByCategory();
+
+        for (Object[] arr : categoryList) {
+            DisputeCategory category = (DisputeCategory) arr[0];
+            Long count = (Long) arr[1];
+            byCategory.put(category, count);
+        }
+
+        // 타입별
+        Map<DisputeType, Long> byType = new HashMap<>();
+        List<Object[]> typeList = disputeRepository.countGroupByType();
+
+        for (Object[] arr : typeList) {
+            DisputeType type = (DisputeType) arr[0];
+            Long count = (Long) arr[1];
+            byType.put(type, count);
+        }
+
+        return new DisputeStatisticsResponse(byCategory, byType);
     }
 
 
