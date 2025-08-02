@@ -42,6 +42,16 @@ public interface TradeCancelRepository extends JpaRepository<TradeCancel, Long> 
     """)
     List<TradeCancelSummary> findCancelSummaryByTradeIds(@Param("tradeIds") Collection<Long> tradeIds);
 
+    @Query("""
+    select tc.trade.id as tradeId,
+           tc.reason as reason,
+           tc.status as status,
+           tc.createdAt as createdAt
+      from TradeCancel tc
+     where tc.trade.id = :tradeId
+    """)
+    Optional<TradeCancelSummary> findSummaryByTradeId(@Param("tradeId") Long tradeId);
+
     interface TradeCancelSummary {
         Long getTradeId();
         com.ureca.snac.trade.entity.CancelReason getReason();
