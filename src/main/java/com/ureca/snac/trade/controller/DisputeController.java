@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class DisputeController {
+public class DisputeController implements DisputeControllerSwagger{
 
     private final DisputeService disputeService;
 
