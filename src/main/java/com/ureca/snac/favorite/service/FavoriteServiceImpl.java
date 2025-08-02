@@ -42,7 +42,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         Member toMember = findMemberById(toMemberId);
 
-        if (favoriteRepository.existsByFromMemberAndToMember(fromMember, toMember)) {
+        if (favoriteRepository.existsByFromMemberIdAndToMemberId(fromMember.getId(), toMember.getId())) {
             throw new AlreadyFavoriteMember();
         }
 
@@ -109,7 +109,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         Member fromMember = findMemberByEmail(fromUserEmail);
         Member toMember = findMemberById(toMemberId);
 
-        boolean isFavorite = favoriteRepository.existsByFromMemberAndToMember(fromMember, toMember);
+        boolean isFavorite = favoriteRepository.existsByFromMemberIdAndToMemberId(fromMember.getId(), toMember.getId());
 
         log.info("[단골 여부 확인] 요청자 : {}, 상대방 : {}, 여부 : {}",
                 fromUserEmail, toMemberId, isFavorite);
