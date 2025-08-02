@@ -2,6 +2,15 @@ spring:
   application:
     name: snac-server
 
+  ai:
+    azure:
+      openai:
+        api-key: ${AZURE_OPENAI_API_KEY}
+        endpoint: ${AZURE_OPENAI_ENDPOINT}
+        chat:
+          options:
+            deployment-name: gpt-4o
+
   servlet:
     multipart:
       max-file-size: 10MB
