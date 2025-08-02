@@ -22,26 +22,44 @@ import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;
 import com.ureca.snac.payment.service.PaymentService;
 import com.ureca.snac.wallet.service.WalletService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Profile("!prod")
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DevToolServiceImpl implements DevToolService {
 
     private final MemberRepository memberRepository;
     private final PaymentService paymentService;
-    private final PaymentGatewayAdapter paymentGatewayAdapter;
     private final MoneyDepositor moneyDepositor;
     private final DevDataSupport devDataSupport;
     private final WalletService walletService;
     private final PaymentRepository paymentRepository;
     private final AssetHistoryEventPublisher assetHistoryEventPublisher;
+    private final PaymentGatewayAdapter paymentGatewayAdapter;
+
+    public DevToolServiceImpl(
+            MemberRepository memberRepository,
+            PaymentService paymentService,
+            MoneyDepositor moneyDepositor,
+            DevDataSupport devDataSupport,
+            WalletService walletService,
+            PaymentRepository paymentRepository,
+            AssetHistoryEventPublisher assetHistoryEventPublisher,
+            @Qualifier("fake")
+            PaymentGatewayAdapter paymentGatewayAdapter) {
+
+        this.memberRepository = memberRepository;
+        this.paymentService = paymentService;
+        this.moneyDepositor = moneyDepositor;
+        this.devDataSupport = devDataSupport;
+        this.walletService = walletService;
+        this.paymentRepository = paymentRepository;
+        this.assetHistoryEventPublisher = assetHistoryEventPublisher;
+        this.paymentGatewayAdapter = paymentGatewayAdapter;
+    }
 
     @Override
     @Transactional
