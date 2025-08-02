@@ -8,14 +8,14 @@ import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 
-@Profile("!prod")
 @Slf4j
 @Component
+@Qualifier("fake")
 @RequiredArgsConstructor
 public class FakePaymentGatewayAdapter implements PaymentGatewayAdapter {
 
@@ -46,3 +46,4 @@ public class FakePaymentGatewayAdapter implements PaymentGatewayAdapter {
                 .build();
     }
 }
+
