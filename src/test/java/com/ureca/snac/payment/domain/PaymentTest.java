@@ -158,6 +158,7 @@ public class PaymentTest {
         Payment payment = TestFixture.createPendingPayment(owner, 10000L);
         Long wrongAmount = 5000L;
 
+        // when then
         assertThatThrownBy(() -> payment.validateForConfirmation(owner,
                 wrongAmount))
                 .isInstanceOf(PaymentAmountMismatchException.class);
@@ -168,6 +169,7 @@ public class PaymentTest {
         // given
         Payment payment = TestFixture.createSuccessPayment(member, 10000L, "카드", OffsetDateTime.now());
 
+        // when then
         assertThatThrownBy(() -> payment.validateForConfirmation(member, 10000L))
                 .isInstanceOf(PaymentAlreadyProcessedPaymentException.class);
     }
@@ -189,6 +191,7 @@ public class PaymentTest {
                 "카드", OffsetDateTime.now());
         Long insufficientBalance = 5000L;
 
+        // when then
         assertThatThrownBy(() -> payment.validateForCancellation(member,
                 insufficientBalance))
                 .isInstanceOf(AlreadyUsedRechargeCannotCancelException.class);
