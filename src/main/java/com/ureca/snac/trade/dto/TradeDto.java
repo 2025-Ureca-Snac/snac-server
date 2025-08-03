@@ -37,15 +37,15 @@ public class TradeDto {
                 .tradeId(trade.getId())
                 .cardId(trade.getCardId())
 
-                .sellerId(trade.getSeller() != null ? trade.getSeller().getId() : null)
-                .seller(trade.getSeller() != null ? trade.getSeller().getEmail() : null)
-                .sellerNickName(trade.getSeller() != null ? trade.getSeller().getNickname() : null)
-                .sellerRatingScore(trade.getSeller() != null ? trade.getSeller().getRatingScore() : null)
+                .sellerId(trade.getSeller().getId())
+                .seller(trade.getSeller().getEmail())
+                .sellerNickName(trade.getSeller().getNickname())
+                .sellerRatingScore(trade.getSeller().getRatingScore())
 
-                .buyerId(trade.getBuyer() != null ? trade.getBuyer().getId() : null)
-                .buyer(trade.getBuyer() != null ? trade.getBuyer().getEmail() : null)
-                .buyerNickname(trade.getBuyer() != null ? trade.getBuyer().getNickname() : null)
-                .buyerRatingScore(trade.getBuyer() != null ? trade.getBuyer().getRatingScore() : null)
+                .buyerId(trade.getBuyer().getId())
+                .buyer(trade.getBuyer().getEmail())
+                .buyerNickname(trade.getBuyer().getNickname())
+                .buyerRatingScore(trade.getBuyer().getRatingScore())
 
                 .carrier(trade.getCarrier())
                 .priceGb(trade.getPriceGb())
