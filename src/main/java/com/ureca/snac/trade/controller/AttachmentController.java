@@ -4,6 +4,7 @@ import com.ureca.snac.common.ApiResponse;
 import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.common.s3.S3Uploader;
 import com.ureca.snac.trade.service.interfaces.AttachmentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Authorization")
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
