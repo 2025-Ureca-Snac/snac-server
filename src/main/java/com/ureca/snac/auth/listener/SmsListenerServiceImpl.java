@@ -6,6 +6,7 @@ import com.ureca.snac.trade.dto.TradeMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sns.SnsClient;
@@ -17,6 +18,7 @@ import java.util.Random;
 
 @Slf4j
 @Service
+@Profile("!scheduler")
 @RequiredArgsConstructor
 public class SmsListenerServiceImpl implements SmsListenerService {
 
