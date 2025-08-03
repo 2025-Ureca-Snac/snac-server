@@ -7,6 +7,7 @@ import com.ureca.snac.auth.dto.response.NaverResponse;
 import com.ureca.snac.auth.dto.response.OAuth2Response;
 import com.ureca.snac.auth.repository.AuthRepository;
 import com.ureca.snac.auth.util.JWTUtil;
+import com.ureca.snac.common.BaseCode;
 import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.auth.oauth2.SocialProvider;
 import com.ureca.snac.member.entity.SocialLink;
@@ -19,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.Duration;
 import java.util.Optional;
+
+import static com.ureca.snac.common.BaseCode.*;
 
 
 @Service
@@ -87,15 +91,25 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             Optional<SocialLink> alreadyLinked =
                     socialLinkRepository.findByProviderAndProviderId(provider, providerId);
             if (alreadyLinked.isPresent()) {
-                log.warn("이미 연동된 소셜 계정: provider={}, id={}", provider, providerId);
-                throw new OAuth2AuthenticationException("이미 다른 계정에 연동된 소셜 계정입니다.");
+                Member linkedMember = alreadyLinked.get().getMember();
+                if (linkedMember.getEmail().equals(emailFromState)) {
+                    log.info("같은 계정에 이미 연동된 소셜 계정입니다. provider={}, id={}", provider, providerId);
+                    return new CustomOAuth2User(linkedMember, registrationId, providerId, oAuth2User.getAttributes());
+                } else {
+                    log.warn("이미 다른 계정에 연동된 소셜 계정: provider={}, id={}", provider, providerId);
+                    throw new OAuth2AuthenticationException(
+                            new OAuth2Error(OAUTH_DB_ALREADY_LINKED.getCode()),
+                            "이미 다른 계정에 연동된 소셜 계정입니다.");
+                }
             }
 
             // 연동 대상 회원 조회 및 ID 업데이트
             Optional<Member> email = authRepository.findByEmail(emailFromState);
             if (email.isEmpty()) {
                 log.error("존재하지 않는 회원 이메일: {}", emailFromState);
-                throw new OAuth2AuthenticationException("존재하지 않는 회원입니다.");
+                throw new OAuth2AuthenticationException(
+                        new OAuth2Error(MEMBER_NOT_FOUND.getCode()),
+                        "해당 회원을 찾을 수 없습니다.");
             }
             Member member = email.get();
 
@@ -110,8 +124,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         SocialLink socialLink = socialLinkRepository
                 .findByProviderAndProviderId(provider, providerId)
                 .orElseThrow(() -> {
-                    log.warn("일치하는 소셜 계정 없음: provider={}, id={}", provider, providerId);
-                    return new OAuth2AuthenticationException("일치하는 계정이 없습니다.");
+                    log.warn("연동된 소셜 계정이 아님: provider={}, id={}", provider, providerId);
+                    return new OAuth2AuthenticationException(
+                            new OAuth2Error(OAUTH_DB_ACCOUNT_NOT_FOUND.getCode()),
+                            "소셜 계정에 연동된 계정이 없습니다. 회원가입을 먼저 진행해주세요.");
                 });
 
         Member existingMember = socialLink.getMember();

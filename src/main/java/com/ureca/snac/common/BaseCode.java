@@ -30,8 +30,10 @@ public enum BaseCode {
     OAUTH_LOGIN_SUCCESS("OAUTH_LOGIN_SUCCESS_200", HttpStatus.OK, "소셜 로그인에 성공했습니다."),
 
     // 소셜 로그인 시도 - 실패
-    OAUTH_LOGIN_FAILED("OAUTH_LOGIN_FAILED_401", HttpStatus.UNAUTHORIZED, "회원이 아니거나, 소셜 연동이 되어 있지 않습니다."),
     UNSUPPORTED_SOCIAL_PROVIDER("UNSUPPORTED_SOCIAL_PROVIDER_400", HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 프로바이더입니다."),
+
+    OAUTH_DB_ALREADY_LINKED("OAUTH_DB_ALREADY_LINKED_409", HttpStatus.CONFLICT, "이미 다른 계정에 연동된 소셜 계정입니다."),
+    OAUTH_DB_ACCOUNT_NOT_FOUND("OAUTH_DB_ACCOUNT_NOT_FOUND_404", HttpStatus.NOT_FOUND, "소셜 계정에 연동된 계정이 없습니다. 회원가입을 먼저 진행해주세요."),
 
     // 카카오 연동 해제 관련
     KAKAO_UNLINK_SUCCESS("KAKAO_UNLINK_SUCCESS_200", HttpStatus.OK, "카카오 연결 끊기에 성공했습니다."),
