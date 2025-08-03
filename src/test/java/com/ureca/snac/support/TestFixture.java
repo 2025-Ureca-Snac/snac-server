@@ -42,7 +42,9 @@ public class TestFixture {
 
     // Payment
     public static Payment createPendingPayment(Member member, Long amount) {
-        return Payment.prepare(member, amount);
+        Payment payment = Payment.prepare(member, amount);
+        ReflectionTestUtils.setField(payment, "id", 1L);
+        return payment;
     }
 
     public static Payment createPendingPayment(Member member) {
