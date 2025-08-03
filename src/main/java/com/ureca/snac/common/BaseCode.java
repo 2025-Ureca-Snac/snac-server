@@ -300,6 +300,7 @@ public enum BaseCode {
     DISPUTE_CREATE_SUCCESS("DISPUTE_CREATE_SUCCESS_201", HttpStatus.CREATED, "신고가 접수되었습니다."),
     QNA_CREATE_SUCCESS("QNA_CREATE_SUCCESS_201", HttpStatus.CREATED, "문의가 접수되었습니다."),
     DISPUTE_DETAIL_SUCCESS("DISPUTE_DETAIL_SUCCESS_200", HttpStatus.OK, "신고 상세를 조회했습니다."),
+    DISPUTE_STAT_SUCCESS("DISPUTE_STAT_SUCCESS_200", HttpStatus.OK, "DISPUTE 타입별, 카테고리별 통계를 조회했습니다."),
     DISPUTE_COMMENT_SUCCESS("DISPUTE_COMMENT_SUCCESS_201", HttpStatus.CREATED, "신고 답변이 등록되었습니다."),
 
     DISPUTE_NEED_MORE("DISPUTE_NEED_MORE_200", HttpStatus.OK,"추가 자료 요청"),
