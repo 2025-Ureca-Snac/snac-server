@@ -41,7 +41,7 @@ public class TradeMessageBuilder {
             switch (status) {
                 case PAYMENT_CONFIRMED:
                     statusText = "[SNAC] 결제가 완료되었습니다. 판매자는 데이터 전송을 진행해 주세요.";
-                    phoneList.add(trade.getSeller().getPhone());
+                    phoneList.add(trade.getSeller() != null ? trade.getSeller().getPhone() : "");
                     break;
 
                 case DATA_SENT:
@@ -56,7 +56,7 @@ public class TradeMessageBuilder {
 
                 case CANCELED:
                     statusText = "[SNAC] 거래가 취소되었습니다. 사유를 확인해 주세요.";
-                    phoneList.add(trade.getSeller().getPhone());
+                    phoneList.add(trade.getSeller() != null ? trade.getSeller().getPhone() : "");
                     phoneList.add(trade.getBuyer().getPhone());
                     break;
 
