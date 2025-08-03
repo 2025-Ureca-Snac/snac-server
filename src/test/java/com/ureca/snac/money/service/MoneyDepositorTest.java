@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -55,27 +54,16 @@ class MoneyDepositorTest {
         member = TestFixture.createTestMember();
         payment = TestFixture.createPendingPayment(member);
         tossConfirmResponse = TestFixture.createTossConfirmResponse();
-
-        // 공통 Mock 객체 정의 영속 상태 객체 반환
-        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> {
-            Payment paymentToSave = invocation.getArgument(0);
-            ReflectionTestUtils.setField(paymentToSave, "id", 1L);
-            return paymentToSave;
-        });
     }
 
     @Test
     void 머니_입금_처리시_정상적_상호작용() {
         // given
-        // 가짜 충전 내역 저장소에 저장 해서 돌려준다, null 처리
-        when(moneyRechargeRepository.save(any(MoneyRecharge.class))).
-                thenAnswer(invocation -> {
-                    MoneyRecharge recharge = invocation.getArgument(0);
-                    ReflectionTestUtils.setField(recharge, "id", 1L);
-                    return recharge;
-                });
+        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+
+        when(moneyRechargeRepository.save(any(MoneyRecharge.class))).thenReturn(null);
         // 지갑 서비스 입금 요청
-        when(walletService.depositMoney(member.getId(), 10000L)).
+        when(walletService.depositMoney(anyLong(), anyLong())).
                 thenReturn(20000L);
         // 이벤트 생성
         when(assetChangedEventFactory.createForRechargeEvent(anyLong(), anyLong(), anyLong(), anyLong()))
@@ -92,7 +80,7 @@ class MoneyDepositorTest {
         verify(moneyRechargeRepository).save(any(MoneyRecharge.class));
 
         // wallet 증가
-        verify(walletService).depositMoney(member.getId(), 10000L);
+        verify(walletService).depositMoney(member.getId(), payment.getAmount());
 
         // Asset 이벤트
         verify(assetChangedEventFactory).createForRechargeEvent(anyLong(), anyLong(), anyLong(), anyLong());
@@ -104,6 +92,9 @@ class MoneyDepositorTest {
     @Test
     void 지갑_입금_실패시_충전기록_저장_안됨() {
         // given
+        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+
+        when(moneyRechargeRepository.save(any(MoneyRecharge.class))).thenReturn(null);
         when(walletService.depositMoney(member.getId(), 10000L))
                 .thenThrow(new WalletNotFoundException());
 
@@ -112,7 +103,7 @@ class MoneyDepositorTest {
                 deposit(payment, member, tossConfirmResponse))
                 .isInstanceOf(WalletNotFoundException.class);
 
-        // 트랜잭션 롤백
-        verify(paymentRepository).save(payment);
+        // then 트랜잭션 롤백
+        verify(assetHistoryEventPublisher, never()).publish(any(AssetChangedEvent.class));
     }
 }

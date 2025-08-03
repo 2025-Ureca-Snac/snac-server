@@ -4,8 +4,10 @@ import com.ureca.snac.common.exception.InternalServerException;
 import com.ureca.snac.infra.PaymentGatewayAdapter;
 import com.ureca.snac.infra.dto.response.TossConfirmResponse;
 import com.ureca.snac.member.entity.Member;
+import com.ureca.snac.member.exception.MemberNotFoundException;
 import com.ureca.snac.member.repository.MemberRepository;
 import com.ureca.snac.payment.entity.Payment;
+import com.ureca.snac.payment.exception.PaymentNotFoundException;
 import com.ureca.snac.payment.repository.PaymentRepository;
 import com.ureca.snac.payment.service.PaymentRecoveryService;
 import com.ureca.snac.support.TestFixture;
@@ -50,12 +52,14 @@ class MoneyServiceImplTest {
     private Member member;
     private Payment payment;
     private TossConfirmResponse tossConfirmResponse;
+    private String email;
 
     @BeforeEach
     void setUp() {
         member = TestFixture.createTestMember();
-        payment = TestFixture.createPendingPayment(member);
+        payment = TestFixture.createPendingPayment(member, 10000L);
         tossConfirmResponse = TestFixture.createTossConfirmResponse();
+        email = "test@test.com";
     }
 
     @Test
@@ -72,14 +76,47 @@ class MoneyServiceImplTest {
 
         // when
         moneyServiceImpl.processRechargeSuccess(
-                "test_key_id", "test_order_id", 10000L, "test@test.com");
+                "test_key_id", "test_order_id", 10000L, email);
 
         // then
+        verify(memberRepository).findByEmail(email);
         verify(paymentRepository).findByOrderIdWithMember("test_order_id");
         verify(paymentGatewayAdapter).confirmPayment("test_key_id", "test_order_id", 10000L);
         verify(moneyDepositor).deposit(payment, member, tossConfirmResponse);
         // 호출 X
         verify(paymentRecoveryService, never()).processInternalFailure(any(), any());
+    }
+
+    @Test
+    void 사용자_없음_예외_발생() {
+        // given
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // when
+        assertThrows(MemberNotFoundException.class, () -> {
+            moneyServiceImpl.processRechargeSuccess("test_key_id",
+                    "test_order_id", 10000L, email);
+        });
+
+        // then
+        verify(paymentRepository, never()).findByOrderIdWithMember(anyString());
+        verify(paymentGatewayAdapter, never()).confirmPayment(anyString(), anyString(), anyLong());
+    }
+
+    @Test
+    void 주문번호_결제_내역_없으면_예외_발생() {
+        // given
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+        when(paymentRepository.findByOrderIdWithMember(anyString())).thenReturn(Optional.empty());
+
+        // when
+        assertThrows(PaymentNotFoundException.class, () -> {
+            moneyServiceImpl.processRechargeSuccess("test_key_id", "test_order_id", 10000L, email);
+        });
+
+        // then
+        verify(paymentGatewayAdapter, never()).confirmPayment(anyString(), anyString(), anyLong());
     }
 
     @Test
@@ -105,8 +142,7 @@ class MoneyServiceImplTest {
         InternalServerException thrownException = assertThrows(
                 InternalServerException.class,
                 () -> moneyServiceImpl.processRechargeSuccess("test_key_id",
-                        "test_order_id", 10000L, "test@tset.com"
-                )
+                        "test_order_id", 10000L, email)
         );
 
         // 2. 던져진 예외가 우리가 의도한건지 확인
