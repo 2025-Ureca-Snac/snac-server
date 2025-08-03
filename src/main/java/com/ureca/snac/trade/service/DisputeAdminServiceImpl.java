@@ -241,10 +241,28 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 .map(a -> s3.generatePresignedUrl(a.getS3Key()))
                 .toList();
 
+        // 신고자 상대방
+        String reporterNickname = d.getReporter() != null ? d.getReporter().getNickname() : null;
+        String opponentNickname = null;
+        if (d.getTrade() != null) {
+            Trade t = d.getTrade();
+            // reporter가 buyer면 seller, seller면 buyer를 가져옴
+            if (t.getBuyer() != null && t.getSeller() != null) {
+                if (t.getBuyer().equals(d.getReporter())) {
+                    opponentNickname = t.getSeller().getNickname();
+                } else if (t.getSeller().equals(d.getReporter())) {
+                    opponentNickname = t.getBuyer().getNickname();
+                }
+            }
+        }
+
         return new DisputeDetailResponse(
                 d.getId(), d.getStatus(), d.getType(), d.getTitle(),
                 d.getDescription(), d.getAnswer(), d.getCategory(),
-                urls, d.getCreatedAt(), d.getAnswerAt());
+                urls, d.getCreatedAt(), d.getAnswerAt(),
+                reporterNickname, opponentNickname
+        );
+
     }
 
     private void assertAdmin(String email) {
