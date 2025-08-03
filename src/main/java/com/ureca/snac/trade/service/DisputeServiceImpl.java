@@ -94,6 +94,21 @@ public class DisputeServiceImpl implements DisputeService {
                 .map(attachment -> s3Uploader.generatePresignedUrl(attachment.getS3Key()))
                 .toList();
 
+        String reporterNickname = dispute.getReporter() != null
+                ? dispute.getReporter().getNickname() : null;
+
+        String opponentNickname = null;
+        if (dispute.getTrade() != null) {
+            Trade t = dispute.getTrade();
+            if (t.getBuyer() != null && t.getSeller() != null) {
+                if (t.getBuyer().equals(dispute.getReporter())) {
+                    opponentNickname = t.getSeller().getNickname();
+                } else if (t.getSeller().equals(dispute.getReporter())) {
+                    opponentNickname = t.getBuyer().getNickname();
+                }
+            }
+        }
+
         return new DisputeDetailResponse(
                 dispute.getId(),
                 dispute.getStatus(),
@@ -104,7 +119,10 @@ public class DisputeServiceImpl implements DisputeService {
                 dispute.getCategory(),
                 urls,
                 dispute.getCreatedAt(),
-                dispute.getAnswerAt());
+                dispute.getAnswerAt(),
+                reporterNickname,
+                opponentNickname
+        );
     }
 
     // 내가 신고한 목록 (설명 포함)
