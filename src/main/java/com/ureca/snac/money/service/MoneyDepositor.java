@@ -49,7 +49,7 @@ public class MoneyDepositor {
                 member.getId(), balanceAfter);
 
         AssetChangedEvent event = assetChangedEventFactory.createForRechargeEvent(
-                member.getId(), recharge.getId(), recharge.getPaidAmountWon(), balanceAfter
+                member.getId(), payment.getId(), recharge.getPaidAmountWon(), balanceAfter
         );
         assetHistoryEventPublisher.publish(event);
         log.info("[머니 입금 처리] 자산 변동 기록 이벤트 발행 완료.");
