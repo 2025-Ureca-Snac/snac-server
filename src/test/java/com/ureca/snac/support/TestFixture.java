@@ -76,4 +76,18 @@ public class TestFixture {
                 .sourceId(1L)
                 .build();
     }
+
+    public static AssetChangedEvent createDummyEventWithMemberId(Long memberId) {
+        return AssetChangedEvent.builder()
+                .memberId(memberId)
+                .assetType(AssetType.MONEY)
+                .transactionType(TransactionType.DEPOSIT)
+                .category(TransactionCategory.RECHARGE)
+                .amount(10000L)
+                .balanceAfter(20000L)
+                .title("머니 충전")
+                .sourceDomain(SourceDomain.PAYMENT)
+                .sourceId(1L)
+                .build();
+    }
 }
