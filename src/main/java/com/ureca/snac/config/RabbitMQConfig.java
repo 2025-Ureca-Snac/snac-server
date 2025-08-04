@@ -291,30 +291,24 @@ public class RabbitMQConfig {
 
     // 공통 비즈니스 익스체인지
     public static final String BUSINESS_EXCHANGE = "business_exchange";
-
+    public static final String BUSINESS_DEAD_LETTER_EXCHANGE = "dlx.business";
 
     // 1) 회원가입 처리 전용 큐/라우팅키
     public static final String MEMBER_JOIN_QUEUE = "business.member.join.queue";
     public static final String MEMBER_JOIN_ROUTING_KEY = "business.member.join";
-
     public static final String MEMBER_JOIN_DLQ = "dlq.business.member.join";
-    public static final String BUSINESS_DEAD_LETTER_EXCHANGE = "dlx.business";
-
-    // 2) 자산 변경 처리 전용 큐/라우팅키
-    public static final String ASSET_CHANGED_QUEUE = "business.asset.changed.queue";
-    public static final String ASSET_CHANGED_ROUTING_KEY = "business.asset.changed";
 
     @Bean
     public DirectExchange businessExchange() {
         return new DirectExchange(BUSINESS_EXCHANGE);
     }
 
-    // 회원가입 전용 큐
     @Bean
     public FanoutExchange businessDeadLetterExchange() {
         return new FanoutExchange(BUSINESS_DEAD_LETTER_EXCHANGE);
     }
 
+    // 회원가입 전용 큐
     @Bean
     public Queue memberJoinDlq() {
         return new Queue(MEMBER_JOIN_DLQ);
@@ -343,18 +337,37 @@ public class RabbitMQConfig {
                 .with(MEMBER_JOIN_ROUTING_KEY);
     }
 
+    // 2) 자산 변경 처리 전용 큐/라우팅키
+    public static final String ASSET_HISTORY_QUEUE = "business.asset.history.queue";
+    public static final String ASSET_HISTORY_ROUTING_KEY = "business.asset.history";
+    public static final String ASSET_HISTORY_DLQ = "dlq.business.asset.history";
+
     // 자산 변경 전용 큐
     @Bean
-    public Queue assetChangedQueue() {
-        return new Queue(ASSET_CHANGED_QUEUE, false);
+    public Queue assetHistoryDlq() {
+        return new Queue(ASSET_HISTORY_DLQ);
     }
 
     @Bean
-    public Binding assetChangedBinding(DirectExchange businessExchange, Queue assetChangedQueue) {
+    public Binding assetHistoryDlqBinding(FanoutExchange businessDeadLetterExchange, Queue assetHistoryDlq) {
         return BindingBuilder
-                .bind(assetChangedQueue)
+                .bind(assetHistoryDlq)
+                .to(businessDeadLetterExchange);
+    }
+
+    @Bean
+    public Queue assetHistoryQueue() {
+        return QueueBuilder.durable(ASSET_HISTORY_QUEUE)
+                .withArgument("x-dead-letter-exchange", BUSINESS_DEAD_LETTER_EXCHANGE)
+                .build();
+    }
+
+    @Bean
+    public Binding assetHistoryBinding(DirectExchange businessExchange, Queue assetHistoryQueue) {
+        return BindingBuilder
+                .bind(assetHistoryQueue)
                 .to(businessExchange)
-                .with(ASSET_CHANGED_ROUTING_KEY);
+                .with(ASSET_HISTORY_ROUTING_KEY);
     }
 
     /* ------------------- 공통 설정 ------------------- */
