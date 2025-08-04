@@ -41,19 +41,19 @@ public class MoneyServiceImpl implements MoneyService {
     @Transactional
     public MoneyRechargePreparedResponse prepareRecharge(MoneyRechargeRequest request, String email) {
 
-        log.info("[머니 충전 준비] 시작. 회원 : {}, 요청 금액 : {}", email, request.getAmount());
+        log.info("[머니 충전 준비] 시작. 회원 : {}, 요청 금액 : {}", email, request.amount());
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(MemberNotFoundException::new);
 
-        Payment payment = paymentService.preparePayment(member, request.getAmount());
+        Payment payment = paymentService.preparePayment(member, request.amount());
 
         log.info("[머니 충전 준비] Payment 생성 완료 주문번호 : {}", payment.getOrderId());
 
         // 응답 Dto 생성 및 반환
         return MoneyRechargePreparedResponse.builder()
                 .orderId(payment.getOrderId())
-                .orderName("스낵 머니 " + request.getAmount() + "원 충전")
-                .amount(request.getAmount())
+                .orderName("스낵 머니 " + request.amount() + "원 충전")
+                .amount(request.amount())
                 .customerName(member.getName())
                 .customerEmail(member.getEmail())
                 .build();
