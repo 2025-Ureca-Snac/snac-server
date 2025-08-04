@@ -22,4 +22,6 @@ public interface MemberService {
     void resetPasswordByEmail(String email, String newPwd);
 
     CountMemberResponse countMember();
+
+    void addRatingScore(Long memberId, int score);
 }
