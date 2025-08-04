@@ -74,7 +74,7 @@ public class JoinServiceImpl implements JoinService {
                 .phone(phone)
                 .birthDate(joinRequest.getBirthDate())
                 .role(USER)
-                .ratingScore(1000)
+                .ratingScore(100)
                 .activated(NORMAL)
                 .build();
 
