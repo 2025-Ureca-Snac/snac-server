@@ -45,6 +45,14 @@ public class TradeCancel extends BaseTimeEntity {
         this.resolvedAt = LocalDateTime.now();
     }
 
+    // 판매자에 의한 취소로 업데이트
+    public void updateBySellerCancel(Member seller, CancelReason reason) {
+        this.requester = seller;
+        this.reason = reason;
+        this.status = CancelStatus.ACCEPTED;
+        this.resolvedAt = LocalDateTime.now();
+    }
+
     @Builder
     public TradeCancel(Trade trade, Member requester, CancelReason reason, CancelStatus status, LocalDateTime resolvedAt) {
         this.trade = trade;
