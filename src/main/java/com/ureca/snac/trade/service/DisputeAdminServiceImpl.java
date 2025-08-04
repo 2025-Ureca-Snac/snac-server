@@ -102,24 +102,25 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
     }
 
     // 관리자 답변 처리 후 , 활성 신고가 없으면 원상복구
-    private void restoreTradeIfNoActive(Trade trade) {
-        boolean hasActive = disputeRepository.existsByTradeIdAndStatusIn(trade.getId(), ACTIVE);
-        if (hasActive) return;
-
-        // REPORTED 로 만든 신고를 찾아 그때 백업했던 상태로 복귀
-        disputeRepository.findTopByTradeIdAndReportedAppliedTrueOrderByCreatedAtAsc(trade.getId())
-                .ifPresent(marker -> {
-                    TradeStatus prev = marker.getPrevTradeStatus();
-                    if (prev != null) {
-                        trade.changeStatus(prev);
-                    } else {
-                        //  신고는 DATA_SENT 이후에 가능하므로 DATA_SENT로 복원
-                        trade.changeStatus(TradeStatus.DATA_SENT);
-                    }
-                });
-
-        trade.resumeAutoConfirm(); // 자동 확정 재개
-    }
+//    private void restoreTradeIfNoActive(Trade trade) {
+//
+//        boolean hasActive = disputeRepository.existsByTradeIdAndStatusIn(trade.getId(), ACTIVE);
+//        if (hasActive) return;
+//
+//        // REPORTED 로 만든 신고를 찾아 그때 백업했던 상태로 복귀
+//        disputeRepository.findTopByTradeIdAndReportedAppliedTrueOrderByCreatedAtAsc(trade.getId())
+//                .ifPresent(marker -> {
+//                    TradeStatus prev = marker.getPrevTradeStatus();
+//                    if (prev != null) {
+//                        trade.changeStatus(prev);
+//                    } else {
+//                        //  신고는 DATA_SENT 이후에 가능하므로 DATA_SENT로 복원
+//                        trade.changeStatus(TradeStatus.DATA_SENT);
+//                    }
+//                });
+//
+//        trade.resumeAutoConfirm(); // 자동 확정 재개
+//    }
 
     /** 환불 + 거래 취소 + 자동확정 재개
      *    1) ANSWERED 상태의 Dispute 에서만 수행 (권한·검증 명확)
@@ -192,7 +193,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 .orElseThrow(DisputeNotFoundException::new);
 
         Trade trade = d.getTrade();
-
+        // 처리 안된 dispute 가 있는 확인
         boolean hasActive = disputeRepository.existsByTradeIdAndStatusIn(
                 trade.getId(), ACTIVE);
         if (hasActive) return false;

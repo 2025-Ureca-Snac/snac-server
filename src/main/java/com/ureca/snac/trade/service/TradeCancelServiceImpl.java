@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.ureca.snac.trade.entity.CancelReason.NOT_SELECTED;
 import static com.ureca.snac.trade.entity.TradeStatus.BUY_REQUESTED;
@@ -56,9 +57,9 @@ public class TradeCancelServiceImpl implements TradeCancelService {
         Trade trade = findLockedTrade(tradeId);
 
         // 이미 취소요청이 있었다면 중복 요청 불가
-        if (cancelRepo.existsByTradeId(tradeId)) {
-            throw new TradeAlreadyCancelRequestedException();
-        }
+//        if (cancelRepo.existsByTradeId(tradeId)) {
+//            throw new TradeAlreadyCancelRequestedException();
+//        }
 
         // 제목 생성위해서 만들었음.. 리팩토링 시 변경 가능
         Card card = findLockedCard(trade.getCardId());
@@ -74,19 +75,28 @@ public class TradeCancelServiceImpl implements TradeCancelService {
 //        if (cancelRepo.existsByTradeIdAndStatus(tradeId, CancelStatus.REQUESTED)
 //        ) throw new TradeAlreadyCancelRequestedException();
 
+        Optional<TradeCancel> prevCancelOpt = cancelRepo.findByTradeId(tradeId);
         boolean isSeller = requester.equals(trade.getSeller());
 
         // 판매자 => 즉시 취소
         if (isSeller) {
-            // 취소 엔티티 저장: ACCEPTED & resolvedAt
-            TradeCancel cancel = TradeCancel.builder()
-                    .trade(trade)
-                    .requester(requester)
-                    .reason(reason)
-                    .status(CancelStatus.ACCEPTED)
-                    .resolvedAt(LocalDateTime.now())
-                    .build();
-            cancelRepo.save(cancel);
+            if (prevCancelOpt.isPresent()) {
+                TradeCancel prevCancel = prevCancelOpt.get();
+                if (prevCancel.getStatus() == CancelStatus.REQUESTED) {
+                    throw new TradeAlreadyCancelRequestedException();
+                }
+                prevCancel.updateBySellerCancel(requester, reason);
+            } else {
+                // 기존 취소요청이 없으면 새로 생성
+                TradeCancel cancel = TradeCancel.builder()
+                        .trade(trade)
+                        .requester(requester)
+                        .reason(reason)
+                        .status(CancelStatus.ACCEPTED)
+                        .resolvedAt(LocalDateTime.now())
+                        .build();
+                cancelRepo.save(cancel);
+            }
 
             // 카드 상태 처리
             // 지금 판매자가 취소 요청 상태인데 판매글이면 삭제 처리 / 구매글이면 다시 구매중으로
@@ -141,6 +151,11 @@ public class TradeCancelServiceImpl implements TradeCancelService {
             // 패널티 x
         }
         else {
+            // 구매자 : 한 번이라도 요청했으면 무조건 중복 차단
+            if (prevCancelOpt.isPresent()) {
+                throw new TradeAlreadyCancelRequestedException();
+            }
+
             // 구매자 => 취소
             TradeCancel cancel = TradeCancel.builder()
                     .trade(trade)
