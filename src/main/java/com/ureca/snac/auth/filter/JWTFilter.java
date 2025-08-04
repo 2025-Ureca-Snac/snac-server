@@ -38,7 +38,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("JWTFilter 호출 URI: {} ", request.getRequestURI());
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         // 토큰이 없다면 다음 필터로 넘김
