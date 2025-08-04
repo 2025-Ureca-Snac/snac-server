@@ -95,6 +95,10 @@ public class Member extends BaseTimeEntity {
         this.socialLinks.add(socialLink);
     }
 
+    public void addRatingScore(int ratingScore) {
+        this.ratingScore += ratingScore;
+    }
+
     public void removeSocialLink(SocialProvider provider) {
         this.socialLinks.removeIf(link -> link.getProvider() == provider);
     }

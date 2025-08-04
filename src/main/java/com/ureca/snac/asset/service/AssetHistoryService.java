@@ -21,5 +21,5 @@ public interface AssetHistoryService {
     CursorResult<AssetHistoryResponse> getAssetHistories(String username, AssetHistoryListRequest request);
 }
 
-// LastestBalance랑 Wallet이랑 고려
+// LastestBalance랑 Wallet 이랑 고려
 // 그리고 새로운 내부

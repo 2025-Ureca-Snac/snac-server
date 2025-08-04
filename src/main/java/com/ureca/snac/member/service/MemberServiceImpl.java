@@ -43,6 +43,7 @@ public class MemberServiceImpl implements MemberService {
         }
         member.changePasswordTo(passwordEncoder.encode(req.getNewPwd()));
     }
+
     @Override
     public void checkPassword(String email, PhoneChangeRequest request) {
         Member member = memberRepository.findByEmail(email)
@@ -98,5 +99,12 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public CountMemberResponse countMember() {
         return new CountMemberResponse(memberRepository.count());
+    }
+
+    @Override
+    public void addRatingScore(Long memberId, int score) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+        member.addRatingScore(score);
     }
 }

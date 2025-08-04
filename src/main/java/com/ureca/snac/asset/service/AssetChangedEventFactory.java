@@ -132,6 +132,38 @@ public class AssetChangedEventFactory {
                 .build();
     }
 
+    @Getter
+    @RequiredArgsConstructor
+    private enum PointDepositEventType {
+        SIGNUP_BONUS(
+                "회원가입 축하 포인트",
+                SourceDomain.EVENT
+        ),
+        TRADE_COMPLETION_BONUS(
+                "거래 완료 보너스",
+                SourceDomain.TRADE
+        );
+
+        private final String title;
+        private final SourceDomain sourceDomain;
+    }
+
+    private AssetChangedEvent createPointDepositEvent(
+            PointDepositEventType eventType, Long memberId, Long sourceId,
+            Long amount, Long balanceAfter) {
+        return AssetChangedEvent.builder()
+                .memberId(memberId)
+                .assetType(AssetType.POINT)
+                .transactionType(TransactionType.DEPOSIT)
+                .category(TransactionCategory.EVENT)
+                .amount(amount)
+                .balanceAfter(balanceAfter)
+                .title(eventType.getTitle())
+                .sourceDomain(eventType.getSourceDomain())
+                .sourceId(sourceId)
+                .build();
+    }
+
     // 거래관련
     public AssetChangedEvent createForBuyWithMoney(
             Long memberId, Long tradeId,
@@ -206,5 +238,27 @@ public class AssetChangedEventFactory {
                 .sourceDomain(SourceDomain.SETTLEMENT)
                 .sourceId(settlementId)
                 .build();
+    }
+
+    public AssetChangedEvent createForSignupBonus(
+            Long memberId, Long amount, Long balanceAfter) {
+        return createPointDepositEvent(
+                PointDepositEventType.SIGNUP_BONUS,
+                memberId,
+                memberId,
+                amount,
+                balanceAfter
+        );
+    }
+
+    public AssetChangedEvent createForTradeCompletionBonus(
+            Long memberId, Long tradeId, Long amount, Long balanceAfter) {
+        return createPointDepositEvent(
+                PointDepositEventType.TRADE_COMPLETION_BONUS,
+                memberId,
+                tradeId,
+                amount,
+                balanceAfter
+        );
     }
 }
