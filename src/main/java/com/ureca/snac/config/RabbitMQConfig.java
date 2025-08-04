@@ -178,7 +178,7 @@ public class RabbitMQConfig {
 
     // 이메일 전송용 Direct Exchange
     public static final String EMAIL_EXCHANGE = "email_exchange";
-    public static final String EMAIL_QUEUE    = "email_queue";
+    public static final String EMAIL_QUEUE = "email_queue";
     public static final String EMAIL_ROUTING_KEY = "email.send";
 
     @Bean
@@ -290,14 +290,18 @@ public class RabbitMQConfig {
     }
 
     // 공통 비즈니스 익스체인지
-    public static final String BUSINESS_EXCHANGE       = "business_exchange";
+    public static final String BUSINESS_EXCHANGE = "business_exchange";
+
 
     // 1) 회원가입 처리 전용 큐/라우팅키
-    public static final String MEMBER_JOIN_QUEUE       = "business.member.join.queue";
+    public static final String MEMBER_JOIN_QUEUE = "business.member.join.queue";
     public static final String MEMBER_JOIN_ROUTING_KEY = "business.member.join";
 
+    public static final String MEMBER_JOIN_DLQ = "dlq.business.member.join";
+    public static final String BUSINESS_DEAD_LETTER_EXCHANGE = "dlx.business";
+
     // 2) 자산 변경 처리 전용 큐/라우팅키
-    public static final String ASSET_CHANGED_QUEUE       = "business.asset.changed.queue";
+    public static final String ASSET_CHANGED_QUEUE = "business.asset.changed.queue";
     public static final String ASSET_CHANGED_ROUTING_KEY = "business.asset.changed";
 
     @Bean
@@ -307,9 +311,30 @@ public class RabbitMQConfig {
 
     // 회원가입 전용 큐
     @Bean
-    public Queue memberJoinQueue() {
-        return new Queue(MEMBER_JOIN_QUEUE, false);
+    public FanoutExchange businessDeadLetterExchange() {
+        return new FanoutExchange(BUSINESS_DEAD_LETTER_EXCHANGE);
     }
+
+    @Bean
+    public Queue memberJoinDlq() {
+        return new Queue(MEMBER_JOIN_DLQ);
+    }
+
+    @Bean
+    public Binding memberJoinDlqBinding(FanoutExchange businessDeadLetterExchange, Queue memberJoinDlq) {
+        return BindingBuilder
+                .bind(memberJoinDlq)
+                .to(businessDeadLetterExchange);
+    }
+
+    @Bean
+    public Queue memberJoinQueue() {
+        return QueueBuilder.durable(MEMBER_JOIN_QUEUE)
+                .withArgument("x-dead-letter-exchange",
+                        BUSINESS_DEAD_LETTER_EXCHANGE)
+                .build();
+    }
+
     @Bean
     public Binding memberJoinBinding(DirectExchange businessExchange, Queue memberJoinQueue) {
         return BindingBuilder
@@ -323,6 +348,7 @@ public class RabbitMQConfig {
     public Queue assetChangedQueue() {
         return new Queue(ASSET_CHANGED_QUEUE, false);
     }
+
     @Bean
     public Binding assetChangedBinding(DirectExchange businessExchange, Queue assetChangedQueue) {
         return BindingBuilder

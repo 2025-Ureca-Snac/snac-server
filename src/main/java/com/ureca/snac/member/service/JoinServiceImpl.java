@@ -1,21 +1,19 @@
 package com.ureca.snac.member.service;
 
-import com.ureca.snac.member.dto.request.JoinRequest;
-import com.ureca.snac.member.exception.EmailDuplicateException;
 import com.ureca.snac.auth.exception.EmailNotVerifiedException;
-import com.ureca.snac.member.exception.NicknameDuplicateException;
 import com.ureca.snac.auth.exception.PhoneNotVerifiedException;
 import com.ureca.snac.auth.service.verify.EmailService;
 import com.ureca.snac.auth.service.verify.SnsService;
+import com.ureca.snac.config.RabbitMQConfig;
+import com.ureca.snac.member.dto.request.JoinRequest;
 import com.ureca.snac.member.entity.Member;
 import com.ureca.snac.member.event.MemberJoinEvent;
+import com.ureca.snac.member.exception.EmailDuplicateException;
+import com.ureca.snac.member.exception.NicknameDuplicateException;
 import com.ureca.snac.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.context.ApplicationEventPublisher;
-
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +30,7 @@ public class JoinServiceImpl implements JoinService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final SnsService snsService;
     private final EmailService emailService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
@@ -79,13 +77,21 @@ public class JoinServiceImpl implements JoinService {
                 .build();
 
         memberRepository.save(member);
-        log.info("회원가입 완료됨! : 이메일 : {}, 이름 : {}", member.getEmail(),member.getName());
+        log.info("회원가입 완료됨! : 이메일 : {}, 이름 : {}", member.getEmail(), member.getName());
 
         // 여기서 이벤트 발행 서비스 동작
         publishMemberJoinEvent(member);
     }
 
     private void publishMemberJoinEvent(Member member) {
-        eventPublisher.publishEvent(new MemberJoinEvent(member.getId())); // rabbitMQ 비동기 처리
+        log.info("[이벤트 발행] 회원가입 이벤트 발행 시작. 회원 Id : {}", member.getId());
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.BUSINESS_EXCHANGE,
+                RabbitMQConfig.MEMBER_JOIN_ROUTING_KEY,
+                new MemberJoinEvent(member.getId())
+        );
+
+        log.info("[이벤트 발행] 회원가입 이벤트 발행 완료. 목적지 : {}", RabbitMQConfig.BUSINESS_EXCHANGE);
     }
 }

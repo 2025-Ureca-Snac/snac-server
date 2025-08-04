@@ -207,4 +207,19 @@ public class AssetChangedEventFactory {
                 .sourceId(settlementId)
                 .build();
     }
+
+    public AssetChangedEvent createForSignupBonus(
+            Long memberId, Long amount, Long balanceAfter) {
+        return AssetChangedEvent.builder()
+                .memberId(memberId)
+                .assetType(AssetType.POINT)
+                .transactionType(TransactionType.DEPOSIT)
+                .category(TransactionCategory.EVENT)
+                .amount(amount)
+                .balanceAfter(balanceAfter)
+                .title("회원가입 축하 포인트")
+                .sourceDomain(SourceDomain.EVENT)
+                .sourceId(memberId)
+                .build();
+    }
 }
