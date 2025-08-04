@@ -56,7 +56,10 @@ public class TradeMessageBuilder {
 
                 case CANCELED:
                     statusText = "[SNAC] 거래가 취소되었습니다. 사유를 확인해 주세요.";
-                    phoneList.add(trade.getSeller() != null ? trade.getSeller().getPhone() : "");
+                    if (trade.getSeller() != null && trade.getSeller().getPhone() != null) {
+                        phoneList.add(trade.getSeller().getPhone());
+                    }
+//                    phoneList.add(trade.getSeller() != null ? trade.getSeller().getPhone() : "");
                     phoneList.add(trade.getBuyer().getPhone());
                     break;
 
