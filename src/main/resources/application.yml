@@ -114,12 +114,12 @@ spring:
   # JWT 설정
   jwt:
     secret: ${JWT_SECRET_KEY}
-#    access-expiration: 900000
+    #    access-expiration: 900000
     access-expiration: 43200000
     #15분
     refresh-expiration: 43200000
     #12시간
-#    social-expiration: 60000
+    #    social-expiration: 60000
     social-expiration: 43200000
     #1분
 
@@ -153,8 +153,8 @@ cors:
     - PATCH
     - DELETE
     - OPTIONS
-  allowed-headers: ["*"]
-  exposed-headers: ["Authorization"]
+  allowed-headers: [ "*" ]
+  exposed-headers: [ "Authorization" ]
   allow-credentials: true
 
 kakao:
@@ -172,8 +172,6 @@ springdoc:
 payments:
   toss:
     url: "https://api.tosspayments.com/"
-    success-url: ${PAYMENT_SUCCESS_URL}
-    fail-url: ${PAYMENT_FAIL_URL}
     secret-key: ${TOSS_SECRET_KEY}
 
 # AES 암호화 설정
