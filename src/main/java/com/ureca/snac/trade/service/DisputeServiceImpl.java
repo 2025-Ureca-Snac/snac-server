@@ -98,8 +98,10 @@ public class DisputeServiceImpl implements DisputeService {
                 ? dispute.getReporter().getNickname() : null;
 
         String opponentNickname = null;
+        TradeSummaryDto tradeSummary = null;
         if (dispute.getTrade() != null) {
             Trade t = dispute.getTrade();
+            tradeSummary = toTradeSummary(dispute.getTrade(), reporter);
             if (t.getBuyer() != null && t.getSeller() != null) {
                 if (t.getBuyer().equals(dispute.getReporter())) {
                     opponentNickname = t.getSeller().getNickname();
@@ -121,7 +123,8 @@ public class DisputeServiceImpl implements DisputeService {
                 dispute.getCreatedAt(),
                 dispute.getAnswerAt(),
                 reporterNickname,
-                opponentNickname
+                opponentNickname,
+                tradeSummary
         );
     }
 

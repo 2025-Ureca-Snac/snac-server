@@ -18,4 +18,6 @@ public interface DisputeAdminService {
     boolean restoreIfNoActive(Long disputeId, String adminEmail);
 
     DisputeStatisticsResponse getStatistics();
+
+    DisputeDetailResponse getDispute(Long id,String email);
 }

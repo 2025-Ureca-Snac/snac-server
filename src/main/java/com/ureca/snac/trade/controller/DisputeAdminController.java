@@ -86,7 +86,7 @@ public class DisputeAdminController implements  DisputeAdminControllerSwagger{
             @AuthenticationPrincipal UserDetails userDetails) {
 
         String email = userDetails.getUsername();
-        return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS,disputeService.getDispute(id, email)));
+        return ResponseEntity.ok(ApiResponse.of(BaseCode.DISPUTE_DETAIL_SUCCESS,disputeAdminService.getDispute(id,email)));
     }
 
     /** 1) 환불 + 거래 취소 */

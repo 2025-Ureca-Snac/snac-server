@@ -14,6 +14,7 @@ import com.ureca.snac.trade.dto.DisputeSearchCond;
 import com.ureca.snac.trade.dto.dispute.DisputeAnswerRequest;
 import com.ureca.snac.trade.dto.dispute.DisputeDetailResponse;
 import com.ureca.snac.trade.dto.dispute.DisputeStatisticsResponse;
+import com.ureca.snac.trade.dto.dispute.TradeSummaryDto;
 import com.ureca.snac.trade.entity.*;
 import com.ureca.snac.trade.exception.DisputeAdminPermissionDeniedException;
 import com.ureca.snac.trade.exception.DisputeNotFoundException;
@@ -234,6 +235,15 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
         return new DisputeStatisticsResponse(byCategory, byType);
     }
 
+    @Override
+    public DisputeDetailResponse getDispute(Long id, String email) {
+        assertAdmin(email);
+
+        Dispute d = disputeRepository.findById(id)
+                .orElseThrow(DisputeNotFoundException::new);
+        return toDto(d);
+    }
+
 
     // 엔티티 → DTO 변환 + 첨부 Presigned URL 생성
     private DisputeDetailResponse toDto(Dispute d) {
@@ -245,8 +255,10 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
         // 신고자 상대방
         String reporterNickname = d.getReporter() != null ? d.getReporter().getNickname() : null;
         String opponentNickname = null;
+        TradeSummaryDto tradeSummary = null;
         if (d.getTrade() != null) {
             Trade t = d.getTrade();
+            tradeSummary = toTradeSummaryForAdmin(d.getTrade());
             // reporter가 buyer면 seller, seller면 buyer를 가져옴
             if (t.getBuyer() != null && t.getSeller() != null) {
                 if (t.getBuyer().equals(d.getReporter())) {
@@ -261,7 +273,7 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
                 d.getId(), d.getStatus(), d.getType(), d.getTitle(),
                 d.getDescription(), d.getAnswer(), d.getCategory(),
                 urls, d.getCreatedAt(), d.getAnswerAt(),
-                reporterNickname, opponentNickname
+                reporterNickname, opponentNickname, tradeSummary
         );
 
     }
@@ -278,5 +290,18 @@ public class DisputeAdminServiceImpl implements DisputeAdminService {
 
     private Wallet findLockedWallet(Long memberId) {
         return walletRepository.findByMemberIdWithLock(memberId).orElseThrow(WalletNotFoundException::new);
+    }
+
+    private TradeSummaryDto toTradeSummaryForAdmin(Trade trade) {
+        return new TradeSummaryDto(
+                trade.getId(),
+                trade.getStatus(),
+                trade.getTradeType(),
+                trade.getPriceGb(),
+                trade.getDataAmount(),
+                trade.getCarrier().name(),
+                null,
+                null
+        );
     }
 }
