@@ -26,4 +26,6 @@ public class DisputeDetailResponse {
 
     private String reporterNickname; // 신고자 닉네임
     private String opponentNickname; // 신고대상자 닉네임
+
+    private TradeSummaryDto tradeSummary;
 }
